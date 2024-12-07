@@ -1,0 +1,37 @@
+version: "3.8" # Define a versão do Docker Compose
+
+services:
+  db:
+    image: postgres:alpine # Usa a versão leve do PostgreSQL (alpine)
+    container_name: postgres_clinica_michel # Nome do contêiner
+    environment:
+      POSTGRES_USER: michel_admin # Usuário do PostgreSQL
+      POSTGRES_PASSWORD: admin # Senha do PostgreSQL
+      POSTGRES_DB: db_clinica_michel_dev # Nome do banco de dados
+    ports:
+      - "5430:5432" # Mapeia a porta 5432 do container para a 5430 do host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistência de dados
+    networks:
+      - clinica_net # Rede para o banco de dados
+
+  pgadmin:
+    image: dpage/pgadmin4 # Usa a imagem do pgAdmin
+    container_name: pgadmin_clinica_michel
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@clinica.com # E-mail de login do pgAdmin
+      PGADMIN_DEFAULT_PASSWORD: admin # Senha do pgAdmin
+    ports:
+      - "8080:80" # Porta para acessar o pgAdmin no navegador
+    depends_on:
+      - db # Garante que o PostgreSQL esteja ativo antes de iniciar o pgAdmin
+    networks:
+      - clinica_net # Rede para o pgAdmin
+
+volumes:
+  postgres_data:
+    driver: local # Volume para armazenar os dados do PostgreSQL
+
+networks:
+  clinica_net:
+    driver: bridge # Cria uma rede do tipo bridge

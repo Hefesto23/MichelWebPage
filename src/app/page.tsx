@@ -1,101 +1,148 @@
+"use client";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ArrowDown } from "lucide-react";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import SwiperUi from "@/components/ui/Swiper/swiper";
+import { caveat } from "./fonts";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Home() {
+  const scrollToSection = () => {
+    const section = document.getElementById("saiba-mais");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+  return (
+    // Conteúdo da página Home
+    <div>
+      <div
+        className="bg-cover bg-center w-full h-screen text-[white]"
+        style={{ backgroundImage: "url('/assets/horizonte.jpg')" }}
+      >
+        {/* <Image
+          src="/assets/horizonte.jpg"
+          alt="Imagem principal Home da clínica"
+          fill
+          priority
+        /> */}
+
+        <div className="relative bg-black bg-opacity-25 h-screen">
+          <div className="flex items-center text-left h-1/6">
+            <h1
+              className={cn(
+                "text-white text-6xl font-bold mb-4 px-8",
+                caveat.className
+              )}
+            >
+              Imagine...
+            </h1>
+          </div>
+          <div className="py-8 w-full text-center h-3/6">
+            <h1
+              className={cn(
+                "animate-fade delay-0 text-6xl font-bold mb-4",
+                caveat.className
+              )}
+            >
+              ...Controlar a Ansiedade e seus Efeitos
+            </h1>
+            <h1
+              className={cn(
+                "animate-fade text-6xl font-bold mb-4",
+                caveat.className
+              )}
+              style={{ animationDelay: "3s" }}
+            >
+              ...Encontrar a Serenidade que você sempre Desejou
+            </h1>
+            <h1
+              className={cn(
+                "animate-fade animation-delay-medium text-6xl font-bold mb-4",
+                caveat.className
+              )}
+              style={{ animationDelay: "6s" }}
+            >
+              ...Ter mais Autoconfiança para enfrentar os Desafios
+            </h1>
+            <h1
+              className={cn(
+                "animate-fade animation-delay-long text-6xl font-bold mb-4",
+                caveat.className
+              )}
+              style={{ animationDelay: "9s" }}
+            >
+              ...Aumentar sua Autoestima e Desenvolvimento Pessoal
+            </h1>
+          </div>
+          <div className="flex items-center justify-center h-2/6">
+            <Button
+              variant="outline"
+              onClick={scrollToSection}
+              className="w-16 h-16 rounded-full text-white text-sm flex items-center justify-center shadow-lg focus:outline-none transition-transform animate-softBounce animate-infinite"
+            >
+              <ArrowDown className="w-6 h-6" />
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      <section id="saiba-mais" className="w-full h-full overflow-hidden">
+        {/* Cabeçalho da seção */}
+        <div className="flex items-center text-left border-4 border-red-700">
+          <h1
+            className={cn(
+              "text-foreground text-6xl font-bold mb-4 px-8",
+              caveat.className
+            )}
+          >
+            Seja Bem-Vindo!
+          </h1>
+        </div>
+        {/* Cabeçalho da seção */}
+        <div className="flex flex-row py-4 border-2 border-yellow-400">
+          {/* Imagem lateral esquerda da seção */}
+          <div className="basis-1/6 border-4 border-sky-600 h-[600px]">
+            <Image
+              src="/assets/michel2.svg"
+              alt="Foto de Michel Psicologo Clinico"
+              className="w-full h-full object-cover"
+              width={407}
+              height={611}
+            />
+          </div>
+          <div className="basis-4/6 border-4 border-blue-700 overflow-hidden">
+            {/* <p className="text-lg mb-8">
+              Agende uma consulta com nossos especialistas e comece sua jornada
+              para uma mente mais saudável. Lorem ipsum dolor sit amet
+              consectetur adipisicing elit. Dolor eum incidunt expedita maxime
+              voluptatibus accusantium qui, totam necessitatibus quo fugiat a
+              ducimus, et officia cum, sunt possimus est nam vel. Lorem ipsum
+              dolor sit amet consectetur adipisicing elit. Ut vero id reiciendis
+              ullam, exercitationem necessitatibus assumenda accusamus quam
+              quibusdam voluptatum ducimus inventore alias accusantium aliquam
+              harum laborum blanditiis laboriosam iusto. Lorem ipsum, dolor sit
+              amet consectetur adipisicing elit. Mollitia ullam doloremque
+              perspiciatis eaque odio commodi omnis, quaerat corporis
+              reiciendis, aspernatur non soluta, facilis dolores? Aut incidunt
+              eos dolor nemo unde? Agende uma
+            </p>
+            <Link href="/appointment">
+              <Button>Agendar Consulta</Button>
+            </Link> */}
+            <SwiperUi />
+          </div>
+          <div className="basis-1/6 border-4 border-sky-600">
+            <Image
+              src="/assets/michel1.svg"
+              alt="Foto de Michel Psicologo Clinico"
+              className="w-full h-full object-cover"
+              width={407}
+              height={611}
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

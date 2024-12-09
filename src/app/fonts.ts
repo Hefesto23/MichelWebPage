@@ -26,6 +26,13 @@ export const robotoThin = localFont({
   style: "normal",
 });
 
+export const robotoBold = localFont({
+  src: "../../public/fonts/roboto/Roboto-Bold.ttf",
+  variable: "--font-roboto-bold",
+  weight: "700",
+  style: "normal",
+});
+
 export const caveat = localFont({
   src: "../../public/fonts/caveat/Caveat-Bold.ttf",
   variable: "--font-caveat",

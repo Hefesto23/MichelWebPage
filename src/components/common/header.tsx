@@ -56,10 +56,16 @@ export const Header = ({
             Sobre
           </Link>
           <Link
-            href="/services"
+            href="/therapies"
             className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
           >
-            Serviços
+            Terapias
+          </Link>
+          <Link
+            href="/assessments"
+            className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
+          >
+            Avaliações
           </Link>
           <Link
             href="/appointment"

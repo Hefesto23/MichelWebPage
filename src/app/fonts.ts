@@ -9,6 +9,7 @@ export const roboto = localFont({
 
 export const robotoSlab = localFont({
   src: "../../public/fonts/roboto-slab/RobotoSlab-ExtraBold.ttf",
+  variable: "--font-robotoSlab",
   style: "normal",
 });
 

@@ -1,0 +1,135 @@
+/* Estilo da barra de rolagem - Compatível com WebKit */
+/* Barra de rolagem minimalista e estilosa */
+.home-welcome-text::-webkit-scrollbar {
+  height: 0px;
+  width: 5px;
+  background-color: transparent;
+}
+
+.home-welcome-text::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+}
+
+.home-welcome-text::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.home-welcome-text::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Hero Section */
+.home-hero-section {
+  @apply w-full h-screen overflow-hidden bg-no-repeat bg-center bg-cover;
+}
+.home-hero-overlay {
+  @apply relative h-screen;
+}
+.home-hero-header {
+  @apply flex items-center text-left h-1/6 mb-4 pt-2;
+}
+.home-hero-title {
+  font-family: var(--font-robotoSlab), serif;
+  @apply text-white;
+}
+.home-hero-subtitle {
+  font-family: var(--font-robotoSlab), serif;
+  @apply animate-fade w-full text-center h-3/6 text-white my-8;
+}
+.home-hero-cta {
+  @apply flex items-center justify-center h-2/6;
+}
+
+.home-hero-cta-button {
+  @apply w-16 h-16 rounded-full text-white border-white text-sm 
+         flex items-center justify-center 
+         shadow-lg focus:outline-none;
+}
+/* Welcome Section */
+.home-welcome-section {
+  @apply w-full h-screen overflow-hidden;
+}
+.home-welcome-container {
+  @apply flex flex-row h-screen overflow-hidden px-8 pt-8 relative;
+}
+.home-welcome-text {
+  @apply basis-4/6 overflow-scroll p-4 justify-start text-foreground relative z-[2];
+}
+
+.home-welcome-header h1 {
+  @apply flex items-center text-left pb-4 text-4xl font-bold mb-4;
+}
+.home-welcome-content article p {
+  @apply mb-4 leading-relaxed font-extrabold;
+}
+.home-welcome-content article ul {
+  @apply pl-6 mb-4 space-y-2 font-extrabold;
+}
+
+.home-welcome-image {
+  @apply basis-2/6 relative h-full grid place-items-center z-[2];
+}
+/* Botões */
+/* .home-cta-container {
+  @apply mt-6 flex justify-start;
+}
+.home-cta-button {
+  @apply bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition;
+} */
+
+/* Serviços */
+.home-services-section {
+  @apply min-h-screen w-full px-8 py-8 overflow-hidden;
+}
+.home-services-container {
+  @apply container mx-auto pr-2 relative z-0;
+}
+
+.home-services-content {
+  @apply relative z-[2];
+}
+
+.home-services-header h2 {
+  @apply text-4xl text-left font-bold mb-4 text-foreground;
+}
+.home-services-header p {
+  @apply text-xl text-left max-w-2xl text-foreground;
+}
+
+.home-services-grid {
+  @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr max-h-[calc(100vh-12rem)];
+}
+/* Espaço Clínico */
+.home-clinic-section {
+  @apply w-full h-full flex items-center justify-center;
+}
+
+.home-clinic-container {
+  @apply container h-full p-8;
+}
+.home-clinic-header h2 {
+  font-family: var(--font-robotoSlab), serif;
+  @apply text-4xl font-bold text-left my-4;
+}
+.home-clinic-header p {
+  font-family: var(--font-roboto), sans-serif;
+  @apply text-xl text-left max-w-2xl my-8;
+}
+/* image container */
+
+.image-gallery-container {
+  margin-top: 2rem;
+}
+
+.custom-gallery .image-gallery-slide img {
+  border-radius: 0.5rem;
+}
+
+.custom-gallery .image-gallery-thumbnail {
+  border-radius: 0.25rem;
+}
+
+.custom-gallery .image-gallery-thumbnail:hover {
+  border: 2px solid var(--primary-foreground);
+}

@@ -1,9 +1,11 @@
+import { RTLDecorativeShapes } from "@/components/ui/decorative-shapes";
 import Image from "next/image";
 
 export default function About() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row items-center gap-8">
+    <div className="container h-screen mx-auto px-4 py-8 relative z-0 overflow-hidden">
+      <RTLDecorativeShapes />
+      <div className="flex flex-col md:flex-row items-center gap-8 relative z-[2]">
         <div className="w-full md:w-1/3 flex justify-center">
           <Image
             src="/assets/michel2.png"

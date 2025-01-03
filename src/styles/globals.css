@@ -1,7 +1,34 @@
-/* app/globals.css */
+/* styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Utilities */
+@layer utilities {
+  .container-centered {
+    @apply flex items-center justify-center;
+  }
+
+  .section-padding {
+    @apply py-6 px-4 md:py-8 md:px-8;
+  }
+
+  .bg-overlay {
+    @apply bg-black bg-opacity-50;
+  }
+
+  .animate-infinite {
+    animation-iteration-count: infinite;
+  }
+}
+
+/* Componentes */
+/* @import "./components/buttons.css";
+@import "./components/cards.css";
+@import "./components/swiper.css"; */
+
+/* @import "./pages/about.css";
+@import "./pages/contact.css"; */
 
 @layer base {
   :root {
@@ -19,18 +46,6 @@
     --muted: #f2f2f2;
     --muted-foreground: #737373;
     --accent: #f2f2f2;
-    --accent-foreground: #0d0d0d;
-    --destructive: #e63946;
-    --destructive-foreground: #fafafa;
-    --border: #e5e5e5;
-    --input: #e5e5e5;
-    --ring: #0a0a0a;
-    --chart-1: #f57b48;
-    --chart-2: #37b17d;
-    --chart-3: #355f8c;
-    --chart-4: #fac37e;
-    --chart-5: #ffb83f;
-    --radius: 0.5rem;
   }
   .dark {
     --background: #001046;
@@ -48,27 +63,43 @@
     --secondary-foreground: #fafafa;
     --muted: #2a2a2a;
     --muted-foreground: #a3a3a3;
-    --accent: #2a2a2a;
-    --accent-foreground: #fafafa;
-    --destructive: #99212c;
-    --destructive-foreground: #fafafa;
-    --border: #2a2a2a;
-    --input: #2a2a2a;
-    --ring: #d9d9d9;
-    --chart-1: #3399ff;
-    --chart-2: #29947d;
-    --chart-3: #ffae73;
-    --chart-4: #bf67e3;
-    --chart-5: #ff6fa9;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     font-family: var(--font-roboto), sans-serif;
     @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-foreground;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  p {
+    @apply text-foreground leading-relaxed;
+  }
+
+  a {
+    @apply text-primary-foreground hover:text-primary transition-colors;
   }
 }

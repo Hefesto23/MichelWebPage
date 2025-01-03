@@ -1,9 +1,11 @@
 "use client"; // Adicione isso na primeira linha
 
-import "@/app/globals.css"; // Estilos globais
 import { Footer } from "@/components/common/footer";
+import PageTransition from "@/components/common/page-transition";
+import WhatsAppButton from "@/components/common/zap";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { cn } from "@/lib/utils";
+import "@/styles/globals.css"; // Estilos globais
 import { ReactNode, useEffect, useState } from "react";
 import { Header } from "../components/common/header";
 import { roboto } from "./fonts";
@@ -42,7 +44,8 @@ export default function RootLayout({ children }: LayoutProps) {
           />
           {/* Main Content */}
           <main className={cn("flex-grow py-0 bg-primary", roboto.className)}>
-            {children}
+            <PageTransition>{children}</PageTransition>
+            <WhatsAppButton />
           </main>
           {/* Footer */}
           <Footer />

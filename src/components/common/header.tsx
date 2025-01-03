@@ -18,30 +18,30 @@ export const Header = ({
   return (
     <header
       className={cn(
-        "dark:bg-background dark:text-foreground shadow-md w-full p-4",
+        "dark:bg-background dark:text-foreground shadow-md w-full py-4",
         robotoSlab.className
       )}
     >
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="mx-8 flex justify-between items-center">
         <div className="flex items-center space-x-4 stretch">
           {isDarkMode ? (
             <Image
               src="/logo2.png"
               alt="Logo da Clínica"
-              width={150}
-              height={50}
+              width={200}
+              height={75}
             />
           ) : (
             <Image
               src="/logo.png"
               alt="Logo da Clínica"
-              width={150}
-              height={50}
+              width={200}
+              height={75}
             />
           )}
         </div>
 
-        <nav className="flex items-center space-x-4">
+        <nav className="flex items-center space-x-4 text-lg ">
           {/* Usando variável CSS para links e hover */}
           <Link
             href="/"
@@ -56,25 +56,25 @@ export const Header = ({
             Sobre
           </Link>
           <Link
-            href="/therapies"
+            href="/terapias"
             className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
           >
             Terapias
           </Link>
           <Link
-            href="/assessments"
+            href="/avaliacoes"
             className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
           >
             Avaliações
           </Link>
           <Link
-            href="/appointment"
+            href="/agendamento"
             className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
           >
             Agendamento
           </Link>
           <Link
-            href="/contact"
+            href="/contato"
             className="text-foreground dark:text-card-foreground hover:text-primary-foreground dark:hover:text-primary-foreground"
           >
             Contato

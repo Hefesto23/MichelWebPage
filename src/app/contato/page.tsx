@@ -1,107 +1,143 @@
 "use client";
-import { Clock, Mail, MapPin, Maximize2, Phone } from "lucide-react";
+import { ContactCard } from "@/components/ui/cards/ServiceCard";
+import Divisor from "@/components/ui/divisor";
+import styles from "@/styles/pages/contato.module.css";
+import { Clock, Mail, MapPin, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { IoLogoWhatsapp } from "react-icons/io";
 
 export default function Contact() {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
 
-  const toggleMapSize = () => {
-    setIsMapExpanded(!isMapExpanded);
-  };
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Contato</h1>
+    <div>
+      <section className={styles.contactSection}>
+        <div className="content-container">
+          <div className={styles.container}>
+            <h1 className={styles.title}>Contato</h1>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Contact Information */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-6 border-b pb-3">
-            Informações de Contato
-          </h2>
+            <div className={styles.contatoGrid}>
+              {/* Contact Information Card */}
+              <ContactCard title="Informações de Contato">
+                <div className="space-y-6">
+                  {/* Phone */}
+                  <Link
+                    href="https://wa.me/5515997646421"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${styles.contactItem} group`}
+                  >
+                    <div
+                      className={`${styles.contactItemWrapper} hover:-translate-x-1 transition-transform duration-300`}
+                    >
+                      <IoLogoWhatsapp
+                        className={`${styles.contactIcon} group-hover:scale-110 transition-transform duration-300`}
+                        size={24}
+                      />
+                      <span
+                        className={`${styles.contactText} group-hover:text-foreground/80 transition-colors`}
+                      >
+                        +55 (15) 99764-6421
+                      </span>
+                    </div>
+                  </Link>
 
-          {/* Phone */}
-          <div className="mb-4 flex items-center">
-            <Phone className="mr-3 text-blue-600" size={24} />
-            <Link
-              href="https://wa.me/5515997646421"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lg hover:text-blue-700 transition-colors"
-            >
-              +55 (15) 99764-6421
-            </Link>
-          </div>
+                  {/* Email */}
+                  <Link
+                    href="mailto:michelcamargo.psi@gmail.com"
+                    className={styles.contactItem}
+                  >
+                    <div className={styles.contactItemWrapper}>
+                      <Mail
+                        className={styles.contactIcon}
+                        size={24}
+                        strokeWidth={3}
+                      />
+                      <span className={styles.contactText}>
+                        michelcamargo.psi@gmail.com
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              </ContactCard>
 
-          {/* Email */}
-          <div className="mb-4 flex items-center">
-            <Mail className="mr-3 text-blue-600" size={24} />
-            <Link
-              href="mailto:michelcamargo.psi@gmail.com"
-              className="text-lg hover:text-blue-700 transition-colors"
-            >
-              michelcamargo.psi@gmail.com
-            </Link>
-          </div>
-        </div>
+              {/* Location and Hours Card */}
+              <ContactCard title="Atendimento">
+                {/* Address */}
+                <div className="space-y-6">
+                  <div className={`${styles.addressItem} group`}>
+                    <MapPin
+                      className={`${styles.addressIcon}  group-hover:scale-110 transition-transform duration-300`}
+                      size={24}
+                      strokeWidth={3}
+                    />
+                    <div
+                      className={`${styles.addressContent} hover:-translate-x-1 transition-transform duration-300`}
+                    >
+                      <p className={styles.addressText}>
+                        Rua Antônio Ferreira, 171
+                      </p>
+                      <p className={styles.addressText}>
+                        Parque Campolim, Sorocaba SP
+                      </p>
+                      <p className={styles.addressText}>18047-636, Brasil</p>
+                    </div>
+                  </div>
 
-        {/* Location and Hours */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-6 border-b pb-3">
-            Atendimento
-          </h2>
-
-          {/* Address */}
-          <div className="mb-4 flex items-start">
-            <MapPin className="mr-3 mt-1 text-blue-600" size={24} />
-            <div>
-              <p className="text-lg">Rua Antônio Ferreira, 171</p>
-              <p className="text-lg">Parque Campolim, Sorocaba SP</p>
-              <p className="text-lg">18047-636, Brasil</p>
+                  {/* Hours */}
+                  <div className={styles.addressItem}>
+                    <Clock
+                      className={styles.addressIcon}
+                      size={24}
+                      strokeWidth={3}
+                    />
+                    <div className={styles.addressContent}>
+                      <p className={styles.addressText}>Segunda à Sexta</p>
+                      <p className={styles.addressText}>Das 8:00 as 21:00</p>
+                      <p className={styles.note}>
+                        Obs: As consultas necessitam ser previamente agendadas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </ContactCard>
             </div>
-          </div>
 
-          {/* Hours */}
-          <div className="flex items-start">
-            <Clock className="mr-3 mt-1 text-blue-600" size={24} />
-            <div>
-              <p className="text-lg">Segunda à Sexta</p>
-              <p className="text-lg">Das 8:00 as 21:00</p>
-              <p className="text-sm text-gray-600 mt-2 italic">
-                Obs: As consultas necessitam ser previamente agendadas.
-              </p>
-            </div>
+            {/* Map Card */}
+            <ContactCard title="Localização no Mapa">
+              <div
+                className={`${styles.map} transition-all duration-300 ${
+                  isMapExpanded ? styles.mapExpanded : styles.mapCollapsed
+                }`}
+              >
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3658.5088240408087!2d-47.47244788549275!3d-23.493335284719095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5d9d6e9e5d7a7%3A0x9fdc74c22ed20a13!2sRua%20Ant%C3%B4nio%20Ferreira%2C%20171%20-%20Parque%20Campolim%2C%20Sorocaba%20-%20SP%2C%2018047-636%2C%20Brasil!5e0!3m2!1sen!2sus!4v1696692299380!5m2!1sen!2sus"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen={true}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Mapa da Clínica"
+                  className={styles.mapFrame}
+                />
+              </div>
+              <button
+                onClick={() => setIsMapExpanded(!isMapExpanded)}
+                className={`${styles.mapButton} hover:text-foreground/80 transition-colors group`}
+              >
+                <Maximize2
+                  size={20}
+                  className={`${styles.mapButtonIcon} group-hover:scale-110 transition-transform duration-300`}
+                />
+                {isMapExpanded ? "Reduzir mapa" : "Expandir mapa"}
+              </button>
+            </ContactCard>
           </div>
         </div>
-      </div>
-      {/* Google Maps Card */}
-      <div className="bg-white shadow-md rounded-lg p-6 mt-8">
-        <h3 className="text-xl font-semibold mb-4">Localização no Mapa</h3>
-        <div
-          className={`relative overflow-hidden transition-all duration-300 ${
-            isMapExpanded ? "h-[500px]" : "h-64"
-          }`}
-        >
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3658.5088240408087!2d-47.47244788549275!3d-23.493335284719095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94c5d9d6e9e5d7a7%3A0x9fdc74c22ed20a13!2sRua%20Ant%C3%B4nio%20Ferreira%2C%20171%20-%20Parque%20Campolim%2C%20Sorocaba%20-%20SP%2C%2018047-636%2C%20Brasil!5e0!3m2!1sen!2sus!4v1696692299380!5m2!1sen!2sus"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Mapa da Clínica"
-          ></iframe>
-        </div>
-        <button
-          onClick={toggleMapSize}
-          className="mt-4 text-blue-600 hover:text-blue-800 transition-colors flex items-center"
-        >
-          <Maximize2 size={20} className="mr-2" />
-          {isMapExpanded ? "Reduzir mapa" : "Expandir mapa"}
-        </button>
-      </div>
+      </section>
+      <Divisor index={5} />
     </div>
   );
 }

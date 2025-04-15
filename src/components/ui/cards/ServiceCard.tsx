@@ -104,7 +104,7 @@ const ImageCard: React.FC<ImageCardProps> = ({
       href={href}
       className={cn(
         "group flex flex-col",
-        "w-full max-w-sm overflow-hidden",
+        "w-full overflow-hidden",
         "bg-white dark:bg-gray-800 rounded-xl transition-all duration-300",
         "border-2 border-gray-200 dark:border-gray-700",
         "shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px]",
@@ -155,4 +155,30 @@ const ImageCard: React.FC<ImageCardProps> = ({
   );
 };
 
-export { ImageCard, ServiceCard };
+interface ContactCardProps {
+  title: string;
+  children: React.ReactNode;
+}
+// Card base com o mesmo estilo de sombreamento do ImageCard
+const ContactCard: React.FC<ContactCardProps> = ({ title, children }) => {
+  return (
+    <div
+      className={cn(
+        "bg-white dark:bg-gray-800 rounded-xl",
+        "border-2 border-gray-400 dark:border-gray-700",
+        "shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px]",
+        "dark:shadow-[rgba(0,_0,_0,_0.4)_0px_0px_4px,rgba(0,_0,_0,_0.4)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.4)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.4)_0px_24px_32px_-8px]",
+        "transition-all duration-500 ease-out",
+        "hover:-translate-y-1",
+        "p-6"
+      )}
+    >
+      <h2 className="text-2xl font-semibold mb-6 border-b border-border/20 pb-3 text-foreground">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+};
+
+export { ContactCard, ImageCard, ServiceCard };

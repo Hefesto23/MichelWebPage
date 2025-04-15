@@ -5,6 +5,14 @@
 
 /* Utilities */
 @layer utilities {
+  .bg-overlay {
+    @apply bg-black bg-opacity-50;
+  }
+
+  .content-container {
+    @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
   .container-centered {
     @apply flex items-center justify-center;
   }
@@ -22,13 +30,51 @@
   }
 }
 
-/* Componentes */
-/* @import "./components/buttons.css";
-@import "./components/cards.css";
-@import "./components/swiper.css"; */
+/* Animations */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-/* @import "./pages/about.css";
-@import "./pages/contact.css"; */
+.fadeIn {
+  animation: fadeIn 1s ease forwards;
+}
+
+@keyframes softBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animateSoftBounce {
+  animation: softBounce 2s ease-in-out infinite;
+}
+
+/* Variantes de animação */
+.fadeIn-delay-1 {
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 1s;
+}
+
+.fadeIn-delay-2 {
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 2s;
+}
+
+.fadeIn-delay-3 {
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 3s;
+}
 
 @layer base {
   :root {
@@ -40,6 +86,7 @@
     --btn-fg: #2e5597;
     --btn-border: #cf9373;
     --primary: #fff9f5;
+    --zap-logo: #25d366;
     --primary-foreground: #ffbf9e;
     --secondary: #c4d6ed;
     --secondary-foreground: #0d0d0d;
@@ -53,6 +100,7 @@
     --card: #0a0a0a;
     --card-foreground: #fafafa;
     --popover: #0a0a0a;
+    --zap-logo: #075e54;
     --popover-foreground: #fafafa;
     --btn: #c4d6ed;
     --btn-fg: #001046;
@@ -101,5 +149,28 @@
 
   a {
     @apply text-primary-foreground hover:text-primary transition-colors;
+  }
+
+  /* Serviços */
+  .home-services-section {
+    @apply min-h-screen w-full px-8 py-8 overflow-hidden;
+  }
+  .home-services-container {
+    @apply container mx-auto pr-2 relative z-0;
+  }
+
+  .home-services-content {
+    @apply relative z-[2];
+  }
+
+  .home-services-header h2 {
+    @apply text-4xl text-left font-bold mb-4 text-foreground;
+  }
+  .home-services-header p {
+    @apply text-xl text-left max-w-2xl text-foreground;
+  }
+
+  .home-services-grid {
+    @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr max-h-[calc(100vh-12rem)];
   }
 }

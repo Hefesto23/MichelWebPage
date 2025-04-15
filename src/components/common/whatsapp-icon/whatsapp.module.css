@@ -1,0 +1,16 @@
+/* WhatsAppButton.module.css */
+
+.whatsappButton {
+  @apply fixed bottom-6 left-6 z-50 flex items-center justify-center w-14 h-14 bg-[var(--zap-logo)] rounded-full shadow-lg;
+  /* Classe group deve ser aplicada diretamente, não com @apply */
+  /* As transições devem estar no globals.css */
+}
+
+.icon {
+  @apply text-white text-3xl;
+}
+
+.tooltip {
+  @apply absolute left-full ml-4 px-4 py-2 bg-white dark:bg-gray-800 text-gray-800 dark:text-white text-sm font-medium rounded-lg shadow-lg whitespace-nowrap opacity-0 border border-gray-200 dark:border-gray-700;
+  /* Transição será aplicada via classe global */
+}

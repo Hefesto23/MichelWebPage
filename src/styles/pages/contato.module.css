@@ -1,0 +1,77 @@
+/* contato.module.css */
+
+.contactSection {
+  @apply py-16 relative z-0 overflow-hidden;
+}
+
+.container {
+  @apply relative z-[10];
+}
+
+.title {
+  @apply text-4xl font-bold text-left mb-8 text-foreground;
+}
+
+.contatoGrid {
+  @apply grid md:grid-cols-2 gap-8 mb-12;
+}
+
+.contactItem {
+  @apply flex items-center;
+}
+
+.contactItemWrapper {
+  @apply flex items-center w-full;
+}
+
+.contactIcon {
+  @apply mr-3 text-foreground;
+}
+
+.contactText {
+  @apply text-lg text-foreground;
+}
+
+.addressItem {
+  @apply flex items-start;
+}
+
+.addressIcon {
+  @apply mr-3 mt-1 font-bold;
+}
+
+.addressContent {
+  @apply text-foreground;
+}
+
+.addressText {
+  @apply text-lg;
+}
+
+.note {
+  @apply text-sm text-muted-foreground mt-2 italic;
+}
+
+.map {
+  @apply relative overflow-hidden;
+}
+
+.mapExpanded {
+  @apply h-[500px];
+}
+
+.mapCollapsed {
+  @apply h-64;
+}
+
+.mapFrame {
+  @apply rounded-lg;
+}
+
+.mapButton {
+  @apply mt-4 flex items-center;
+}
+
+.mapButtonIcon {
+  @apply mr-2;
+}

@@ -1,0 +1,25 @@
+/* avaliacoes.module.css */
+
+.assessmentSection {
+  @apply h-screen w-full py-16 overflow-hidden relative z-0;
+}
+
+.container {
+  @apply relative z-10;
+}
+
+.header {
+  @apply mb-8;
+}
+
+.headerTitle {
+  @apply text-4xl text-left font-bold mb-4 text-foreground;
+}
+
+.headerDescription {
+  @apply text-xl text-left max-w-2xl text-foreground;
+}
+
+.avaliacaoGrid {
+  @apply pt-8 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-[2];
+}

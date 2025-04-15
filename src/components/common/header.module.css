@@ -1,0 +1,48 @@
+/* components/common/Header/Header.module.css */
+
+.header {
+  @apply dark:bg-background dark:text-foreground shadow-md w-full py-4;
+}
+
+.container {
+  @apply flex justify-between items-center h-16;
+}
+
+.logoContainer {
+  @apply flex items-center space-x-4 h-full;
+}
+
+.navigation {
+  @apply flex items-center justify-center space-x-6 text-lg h-full;
+}
+
+.navLink {
+  @apply text-foreground dark:text-card-foreground hover:text-primary-foreground 
+         dark:hover:text-primary-foreground transition-colors duration-200 
+         flex items-center h-full;
+}
+
+.darkModeToggle {
+  @apply flex items-center space-x-2;
+}
+
+.iconContainer {
+  @apply font-extrabold inline-flex items-center;
+}
+
+.darkModeIcon {
+  @apply mr-1 h-5 w-5 text-primary-foreground;
+}
+
+.lightModeIcon {
+  @apply mr-1 h-5 w-5 text-foreground;
+}
+
+/* Media queries para responsividade */
+@media (max-width: 768px) {
+  .navigation {
+    @apply hidden;
+  }
+
+  /* Adicionar aqui estilo para um menu mobile quando necessário */
+}

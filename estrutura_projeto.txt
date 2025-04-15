@@ -1,0 +1,146 @@
+.
+|-- README.md
+|-- components.json
+|-- config-sendgrid.md
+|-- docker-compose.yml
+|-- estrutura_projeto.txt
+|-- google-agenda.md
+|-- next-env.d.ts
+|-- next.config.mjs
+|-- package-lock.json
+|-- package.json
+|-- postcss.config.mjs
+|-- prisma
+|   |               `-- migrations
+|   |   |           `-- 20240929191410_init
+|   |   |           `-- migration.sql
+|   |   `-- migration_lock.toml
+|   |-- schema.prisma
+|   `-- seed.ts
+|-- public
+|   |-- assets
+|   |   |-- horizonte.jpg
+|   |   |-- mental-health-illustration.svg
+|   |   |-- michel1.png
+|   |   |-- michel1.svg
+|   |   |-- michel2.png
+|   |   |-- michel2.svg
+|   |   |-- quotes
+|   |   |   |       `-- growth.jpg
+|   |   |   |       `-- journey.jpg
+|   |   |   |       `-- mindfulness.jpg
+|   |   |   |       `-- opportunity.jpg
+|   |   |   |       `-- rebuild.jpg
+|   |   |           `-- reflection.jpg
+|   |   `-- terapias1.jpg
+|   |-- fonts
+|   |   |-- caveat
+|   |   |   |       `-- Caveat-Bold.ttf
+|   |   |   |       `-- Caveat-Medium.ttf
+|   |   |   |       `-- Caveat-Regular.ttf
+|   |   |           `-- Caveat-SemiBold.ttf
+|   |   |-- roboto
+|   |   |   |       `-- LICENSE.txt
+|   |   |   |       `-- Roboto-Black.ttf
+|   |   |   |       `-- Roboto-BlackItalic.ttf
+|   |   |   |       `-- Roboto-Bold.ttf
+|   |   |   |       `-- Roboto-BoldItalic.ttf
+|   |   |   |       `-- Roboto-Italic.ttf
+|   |   |   |       `-- Roboto-Light.ttf
+|   |   |   |       `-- Roboto-LightItalic.ttf
+|   |   |   |       `-- Roboto-Medium.ttf
+|   |   |   |       `-- Roboto-MediumItalic.ttf
+|   |   |   |       `-- Roboto-Regular.ttf
+|   |   |   |       `-- Roboto-Thin.ttf
+|   |   |           `-- Roboto-ThinItalic.ttf
+|   |   `-- roboto-slab
+|   |       |       `-- RobotoSlab-Black.ttf
+|   |       |       `-- RobotoSlab-Bold.ttf
+|   |       |       `-- RobotoSlab-ExtraBold.ttf
+|   |       |       `-- RobotoSlab-ExtraLight.ttf
+|   |       |       `-- RobotoSlab-Light.ttf
+|   |       |       `-- RobotoSlab-Medium.ttf
+|   |       |       `-- RobotoSlab-Regular.ttf
+|   |       |       `-- RobotoSlab-SemiBold.ttf
+|   |       |       `-- RobotoSlab-Thin.ttf
+|   |               `-- RobotoSlab-VariableFont_wght.ttf
+|   |-- logo.png
+|   `-- logo2.png
+|-- requisitos.md
+|-- src
+|   |-- app
+|   |   |-- about
+|   |   |           `-- page.tsx
+|   |   |-- admin
+|   |   |   |       `-- dashboard
+|   |   |   |   |   `-- layout.tsx
+|   |   |   |       `-- page.tsx
+|   |   |   `-- login
+|   |   |       |   `-- layout.tsx
+|   |   |           `-- page.tsx
+|   |   |-- agendamento
+|   |   |   `-- page.tsx
+|   |   |-- api
+|   |   |   |-- auth
+|   |   |   |       `-- login
+|   |   |   |       `-- route.ts
+|   |   |   `-- calendario
+|   |   |       |-- agendar
+|   |   |       |   `-- route.ts
+|   |   |       |-- buscar
+|   |   |       |   `-- route.ts
+|   |   |       |-- cancelar
+|   |   |       |   `-- route.ts
+|   |   |       `-- horarios
+|   |   |           `-- route.ts
+|   |   |-- avaliacoes
+|   |   |   `-- page.tsx
+|   |   |-- contato
+|   |   |   `-- page.tsx
+|   |   |-- favicon.ico
+|   |   |-- fonts.ts
+|   |   |-- layout.tsx
+|   |   |-- middleware
+|   |   |   `-- auth.ts
+|   |   |-- not-found.tsx
+|   |   |-- page.tsx
+|   |   `-- terapias
+|   |       `-- page.tsx
+|   |-- components
+|   |   |-- common
+|   |   |   |-- footer.tsx
+|   |   |   |-- header.tsx
+|   |   |   |-- page-transition.css
+|   |   |   |-- page-transition.tsx
+|   |   |   `-- zap.tsx
+|   |   `-- ui
+|   |       |-- button.tsx
+|   |       |-- cards
+|   |       |   `-- ServiceCard.tsx
+|   |       |-- decorative-shapes.tsx
+|   |       |-- divisor.tsx
+|   |       |-- gallery-styles.css
+|   |       |-- image-grid.tsx
+|   |       |-- input.tsx
+|   |       |-- section-nav.tsx
+|   |       |-- switch.tsx
+|   |       `-- textarea.tsx
+|   |-- hooks
+|   |   |-- useDarkMode.ts
+|   |   `-- useScrollToSection.ts
+|   |-- lib
+|   |   |-- email.ts
+|   |   |-- jwt.ts
+|   |   |-- prisma.ts
+|   |   `-- utils.ts
+|   `-- styles
+|       |-- components
+|       |   |-- footer.css
+|       |   `-- image-gallery.css
+|       |-- globals.css
+|       `-- pages
+|           `-- home.css
+|-- tailwind.config.ts
+`-- tsconfig.json
+
+38 directories, 105 files

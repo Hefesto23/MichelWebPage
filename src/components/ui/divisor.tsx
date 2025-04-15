@@ -3,34 +3,38 @@ const Divisor = ({ index = 0 }) => {
     {
       info: "Segunda à Sexta das 8:00 as 21:00",
       info2: "Obs: As consultas necessitam ser previamente agendadas.",
-      author: "* Atendimentos a partir de 20 anos de idade",
+      info3: "",
+      detail: "* Atendimentos a partir de 20 anos de idade",
       backgroundImage: "/assets/quotes/mindfulness.jpg",
     },
     {
       info: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato.",
       info2:
-        "Psicoterapia online - uma modalidade de terapia que possibilita atendimento à distância, incluindo pacientes em diferentes países.",
-      author: "Veja mais em terapias...",
+        "Psicoterapia online - uma modalidade de terapia que possibilita" +
+        "atendimento à distância, incluindo pacientes em diferentes países.",
+      detail: "Veja mais em terapias...",
       backgroundImage: "/assets/quotes/growth.jpg",
     },
     {
       info: "A mudança é um processo, não um evento.",
-      author: "Albert Ellis",
+      info2: "",
+      info3: "",
+      detail: "Albert Ellis",
       backgroundImage: "/assets/quotes/journey.jpg",
     },
     {
       info: "O comportamento é mantido por suas consequências.",
-      author: "B.F. Skinner",
+      detail: "B.F. Skinner",
       backgroundImage: "/assets/quotes/reflection.jpg",
     },
     {
       info: "A terapia é uma oportunidade de reconstruir a forma como vivenciamos o mundo.",
-      author: "Donald Meichenbaum",
+      detail: "Donald Meichenbaum",
       backgroundImage: "/assets/quotes/rebuild.jpg",
     },
     {
       info: "Toda resposta aprendida é uma oportunidade de mudança.",
-      author: "Joseph Wolpe",
+      detail: "Joseph Wolpe",
       backgroundImage: "/assets/quotes/opportunity.jpg",
     },
   ];
@@ -59,8 +63,11 @@ const Divisor = ({ index = 0 }) => {
             <p className="text-2xl md:text-3xl font-serif text-white mb-6 leading-relaxed">
               {quote?.info2}
             </p>
+            <p className="text-2xl md:text-3xl font-serif text-white mb-6 leading-relaxed">
+              {quote?.info3}
+            </p>
             <footer className="text-base md:text-lg text-white/90 font-bold italic">
-              {quote.author}
+              {quote.detail}
             </footer>
           </blockquote>
         </div>

@@ -2,7 +2,7 @@
 
 import { Footer } from "@/components/common/footer";
 import PageTransition from "@/components/common/page-transition";
-import WhatsAppButton from "@/components/common/zap";
+import WhatsAppButton from "@/components/common/whatsapp-icon";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css"; // Estilos globais
@@ -44,7 +44,7 @@ export default function RootLayout({ children }: LayoutProps) {
           />
           {/* Main Content */}
           <main className={cn("flex-grow py-0 bg-primary", roboto.className)}>
-            <PageTransition>{children}</PageTransition>
+            <PageTransition isDarkMode={isDarkMode}>{children}</PageTransition>
             <WhatsAppButton />
           </main>
           {/* Footer */}

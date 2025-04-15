@@ -1,0 +1,76 @@
+/* transition.module.css */
+.content {
+  @apply transition-opacity duration-500 w-full;
+}
+
+.contentVisible {
+  @apply opacity-100;
+}
+
+.contentHidden {
+  @apply opacity-0;
+}
+
+.loader {
+  @apply fixed inset-0 z-50 bg-background flex items-center justify-center;
+  /* Reduz a altura para não cobrir header e footer */
+  top: 80px;
+  overflow: hidden; /* Para conter a barra de progresso */
+}
+
+/* Contêiner da barra de progresso */
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Barra de progresso animada */
+.progress {
+  position: absolute;
+  top: 0;
+  left: -100%; /* Começa fora da tela */
+  width: 100%;
+  height: 100%;
+  animation: progressAnimation 2s ease-in-out forwards;
+}
+
+/* Cores da barra de progresso */
+.darkProgress {
+  background-color: #c4d6ed; /* Azul escuro para modo escuro */
+}
+
+.lightProgress {
+  background-color: #ffbf9e; /* Azul claro para modo claro */
+}
+
+.logoContainer {
+  @apply relative w-64 h-64 flex items-center justify-center;
+  z-index: 10; /* Acima da barra de progresso */
+}
+
+.fadeIn {
+  animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes progressAnimation {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 0;
+  }
+}
+/* Animações suaves para os logos */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -21,7 +21,7 @@ const SectionNavigator = () => {
   useEffect(() => {
     const checkScroll = () => {
       // Pega a altura da seção hero
-      const heroSection = document.querySelector(".home-hero-section");
+      const heroSection = document.getElementById("hero");
       if (!heroSection) return;
 
       // Define a visibilidade baseada na posição do scroll

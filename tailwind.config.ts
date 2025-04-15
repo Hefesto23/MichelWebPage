@@ -34,6 +34,7 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        zap: "var(--zap-logo)",
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",

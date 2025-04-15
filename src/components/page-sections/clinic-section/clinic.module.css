@@ -1,0 +1,22 @@
+/* Clinic Section */
+.clinicSection {
+  @apply w-full h-full flex items-center justify-center;
+}
+
+.clinicContainer {
+  @apply container h-full my-8;
+}
+
+.clinicHeader h2 {
+  font-family: var(--font-robotoSlab), serif;
+  @apply text-4xl font-bold text-left my-4;
+}
+
+.clinicHeader p {
+  font-family: var(--font-roboto), sans-serif;
+  @apply text-xl text-left max-w-2xl my-8;
+}
+
+.clinicGrid {
+  @apply mx-auto;
+}

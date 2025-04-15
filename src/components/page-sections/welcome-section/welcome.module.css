@@ -1,0 +1,48 @@
+/* Welcome Section */
+.welcomeSection {
+  @apply w-full h-screen overflow-hidden;
+}
+
+.welcomeContainer {
+  @apply flex flex-row h-screen overflow-hidden pt-8 relative;
+}
+
+.welcomeText {
+  @apply basis-4/6 overflow-scroll p-4 justify-start text-foreground relative z-[2];
+}
+
+/* Estilo da barra de rolagem - Compatível com WebKit */
+.welcomeText::-webkit-scrollbar {
+  height: 0px;
+  width: 5px;
+  background-color: transparent;
+}
+
+.welcomeText::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+}
+
+.welcomeText::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.welcomeText::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.welcomeHeader h1 {
+  @apply flex items-center text-left pb-4 text-4xl font-bold mb-4;
+}
+
+.welcomeContent article p {
+  @apply mb-4 leading-relaxed font-extrabold;
+}
+
+.welcomeContent article ul {
+  @apply pl-6 mb-4 space-y-2 font-extrabold;
+}
+
+.welcomeImage {
+  @apply basis-2/6 relative h-full grid place-items-center z-[2];
+}

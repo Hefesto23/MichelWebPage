@@ -80,7 +80,7 @@ const ServicesDecorativeShapes = () => {
           height: "200px",
           backgroundColor: "#ffbf9e",
           borderRadius: "50%",
-          zIndex: 1,
+          zIndex: 0,
         }}
       />
 
@@ -95,7 +95,7 @@ const ServicesDecorativeShapes = () => {
           height: "350px",
           backgroundColor: "#ffbf9e",
           borderRadius: "50%",
-          zIndex: 1,
+          zIndex: 0,
         }}
       />
 
@@ -110,7 +110,7 @@ const ServicesDecorativeShapes = () => {
           height: "150px",
           backgroundColor: "#ffbf9e",
           borderRadius: "50%",
-          zIndex: 1,
+          zIndex: 0,
         }}
       />
     </>

@@ -1,43 +1,132 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import AppointmentConfirmation from "@/components/agendamento/AppointmentConfirmation";
+import AppointmentDetails from "@/components/agendamento/AppointmentDetails";
+import AppointmentForm from "@/components/agendamento/AppointmentForm";
+import AppointmentLookup from "@/components/agendamento/AppointmentLookup";
+import InfoCards from "@/components/agendamento/InfoCards";
+import Divisor from "@/components/ui/divisor";
+import styles from "@/styles/pages/agendamento.module.css";
 import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { IoCloseCircle } from "react-icons/io5";
 
-export default function Appointment() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+export default function Agendamento() {
+  // Estados principais
+  const [step, setStep] = useState(1);
+  const [enviado, setEnviado] = useState(false);
+  const [cancelar, setCancelar] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (selectedDate) {
-      alert(`Consulta agendada para ${selectedDate.toLocaleString()}`);
-    } else {
-      alert("Por favor, selecione uma data.");
-    }
+  // Estados de dados do agendamento
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    telefone: "",
+    dataSelecionada: "",
+    horarioSelecionado: "",
+    modalidade: "presencial",
+    mensagem: "",
+    codigoAgendamento: "",
+    codigoConfirmacao: "",
+  });
+
+  // Função para atualizar os dados do formulário
+  const updateFormData = (newData: Partial<typeof formData>) => {
+    setFormData((prev) => ({ ...prev, ...newData }));
+  };
+
+  // Função para lidar com erros
+  const handleError = (errorMessage: string) => {
+    setErro(errorMessage);
+    window.scrollTo(0, 0);
   };
 
   return (
-    <div className="text-center">
-      <h1 className="text-3xl font-bold mb-4">Agende sua Consulta</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 p-6 rounded shadow-md inline-block"
-      >
-        <div className="mb-6">
-          <label className="block text-left mb-2">
-            Escolha uma data e horário:
-          </label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            showTimeSelect
-            dateFormat="Pp"
-            className="w-full p-2 rounded dark:bg-gray-700 dark:text-white"
-          />
+    <div>
+      <section className={styles.schedulingSection}>
+        <div className="content-container">
+          <div className={styles.container}>
+            <h1 className={styles.title}>Agendamento de Consultas</h1>
+
+            {/* Mensagem de erro */}
+            {erro && (
+              <div className={styles.errorMessage}>
+                <p className={styles.errorText}>
+                  <IoCloseCircle className="mr-2" size={20} />
+                  {erro}
+                </p>
+              </div>
+            )}
+
+            {!enviado ? (
+              <>
+                {/* Abas para Novo Agendamento ou Meus Agendamentos */}
+                <div className={styles.tabs}>
+                  <button
+                    className={`${styles.tab} ${
+                      step !== 0 ? styles.activeTab : styles.inactiveTab
+                    }`}
+                    onClick={() => setStep(1)}
+                  >
+                    Novo Agendamento
+                  </button>
+                  <button
+                    className={`${styles.tab} ${
+                      step === 0 ? styles.activeTab : styles.inactiveTab
+                    }`}
+                    onClick={() => setStep(0)}
+                  >
+                    Meus Agendamentos
+                  </button>
+                </div>
+
+                {step === 0 ? (
+                  <AppointmentLookup
+                    formData={formData}
+                    updateFormData={updateFormData}
+                    setCarregando={setCarregando}
+                    setCancelar={setCancelar}
+                    handleError={handleError}
+                    carregando={carregando}
+                  />
+                ) : (
+                  <AppointmentForm
+                    step={step}
+                    setStep={setStep}
+                    formData={formData}
+                    updateFormData={updateFormData}
+                    setEnviado={setEnviado}
+                    carregando={carregando}
+                    setCarregando={setCarregando}
+                    handleError={handleError}
+                  />
+                )}
+
+                {cancelar && (
+                  <AppointmentDetails
+                    formData={formData}
+                    setCancelar={setCancelar}
+                    setEnviado={setEnviado}
+                    carregando={carregando}
+                    setCarregando={setCarregando}
+                    handleError={handleError}
+                  />
+                )}
+              </>
+            ) : (
+              <AppointmentConfirmation
+                formData={formData}
+                cancelar={cancelar}
+              />
+            )}
+
+            {/* Informações adicionais */}
+            {!enviado && <InfoCards />}
+          </div>
         </div>
-        <Button type="submit">Confirmar Agendamento</Button>
-      </form>
+      </section>
+      <Divisor index={5} />
     </div>
   );
 }

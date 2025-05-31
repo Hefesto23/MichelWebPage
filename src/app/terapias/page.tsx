@@ -7,21 +7,21 @@ import styles from "@/styles/pages/terapias.module.css";
 export default function Therapies() {
   const therapyModalities = [
     {
-      imageUrl: "/images/presencial-therapy.jpg",
+      imageUrl: "/assets/terapias1.jpg",
       title: "Psicoterapia individual - Presencial",
       description:
         "Modalidade de atendimento de um paciente através de técnicas personalizadas em encontros presenciais no consultório.",
       href: "/presencial",
     },
     {
-      imageUrl: "/images/online-therapy.jpg",
+      imageUrl: "/assets/terapias1.jpg",
       title: "Psicoterapia individual - On-line",
       description:
         "Modalidade de terapia que permite o atendimento feito à distância, com todo o conforto e privacidade que você precisa.",
       href: "/online",
     },
     {
-      imageUrl: "/images/emergency-therapy.jpg",
+      imageUrl: "/assets/terapias1.jpg",
       title: "Plantão Psicológico",
       description:
         "Serviço de atendimento rápido e pontual, oferecido para pessoas que precisam de suporte emocional imediato e urgente.",

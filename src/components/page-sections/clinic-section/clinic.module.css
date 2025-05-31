@@ -14,7 +14,7 @@
 
 .clinicHeader p {
   font-family: var(--font-roboto), sans-serif;
-  @apply text-xl text-left max-w-2xl my-8;
+  @apply text-xl text-left font-bold max-w-2xl my-8;
 }
 
 .clinicGrid {

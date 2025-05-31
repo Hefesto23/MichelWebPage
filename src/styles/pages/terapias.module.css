@@ -17,7 +17,7 @@
 }
 
 .headerDescription {
-  @apply text-xl text-left max-w-2xl text-foreground;
+  @apply text-xl text-left font-bold max-w-2xl text-foreground;
 }
 
 .terapiaGrid {

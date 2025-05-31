@@ -2,7 +2,7 @@ version: "3.8" # Define a versão do Docker Compose
 
 services:
   db:
-    image: postgres:alpine # Usa a versão leve do PostgreSQL (alpine)
+    image: postgres:16-alpine # Especifique a versão 16 explicitamente
     container_name: postgres_clinica_michel # Nome do contêiner
     environment:
       POSTGRES_USER: michel_admin # Usuário do PostgreSQL

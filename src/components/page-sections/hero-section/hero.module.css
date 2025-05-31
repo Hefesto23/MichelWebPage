@@ -20,14 +20,14 @@
   @apply flex flex-col items-center justify-center w-full;
 }
 
-.heroSubtitle {
-  font-family: var(--font-robotoSlab), serif;
-  @apply w-full text-center h-3/6 text-white my-8 opacity-0;
+.heroText {
+  font-family: var(--font-roboto), serif;
+  @apply w-full text-center justify-center h-3/6 text-xl/9 text-white mt-10 tracking-wide;
   /* A animação será aplicada via classe global animate-fade */
 }
 
 .heroCta {
-  @apply flex items-center justify-center h-2/6;
+  @apply flex items-start mt-8 justify-center h-2/6;
 }
 
 .heroCtaButton {

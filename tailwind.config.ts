@@ -48,6 +48,7 @@ const config: Config = {
           foreground: "var(--btn-fg)",
           border: "var(--btn-border)",
         },
+
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
@@ -78,6 +79,7 @@ const config: Config = {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+        btnFg: "var(--btn-fg)",
       },
       borderRadius: {
         lg: "var(--radius)",

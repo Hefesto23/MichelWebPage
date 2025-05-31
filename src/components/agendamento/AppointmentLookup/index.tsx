@@ -1,11 +1,10 @@
 // components/scheduling/AppointmentLookup/index.tsx
 import { Button } from "@/components/ui/button";
 import { ContactCard } from "@/components/ui/cards/ServiceCard";
-import styles from "./AppointmentLookup.module.css";
 
 interface FormData {
   codigoConfirmacao: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AppointmentLookupProps {

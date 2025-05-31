@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -25,4 +21,68 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+}
+
+// Modelo para conteúdo CMS
+model Content {
+  id        Int      @id @default(autoincrement())
+  page      String // 'home', 'about', 'services', etc.
+  section   String // 'hero', 'welcome', 'services', etc.
+  key       String // identificador único do conteúdo
+  type      String // 'text', 'title', 'description', 'image'
+  value     String   @db.Text
+  metadata  Json? // informações extras como alt text para imagens
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([page, section, key])
+}
+
+// Modelo para uploads de imagens
+model Upload {
+  id           Int      @id @default(autoincrement())
+  filename     String
+  originalName String
+  path         String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  alt          String?
+  category     String? // 'profile', 'service', 'gallery', etc.
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Modelo para analytics
+model Analytics {
+  id        Int      @id @default(autoincrement())
+  event     String // 'page_view', 'section_view', 'appointment_created', etc.
+  page      String?
+  section   String?
+  metadata  Json? // dados adicionais como user agent, referrer, etc.
+  sessionId String?
+  ipAddress String?
+  userAgent String?
+  timestamp DateTime @default(now())
+}
+
+// Modelo para agendamentos (para relatórios)
+model Appointment {
+  id                 Int      @id @default(autoincrement())
+  nome               String
+  email              String
+  telefone           String
+  dataSelecionada    DateTime
+  horarioSelecionado String
+  modalidade         String
+  primeiraConsulta   Boolean  @default(false)
+  mensagem           String?
+  codigo             String   @unique
+  status             String   @default("agendado") // agendado, confirmado, cancelado, realizado
+  googleEventId      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }

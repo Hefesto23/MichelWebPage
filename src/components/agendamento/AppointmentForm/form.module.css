@@ -1,2 +1,46 @@
-/* AppointmentForm.module.css */
-/* Estilos específicos para o componente de formulário, se necessário */
+/* src\components\agendamento\AppointmentForm\form.module.css */
+
+/* Estilos de Tipografia */
+.formLabel {
+  @apply text-xl font-bold text-foreground mb-2 block;
+}
+
+.formText {
+  @apply text-base text-foreground;
+}
+
+.infoText {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Estilos de Botões */
+.primaryButton {
+  @apply py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg shadow-md;
+}
+
+.secondaryButton {
+  @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:bg-secondary;
+}
+
+.smallButton {
+  @apply py-2 px-4 font-bold transition-colors;
+}
+
+/* Estilos de Cards e Containers */
+.formCard {
+  @apply bg-background rounded-xl p-6 md:p-8 border border-border shadow-sm mb-6;
+}
+
+.dataDisplay {
+  @apply bg-background bg-opacity-10 p-4 rounded-md border-2 border-foreground border-opacity-20 text-primary-foreground;
+}
+
+/* Estilos de Inputs */
+.inputField {
+  @apply w-full p-3 border border-border rounded-md bg-background text-foreground;
+}
+
+/* Estilos de Alerta */
+.alertInfo {
+  @apply bg-amber-50 dark:bg-amber-900 dark:bg-opacity-50 p-4 rounded-md border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-sm;
+}

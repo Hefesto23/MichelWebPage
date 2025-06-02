@@ -1,0 +1,86 @@
+/* ==========================================
+/ src/components/layout/Header/Header.module.css
+ ==========================================
+
+*/
+.header {
+  @apply dark:bg-background dark:text-foreground shadow-md w-full py-4;
+  @apply sticky top-0 z-50 backdrop-blur-sm bg-background/95;
+}
+
+.container {
+  @apply flex justify-between items-center h-16;
+}
+
+.logoContainer {
+  @apply flex items-center space-x-4 h-full;
+}
+
+.navigation {
+  @apply hidden md:flex items-center justify-center space-x-6 text-lg h-full;
+}
+
+.navLink {
+  @apply text-foreground dark:text-card-foreground hover:text-primary-foreground 
+         dark:hover:text-primary-foreground transition-colors duration-200 
+         flex items-center h-full relative;
+}
+
+.navLink.active {
+  @apply text-primary-foreground;
+}
+
+.navLink.active::after {
+  content: "";
+  @apply absolute bottom-0 left-0 right-0 h-0.5 bg-primary-foreground;
+}
+
+.darkModeToggle {
+  @apply flex items-center space-x-2;
+}
+
+.iconContainer {
+  @apply font-extrabold inline-flex items-center;
+}
+
+.darkModeIcon {
+  @apply mr-1 h-5 w-5 text-primary-foreground;
+}
+
+.lightModeIcon {
+  @apply mr-1 h-5 w-5 text-foreground;
+}
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+  @apply md:hidden flex items-center justify-center w-10 h-10;
+}
+
+.hamburger {
+  @apply block w-6 h-0.5 bg-foreground relative;
+}
+
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  @apply absolute left-0 w-6 h-0.5 bg-foreground transition-transform;
+}
+
+.hamburger::before {
+  @apply -top-2;
+}
+
+.hamburger::after {
+  @apply top-2;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .navigation {
+    @apply hidden;
+  }
+
+  .darkModeToggle {
+    @apply mr-2;
+  }
+}

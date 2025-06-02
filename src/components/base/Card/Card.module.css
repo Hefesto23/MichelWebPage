@@ -1,0 +1,70 @@
+/* 
+==========================================
+src/components/base/Card/Card.module.css
+==========================================
+*/
+.card {
+  background: var(--card);
+  transition: all 0.3s ease;
+}
+
+/* Variante padrão - usada em ServiceCard com ícone */
+.card.default {
+  @apply flex flex-col items-center p-8 rounded-2xl;
+  @apply border-2 border-[var(--card-foreground)];
+  @apply shadow-md hover:shadow-xl;
+  @apply hover:-translate-y-1;
+  @apply dark:bg-[var(--card)] dark:border-[var(--btn-border)];
+  @apply relative overflow-hidden;
+}
+
+/* Variante admin - usada em AdminCard */
+.card.admin {
+  @apply bg-white dark:bg-gray-800 rounded-xl;
+  @apply border-2 border-gray-200 dark:border-gray-700;
+  @apply shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px];
+  @apply dark:shadow-[rgba(0,_0,_0,_0.4)_0px_0px_4px,rgba(0,_0,_0,_0.4)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.4)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.4)_0px_24px_32px_-8px];
+  @apply transition-all duration-500 ease-out;
+  @apply hover:-translate-y-1;
+  @apply p-6;
+}
+
+/* Variante contact - usada em ContactCard */
+.card.contact {
+  @apply bg-white dark:bg-gray-800 rounded-xl;
+  @apply border-2 border-gray-400 dark:border-gray-700;
+  @apply shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px];
+  @apply dark:shadow-[rgba(0,_0,_0,_0.4)_0px_0px_4px,rgba(0,_0,_0,_0.4)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.4)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.4)_0px_24px_32px_-8px];
+  @apply transition-all duration-500 ease-out;
+  @apply hover:-translate-y-1;
+  @apply p-6;
+}
+
+/* Variante image - usada em ImageCard */
+.card.image {
+  @apply flex flex-col w-full overflow-hidden;
+  @apply bg-white dark:bg-gray-800 rounded-xl;
+  @apply border-2 border-gray-200 dark:border-gray-700;
+  @apply shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px];
+  @apply dark:shadow-[rgba(0,_0,_0,_0.4)_0px_0px_4px,rgba(0,_0,_0,_0.4)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.4)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.4)_0px_24px_32px_-8px];
+  @apply transition-all duration-300;
+  @apply relative transform-gpu translate-y-0 isolate;
+  @apply after:absolute after:inset-0 after:rounded-xl;
+  @apply after:shadow-[0_0_0_1px_rgba(255,255,255,0.1)] after:-z-[1];
+}
+
+/* Título do card */
+.cardTitle {
+  @apply text-2xl font-semibold mb-6;
+  @apply border-b border-gray-200 dark:border-gray-700 pb-3;
+  @apply text-foreground;
+}
+
+/* Para cards com gradient no hover */
+.card.default::before {
+  content: "";
+  @apply absolute inset-0;
+  @apply bg-gradient-to-r from-[var(--primary)] to-transparent;
+  @apply opacity-0 group-hover:opacity-10;
+  @apply transition-opacity duration-500;
+}

@@ -1,0 +1,135 @@
+/* Layout Container */
+.adminLayout {
+  @apply min-h-screen flex bg-gray-50 dark:bg-gray-900;
+}
+
+/* Loading State */
+.loadingContainer {
+  @apply min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center;
+}
+
+.loadingSpinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-primary-foreground;
+}
+
+/* Sidebar */
+.sidebar {
+  @apply w-64 bg-white dark:bg-gray-800 border-r-2 border-gray-200 dark:border-gray-700 min-h-screen relative flex flex-col;
+}
+
+.sidebarHeader {
+  @apply p-6 border-b-2 border-gray-200 dark:border-gray-700;
+}
+
+.logoWrapper {
+  @apply flex justify-center mb-4;
+}
+
+.sidebarTitle {
+  @apply text-center;
+}
+
+.sidebarTitle h1 {
+  @apply text-xl font-bold text-foreground;
+}
+
+.sidebarTitle p {
+  @apply text-sm text-muted-foreground;
+}
+
+.sidebarNav {
+  @apply mt-6 flex-1;
+}
+
+.navItem {
+  @apply flex items-center px-6 py-3 text-gray-700 dark:text-gray-300;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-foreground transition-colors;
+}
+
+.navItemActive {
+  @apply bg-primary/10 text-primary-foreground;
+  @apply border-r-4 border-primary-foreground font-bold text-lg;
+}
+
+.navIcon {
+  @apply w-5 h-5 mr-3;
+}
+
+.sidebarFooter {
+  @apply absolute bottom-0 left-0 right-0 p-6;
+}
+
+.logoutButton {
+  @apply flex items-center w-full px-4 py-3;
+  @apply text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20;
+  @apply rounded-lg transition-colors font-medium;
+}
+
+/* Main Content */
+.mainContent {
+  @apply flex-1 overflow-auto flex flex-col;
+}
+
+/* Admin Header */
+.adminHeader {
+  @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
+  @apply h-16 flex items-center px-6;
+}
+
+.headerContent {
+  @apply flex items-center justify-between w-full;
+}
+
+.searchBar {
+  @apply relative flex-1 max-w-md;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5;
+}
+
+.searchInput {
+  @apply w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700;
+  @apply border border-gray-300 dark:border-gray-600 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-foreground;
+}
+
+.headerRight {
+  @apply flex items-center space-x-4;
+}
+
+.iconButton {
+  @apply relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors;
+}
+
+.notificationBadge {
+  @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs;
+  @apply w-5 h-5 rounded-full flex items-center justify-center;
+}
+
+.userMenu {
+  @apply flex items-center space-x-2 px-3 py-2;
+  @apply bg-gray-50 dark:bg-gray-700 rounded-lg;
+  @apply cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors;
+}
+
+/* Page Content */
+.pageContent {
+  @apply bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-4rem)] overflow-auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .sidebar {
+    @apply fixed -left-64 z-50;
+    @apply transition-transform duration-300;
+  }
+
+  .sidebar.open {
+    @apply left-0;
+  }
+
+  .mainContent {
+    @apply ml-0;
+  }
+}

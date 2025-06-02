@@ -1,0 +1,33 @@
+/* ==========================================
+// src/components/base/Container/Container.module.css
+// ==========================================
+Container base */
+.container {
+  @apply w-full;
+}
+
+/* Variante padrão - content-container global */
+.container.default {
+  @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Variante hero - para conteúdo hero sections */
+.container.hero {
+  @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  @apply relative h-full;
+}
+
+/* Variante content - para conteúdo de texto */
+.container.content {
+  @apply container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Variante admin - para área administrativa */
+.container.admin {
+  @apply p-8;
+}
+
+/* Modificador centered */
+.container.centered {
+  @apply flex items-center justify-center;
+}

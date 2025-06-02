@@ -1,14 +1,194 @@
-/* styles/globals.css */
+/* ==========================================
+   src/styles/globals.css - Refatorado
+   ========================================== */
+
+/* Tailwind Base */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Utilities */
-@layer utilities {
-  .bg-overlay {
-    @apply bg-black bg-opacity-50;
+/* ==========================================
+   1. CSS Variables (Design Tokens)
+   ========================================== */
+@layer base {
+  :root {
+    /* Colors - Light Mode */
+    --background: #ffffff;
+    --foreground: #2e5597;
+    --card: #c4d6ed;
+    --card-foreground: #2e5597;
+    --btn: #ffbf9e;
+    --btn-fg: #2e5597;
+    --btn-border: #cf9373;
+    --primary: #fff9f5;
+    --primary-foreground: #ffbf9e;
+    --secondary: #c4d6ed;
+    --secondary-foreground: #0d0d0d;
+    --muted: #f2f2f2;
+    --muted-foreground: #737373;
+    --accent: #f2f2f2;
+    --accent-foreground: #2e5597;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7eb;
+    --input: #ffffff;
+    --ring: #ffbf9e;
+    --zap-logo: #25d366;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 4rem;
+    --spacing-2xl: 6rem;
+
+    /* Border Radius */
+    --radius: 0.5rem;
+    --radius-sm: 0.25rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: rgba(0, 0, 0, 0.15) 0px 0px 4px,
+      rgba(0, 0, 0, 0.15) 0px 8px 16px -2px,
+      rgba(0, 0, 0, 0.15) 0px 16px 24px -4px,
+      rgba(0, 0, 0, 0.15) 0px 24px 32px -8px;
+    --shadow-xl: rgba(0, 0, 0, 0.2) 0px 0px 8px,
+      rgba(0, 0, 0, 0.2) 0px 16px 32px -4px,
+      rgba(0, 0, 0, 0.2) 0px 32px 48px -8px;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 300ms ease;
+    --transition-slow: 500ms ease;
+
+    /* Z-index Scale */
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
   }
 
+  /* Colors - Dark Mode */
+  .dark {
+    --background: #001046;
+    --foreground: #fafafa;
+    --card: #0a0a0a;
+    --card-foreground: #fafafa;
+    --btn: #c4d6ed;
+    --btn-fg: #001046;
+    --btn-border: #626b77;
+    --primary: #1a2859;
+    --primary-foreground: #ffbf9e;
+    --secondary: #2a2a2a;
+    --secondary-foreground: #fafafa;
+    --muted: #2a2a2a;
+    --muted-foreground: #a3a3a3;
+    --accent: #2a2a2a;
+    --accent-foreground: #fafafa;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+    --border: #374151;
+    --input: #374151;
+    --ring: #ffbf9e;
+    --zap-logo: #075e54;
+  }
+}
+
+/* ==========================================
+   2. Base Styles
+   ========================================== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-roboto), system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography Base */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-foreground;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+
+  p {
+    @apply text-foreground leading-relaxed;
+  }
+
+  a {
+    @apply text-primary-foreground hover:text-primary transition-colors;
+  }
+
+  /* Focus Styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-primary-foreground text-primary;
+  }
+
+  /* Scrollbar Styles */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}
+
+/* ==========================================
+   3. Component Classes
+   ========================================== */
+@layer components {
+  /* Container Utilities */
   .content-container {
     @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
@@ -21,16 +201,122 @@
     @apply py-6 px-4 md:py-8 md:px-8;
   }
 
+  /* Background Utilities */
   .bg-overlay {
     @apply bg-black bg-opacity-50;
   }
 
-  .animate-infinite {
-    animation-iteration-count: infinite;
+  /* Card Styles */
+  .card-base {
+    @apply bg-card rounded-xl p-6 transition-all duration-300;
+  }
+
+  .card-elevated {
+    @apply card-base shadow-lg hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .card-bordered {
+    @apply card-base border-2 border-border;
+  }
+
+  /* Button Base (for non-shadcn buttons) */
+  .btn-base {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  /* Form Elements */
+  .input-base {
+    @apply w-full rounded-md border border-input bg-transparent px-3 py-2;
+    @apply text-sm placeholder:text-muted-foreground;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Grid Layouts */
+  .grid-responsive {
+    @apply grid gap-6;
+  }
+
+  .grid-responsive-2 {
+    @apply grid-responsive grid-cols-1 md:grid-cols-2;
+  }
+
+  .grid-responsive-3 {
+    @apply grid-responsive grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .grid-responsive-4 {
+    @apply grid-responsive grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
   }
 }
 
-/* Animations */
+/* ==========================================
+   4. Utilities
+   ========================================== */
+@layer utilities {
+  /* Animation Utilities */
+  .animate-infinite {
+    animation-iteration-count: infinite;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn var(--transition-slow) ease forwards;
+  }
+
+  .animate-softBounce {
+    animation: softBounce 1.5s ease-in-out infinite;
+  }
+
+  /* Text Utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient Utilities */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-primary-foreground;
+  }
+
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-secondary to-secondary-foreground;
+  }
+
+  /* Spacing Utilities */
+  .spacing-section {
+    @apply py-16 md:py-20 lg:py-24;
+  }
+
+  /* Z-index Utilities */
+  .z-dropdown {
+    z-index: var(--z-dropdown);
+  }
+
+  .z-sticky {
+    z-index: var(--z-sticky);
+  }
+
+  .z-fixed {
+    z-index: var(--z-fixed);
+  }
+
+  .z-modal {
+    z-index: var(--z-modal);
+  }
+
+  .z-popover {
+    z-index: var(--z-popover);
+  }
+
+  .z-tooltip {
+    z-index: var(--z-tooltip);
+  }
+}
+
+/* ==========================================
+   5. Animations
+   ========================================== */
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -42,135 +328,89 @@
   }
 }
 
-.fadeIn {
-  animation: fadeIn 1s ease forwards;
-}
-
 @keyframes softBounce {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(-25%);
+    animation-timing-function: ease-in-out;
   }
   50% {
-    transform: translateY(-15px);
+    transform: translateY(0);
+    animation-timing-function: ease-in-out;
   }
 }
 
-.animateSoftBounce {
-  animation: softBounce 2s ease-in-out infinite;
-}
-
-/* Variantes de animação */
-.fadeIn-delay-1 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 1s;
-}
-
-.fadeIn-delay-2 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 2s;
-}
-
-.fadeIn-delay-3 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 3s;
-}
-
-@layer base {
-  :root {
-    --background: #ffffff;
-    --foreground: #2e5597;
-    --card: #c4d6ed;
-    --card-foreground: #2e5597;
-    --btn: #ffbf9e;
-    --btn-fg: #2e5597;
-    --btn-border: #cf9373;
-    --primary: #fff9f5;
-    --zap-logo: #25d366;
-    --primary-foreground: #ffbf9e;
-    --secondary: #c4d6ed;
-    --secondary-foreground: #0d0d0d;
-    --muted: #f2f2f2;
-    --muted-foreground: #737373;
-    --accent: #f2f2f2;
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 0;
   }
-  .dark {
-    --background: #001046;
-    --foreground: #fafafa;
-    --card: #0a0a0a;
-    --card-foreground: #fafafa;
-    --popover: #0a0a0a;
-    --zap-logo: #075e54;
-    --popover-foreground: #fafafa;
-    --btn: #c4d6ed;
-    --btn-fg: #001046;
-    --btn-border: #626b77;
-    --primary: #1a2859;
-    --primary-foreground: #ffbf9e;
-    --secondary: #2a2a2a;
-    --secondary-foreground: #fafafa;
-    --muted: #2a2a2a;
-    --muted-foreground: #a3a3a3;
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Fade Animation Class */
+.animate-fade {
+  animation: fade 12s infinite;
+}
+
+/* ==========================================
+   6. Print Styles
+   ========================================== */
+@media print {
+  /* Hide navigation, buttons, and non-essential elements */
+  header,
+  footer,
+  .no-print,
+  button,
+  .whatsapp-button {
+    @apply hidden !important;
   }
 
-  * {
-    @apply border-border;
-  }
-
+  /* Optimize text for printing */
   body {
-    font-family: var(--font-roboto), sans-serif;
-    @apply bg-background text-foreground;
+    @apply text-black bg-white;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-bold text-foreground;
+  /* Ensure content fits on page */
+  .content-container {
+    @apply max-w-full px-0;
+  }
+}
+
+/* ==========================================
+   7. Accessibility
+   ========================================== */
+/* Skip to content link */
+.skip-to-content {
+  @apply absolute -top-40 left-0 bg-primary-foreground text-primary px-4 py-2 z-tooltip;
+  @apply focus:top-4 transition-all duration-300;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --foreground: #000000;
+    --background: #ffffff;
+    --primary-foreground: #000000;
   }
 
-  h1 {
-    @apply text-3xl md:text-4xl;
+  .dark {
+    --foreground: #ffffff;
+    --background: #000000;
+    --primary-foreground: #ffffff;
   }
+}
 
-  h2 {
-    @apply text-2xl md:text-3xl;
-  }
-
-  h3 {
-    @apply text-xl md:text-2xl;
-  }
-
-  p {
-    @apply text-foreground leading-relaxed;
-  }
-
-  a {
-    @apply text-primary-foreground hover:text-primary transition-colors;
-  }
-
-  /* Serviços */
-  .home-services-section {
-    @apply min-h-screen w-full px-8 py-8 overflow-hidden;
-  }
-  .home-services-container {
-    @apply container mx-auto pr-2 relative z-0;
-  }
-
-  .home-services-content {
-    @apply relative z-[2];
-  }
-
-  .home-services-header h2 {
-    @apply text-4xl text-left font-bold mb-4 text-foreground;
-  }
-  .home-services-header p {
-    @apply text-xl text-left max-w-2xl text-foreground;
-  }
-
-  .home-services-grid {
-    @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr max-h-[calc(100vh-12rem)];
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

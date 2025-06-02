@@ -1,0 +1,48 @@
+.section {
+  @apply relative z-0 overflow-hidden;
+}
+
+/* Variante padrão */
+.section.default {
+  @apply py-16;
+}
+
+/* Variante hero - para HeroSection */
+.section.hero {
+  @apply w-full h-screen overflow-hidden bg-no-repeat bg-center bg-cover;
+}
+
+/* Variante fullHeight */
+.section.fullHeight {
+  @apply min-h-screen w-full;
+}
+
+/* Variante scheduling - para agendamento */
+.section.scheduling {
+  @apply py-16 relative z-0 overflow-hidden;
+}
+
+/* Variante assessment - para avaliações */
+.section.assessment {
+  @apply h-screen w-full py-16 overflow-hidden relative z-0;
+}
+
+/* Variante contact - para contato */
+.section.contact {
+  @apply py-16 relative z-0 overflow-hidden;
+}
+
+/* Variante clinic - para espaço clínico */
+.section.clinic {
+  @apply w-full h-full flex items-center justify-center;
+}
+
+/* Variante welcome - para seção de boas-vindas */
+.section.welcome {
+  @apply w-full h-screen overflow-hidden;
+}
+
+/* Overlay para hero sections */
+.overlay {
+  @apply absolute inset-0 bg-black bg-opacity-50;
+}

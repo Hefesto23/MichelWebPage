@@ -1,0 +1,398 @@
+/* ==========================================
+   src/styles/base/typography.css
+   Estilos tipográficos globais
+   ========================================== */
+
+/* =========================
+   FONTES BASE
+   ========================= */
+body {
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--foreground);
+  font-weight: var(--font-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================
+     HEADINGS
+     ========================= */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-bold);
+  color: var(--foreground);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-4xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+}
+
+h4 {
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+}
+
+h5 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+}
+
+h6 {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+/* Responsividade para headings */
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--text-5xl);
+  }
+
+  h2 {
+    font-size: var(--text-4xl);
+  }
+
+  h3 {
+    font-size: var(--text-3xl);
+  }
+
+  h4 {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* =========================
+     PARÁGRAFOS E TEXTO
+     ========================= */
+p {
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--foreground);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+/* Texto grande */
+.text-lg {
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+}
+
+/* Texto pequeno */
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* Texto extra pequeno */
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
+/* =========================
+     TEXTO DECORATIVO
+     ========================= */
+.font-decorative {
+  font-family: var(--font-decorative);
+}
+
+/* =========================
+     LINKS
+     ========================= */
+a {
+  color: var(--primary-foreground);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--btn);
+  text-decoration: underline;
+}
+
+/* Links em navegação */
+nav a {
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: none;
+}
+
+/* =========================
+     LISTAS
+     ========================= */
+ul,
+ol {
+  margin: 0 0 var(--spacing-md) 0;
+  padding-left: var(--spacing-lg);
+  line-height: var(--leading-relaxed);
+}
+
+li {
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Lista sem estilo */
+ul.unstyled,
+ol.unstyled {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* =========================
+     BLOCKQUOTE
+     ========================= */
+blockquote {
+  margin: var(--spacing-lg) 0;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-left: 4px solid var(--primary-foreground);
+  background-color: var(--muted);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================
+     CÓDIGO
+     ========================= */
+code {
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 0.875em;
+  background-color: var(--muted);
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+}
+
+pre {
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: var(--text-sm);
+  background-color: var(--muted);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  line-height: var(--leading-normal);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* =========================
+     ESTILOS DE TEXTO
+     ========================= */
+/* Pesos */
+.font-thin {
+  font-weight: var(--font-thin);
+}
+.font-light {
+  font-weight: var(--font-light);
+}
+.font-normal {
+  font-weight: var(--font-normal);
+}
+.font-medium {
+  font-weight: var(--font-medium);
+}
+.font-semibold {
+  font-weight: var(--font-semibold);
+}
+.font-bold {
+  font-weight: var(--font-bold);
+}
+.font-extrabold {
+  font-weight: var(--font-extrabold);
+}
+.font-black {
+  font-weight: var(--font-black);
+}
+
+/* Estilos */
+.italic {
+  font-style: italic;
+}
+.not-italic {
+  font-style: normal;
+}
+
+/* Decoração */
+.underline {
+  text-decoration: underline;
+}
+.line-through {
+  text-decoration: line-through;
+}
+.no-underline {
+  text-decoration: none;
+}
+
+/* Transformação */
+.uppercase {
+  text-transform: uppercase;
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.normal-case {
+  text-transform: none;
+}
+
+/* Alinhamento */
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-justify {
+  text-align: justify;
+}
+
+/* Cores de texto */
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+.text-foreground {
+  color: var(--foreground);
+}
+.text-background {
+  color: var(--background);
+}
+
+/* =========================
+     SELEÇÃO DE TEXTO
+     ========================= */
+::selection {
+  background-color: var(--primary-foreground);
+  color: var(--background);
+}
+
+::-moz-selection {
+  background-color: var(--primary-foreground);
+  color: var(--background);
+}
+
+/* =========================
+     PLACEHOLDER
+     ========================= */
+::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+::-moz-placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+/* =========================
+     CLASSES UTILITÁRIAS
+     ========================= */
+/* Truncate text */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Break words */
+.break-words {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.break-all {
+  word-break: break-all;
+}
+
+/* White space */
+.whitespace-normal {
+  white-space: normal;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+.whitespace-pre {
+  white-space: pre;
+}
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+/* =========================
+     RESPONSIVIDADE
+     ========================= */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--text-sm);
+  }
+
+  p {
+    font-size: var(--text-sm);
+  }
+}

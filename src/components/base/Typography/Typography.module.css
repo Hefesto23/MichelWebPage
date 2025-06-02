@@ -1,0 +1,92 @@
+/* 
+==========================================
+src/components/base/Typography/Typography.module.css
+========================================== 
+*/
+.typography {
+  @apply text-foreground;
+}
+
+/* Variantes de heading */
+.h1 {
+  @apply text-4xl md:text-5xl font-bold mb-4;
+}
+
+.h2 {
+  @apply text-3xl md:text-4xl font-bold mb-4;
+}
+
+.h3 {
+  @apply text-2xl md:text-3xl font-bold mb-3;
+}
+
+.h4 {
+  @apply text-xl md:text-2xl font-bold mb-2;
+}
+
+/* Variantes de texto */
+.body {
+  @apply text-base md:text-lg leading-relaxed;
+}
+
+.subtitle {
+  @apply text-lg md:text-xl font-medium;
+}
+
+.caption {
+  @apply text-sm text-muted-foreground;
+}
+
+.label {
+  @apply text-sm md:text-base font-medium block mb-2;
+}
+
+.decorative {
+  @apply text-xl md:text-2xl font-bold;
+}
+
+/* Alinhamento */
+.align-left {
+  @apply text-left;
+}
+
+.align-center {
+  @apply text-center;
+}
+
+.align-right {
+  @apply text-right;
+}
+
+/* Estilos específicos para algumas páginas */
+.h1.hero {
+  @apply text-white;
+}
+
+.body.hero {
+  @apply text-white text-xl/9 tracking-wide;
+}
+
+/* Para textos em cards */
+.h3.card {
+  @apply text-xl font-bold mb-4;
+  @apply text-[var(--card-foreground)];
+  @apply group-hover:text-[var(--btn)];
+  @apply transition-colors duration-500;
+  @apply dark:text-[var(--card-foreground)];
+  @apply dark:group-hover:text-[var(--btn)];
+}
+
+.body.card {
+  @apply text-base text-center;
+  @apply text-[var(--secondary-foreground)];
+  @apply dark:text-[var(--foreground)];
+  @apply opacity-85 group-hover:opacity-100;
+  @apply transition-all duration-500;
+  @apply px-4;
+}
+
+/* Para formulários */
+.label.form {
+  @apply text-xl font-bold text-foreground mb-2 block;
+}

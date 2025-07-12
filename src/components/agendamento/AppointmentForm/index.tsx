@@ -1,4 +1,3 @@
-// components/scheduling/AppointmentForm/index.tsx
 import React from "react";
 import Confirmation from "./steps/Confirmation";
 import ContactInfo from "./steps/ContactInfo";

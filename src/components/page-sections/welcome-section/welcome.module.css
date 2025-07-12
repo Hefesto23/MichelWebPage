@@ -36,11 +36,11 @@
 }
 
 .welcomeContent article p {
-  @apply mb-4 leading-relaxed font-extrabold;
+  @apply mb-4 leading-relaxed text-xl font-extrabold;
 }
 
 .welcomeContent article ul {
-  @apply pl-6 mb-4 space-y-2 font-extrabold;
+  @apply pl-6 mb-4 space-y-2 font-extrabold text-xl;
 }
 
 .welcomeImage {

@@ -28,9 +28,9 @@
 }
 
 .activeTab {
-  @apply bg-primary-foreground text-foreground shadow-md;
+  @apply bg-primary-foreground text-btnFg font-bold shadow-md;
 }
 
 .inactiveTab {
-  @apply border border-border dark:bg-background hover:bg-secondary;
+  @apply border-2 border-border font-bold dark:bg-background hover:bg-secondary;
 }

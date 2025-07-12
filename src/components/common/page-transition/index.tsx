@@ -28,7 +28,7 @@ const PageTransition = ({ children, isDarkMode }: PageTransitionProps) => {
     // Após 3 s, finaliza a transição
     const timer = setTimeout(() => {
       setIsTransitioning(false);
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [pathname]);

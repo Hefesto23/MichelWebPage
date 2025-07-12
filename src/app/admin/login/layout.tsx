@@ -1,15 +1,23 @@
-"use client"; // Este layout usa client-side features como interatividade
+// src/app/admin/login/layout.tsx - LAYOUT DE LOGIN CORRIGIDO
 
-interface AdminLayoutProps {
+"use client";
+
+import { roboto } from "@/app/fonts";
+import { cn } from "@/lib/utils";
+
+interface AdminLoginLayoutProps {
   children: React.ReactNode;
 }
-export default function AdminLoginLayout({ children }: AdminLayoutProps) {
+
+export default function AdminLoginLayout({ children }: AdminLoginLayoutProps) {
   return (
-    <html>
-      <body>
-        {/* Main Content */}
-        <main className="flex-grow bg-gray-100 p-6">{children}</main>
-      </body>
-    </html>
+    <div
+      className={cn(
+        "min-h-screen bg-gray-50 dark:bg-gray-900",
+        roboto.className
+      )}
+    >
+      {children}
+    </div>
   );
 }

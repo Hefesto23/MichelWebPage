@@ -18,6 +18,8 @@
 |   |-- schema.prisma
 |   `-- seed.ts
 |-- public
+|   |-- PsiLogo.svg
+|   |-- PsiLogo2.svg
 |   |-- assets
 |   |   |-- horizonte.jpg
 |   |   |-- mental-health-illustration.svg
@@ -65,7 +67,9 @@
 |   |       |       `-- RobotoSlab-Thin.ttf
 |   |               `-- RobotoSlab-VariableFont_wght.ttf
 |   |-- logo.png
-|   `-- logo2.png
+|   |-- logo.svg
+|   |-- logo2.png
+|   `-- logo2.svg
 |-- requisitos.md
 |-- src
 |   |-- app
@@ -107,14 +111,49 @@
 |   |   `-- terapias
 |   |       `-- page.tsx
 |   |-- components
+|   |   |-- agendamento
+|   |   |   |-- AppointmentConfirmation
+|   |   |   |   `-- index.tsx
+|   |   |   |-- AppointmentDetails
+|   |   |   |   `-- index.tsx
+|   |   |   |-- AppointmentForm
+|   |   |   |   |-- form.module.css
+|   |   |   |   |-- index.tsx
+|   |   |   |   `-- steps
+|   |   |   |       |-- Confirmation.tsx
+|   |   |   |       |-- ContactInfo.tsx
+|   |   |   |       `-- DateTimeSelection.tsx
+|   |   |   |-- AppointmentLookup
+|   |   |   |   `-- index.tsx
+|   |   |   `-- InfoCards
+|   |   |       `-- index.tsx
 |   |   |-- common
+|   |   |   |-- footer.module.css
 |   |   |   |-- footer.tsx
+|   |   |   |-- header.module.css
 |   |   |   |-- header.tsx
-|   |   |   |-- page-transition.css
-|   |   |   |-- page-transition.tsx
-|   |   |   `-- zap.tsx
+|   |   |   |-- page-transition
+|   |   |   |   |-- index.tsx
+|   |   |   |   `-- transition.module.css
+|   |   |   `-- whatsapp-icon
+|   |   |       |-- index.tsx
+|   |   |       `-- whatsapp.module.css
+|   |   |-- page-sections
+|   |   |   |-- clinic-section
+|   |   |   |   |-- clinic.module.css
+|   |   |   |   `-- index.tsx
+|   |   |   |-- hero-section
+|   |   |   |   |-- hero.module.css
+|   |   |   |   `-- index.tsx
+|   |   |   |-- services-section
+|   |   |   |   |-- index.tsx
+|   |   |   |   `-- services.module.css
+|   |   |   `-- welcome-section
+|   |   |       |-- index.tsx
+|   |   |       `-- welcome.module.css
 |   |   `-- ui
 |   |       |-- button.tsx
+|   |       |-- calendar.tsx
 |   |       |-- cards
 |   |       |   `-- ServiceCard.tsx
 |   |       |-- decorative-shapes.tsx
@@ -123,10 +162,12 @@
 |   |       |-- image-grid.tsx
 |   |       |-- input.tsx
 |   |       |-- section-nav.tsx
+|   |       |-- select.tsx
 |   |       |-- switch.tsx
 |   |       `-- textarea.tsx
 |   |-- hooks
 |   |   |-- useDarkMode.ts
+|   |   |-- useParallaxEffect.ts
 |   |   `-- useScrollToSection.ts
 |   |-- lib
 |   |   |-- email.ts
@@ -135,12 +176,16 @@
 |   |   `-- utils.ts
 |   `-- styles
 |       |-- components
-|       |   |-- footer.css
 |       |   `-- image-gallery.css
 |       |-- globals.css
 |       `-- pages
-|           `-- home.css
+|           |-- about.module.css
+|           |-- agendamento.module.css
+|           |-- avaliacoes.module.css
+|           |-- contato.module.css
+|           |-- home.module.css
+|           `-- terapias.module.css
 |-- tailwind.config.ts
 `-- tsconfig.json
 
-38 directories, 105 files
+52 directories, 136 files

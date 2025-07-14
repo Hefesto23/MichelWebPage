@@ -1,82 +1,17 @@
-/* styles/globals.css */
+/* ============================================
+   SISTEMA DE ESTILOS CONSOLIDADO
+   Arquivo único para todo o projeto
+   ============================================ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Utilities */
-@layer utilities {
-  .bg-overlay {
-    @apply bg-black bg-opacity-50;
-  }
-
-  .content-container {
-    @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
-  }
-
-  .container-centered {
-    @apply flex items-center justify-center;
-  }
-
-  .section-padding {
-    @apply py-6 px-4 md:py-8 md:px-8;
-  }
-
-  .bg-overlay {
-    @apply bg-black bg-opacity-50;
-  }
-
-  .animate-infinite {
-    animation-iteration-count: infinite;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fadeIn {
-  animation: fadeIn 1s ease forwards;
-}
-
-@keyframes softBounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
-.animateSoftBounce {
-  animation: softBounce 2s ease-in-out infinite;
-}
-
-/* Variantes de animação */
-.fadeIn-delay-1 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 1s;
-}
-
-.fadeIn-delay-2 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 2s;
-}
-
-.fadeIn-delay-3 {
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 3s;
-}
-
+/* ============================================
+      BASE LAYER - Reset e estilos fundamentais
+      ============================================ */
 @layer base {
+  /* Variáveis CSS - Tema Light/Dark */
   :root {
     --background: #ffffff;
     --foreground: #2e5597;
@@ -93,7 +28,13 @@
     --muted: #f2f2f2;
     --muted-foreground: #737373;
     --accent: #f2f2f2;
+    --border: #e5e5e5;
+    --input: #f5f5f5;
+    --ring: #ffbf9e;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
   }
+
   .dark {
     --background: #001046;
     --foreground: #fafafa;
@@ -111,8 +52,16 @@
     --secondary-foreground: #fafafa;
     --muted: #2a2a2a;
     --muted-foreground: #a3a3a3;
+    --accent: #3a3a3a;
+    --accent-foreground: #fafafa;
+    --border: #2a2a2a;
+    --input: #1a1a1a;
+    --ring: #ffbf9e;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
   }
 
+  /* Reset Global */
   * {
     @apply border-border;
   }
@@ -122,25 +71,20 @@
     @apply bg-background text-foreground;
   }
 
-  h1,
-  h2,
-  h3,
+  /* Tipografia Base */
+  h1 {
+    @apply text-3xl md:text-4xl font-bold text-foreground;
+  }
+  h2 {
+    @apply text-2xl md:text-3xl font-bold text-foreground;
+  }
+  h3 {
+    @apply text-xl md:text-2xl font-bold text-foreground;
+  }
   h4,
   h5,
   h6 {
     @apply font-bold text-foreground;
-  }
-
-  h1 {
-    @apply text-3xl md:text-4xl;
-  }
-
-  h2 {
-    @apply text-2xl md:text-3xl;
-  }
-
-  h3 {
-    @apply text-xl md:text-2xl;
   }
 
   p {
@@ -150,27 +94,523 @@
   a {
     @apply text-primary-foreground hover:text-primary transition-colors;
   }
+}
 
-  /* Serviços */
-  .home-services-section {
+/* ============================================
+      COMPONENTS LAYER - Componentes reutilizáveis
+      ============================================ */
+@layer components {
+  /* =========================
+        Layout Components
+        ========================= */
+  .content-container {
+    @apply container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-base {
+    @apply py-16 relative z-0 overflow-hidden;
+  }
+
+  .section-fullscreen {
+    @apply h-screen w-full overflow-hidden;
+  }
+
+  .section-padding {
+    @apply py-6 px-4 md:py-8 md:px-8;
+  }
+
+  /* =========================
+        Card System
+        ========================= */
+  .card-base {
+    @apply bg-white dark:bg-gray-800 rounded-xl
+              border-2 border-gray-200 dark:border-gray-700
+              transition-all duration-500 ease-out
+              hover:-translate-y-1 p-6;
+  }
+
+  .card-shadow {
+    @apply shadow-[rgba(0,_0,_0,_0.15)_0px_0px_4px,rgba(0,_0,_0,_0.15)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.15)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.15)_0px_24px_32px_-8px]
+              dark:shadow-[rgba(0,_0,_0,_0.4)_0px_0px_4px,rgba(0,_0,_0,_0.4)_0px_8px_16px_-2px,rgba(0,_0,_0,_0.4)_0px_16px_24px_-4px,rgba(0,_0,_0,_0.4)_0px_24px_32px_-8px];
+  }
+
+  .card {
+    @apply card-base card-shadow;
+  }
+
+  .card-compact {
+    @apply card-base card-shadow p-4;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-xl;
+  }
+
+  .card-title {
+    @apply text-2xl font-semibold mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 text-foreground;
+  }
+
+  /* =========================
+        Section Headers
+        ========================= */
+  .section-header {
+    @apply mb-8;
+  }
+
+  .section-title {
+    @apply text-4xl text-left font-bold mb-4 text-foreground;
+  }
+
+  .section-description {
+    @apply text-xl text-left font-bold max-w-2xl text-foreground;
+  }
+
+  /* =========================
+        Grid Systems
+        ========================= */
+  .grid-services {
+    @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr;
+  }
+
+  .grid-cards {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .grid-contact {
+    @apply grid md:grid-cols-2 gap-8 mb-12;
+  }
+
+  /* =========================
+        Form System
+        ========================= */
+  .form-label {
+    @apply text-xl font-bold text-foreground mb-2 block;
+  }
+
+  .form-input {
+    @apply w-full p-3 border border-border rounded-md bg-background text-foreground
+              focus:ring-2 focus:ring-primary-foreground focus:border-transparent;
+  }
+
+  .form-textarea {
+    @apply form-input resize-vertical min-h-[120px];
+  }
+
+  .form-error {
+    @apply mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 
+              dark:border-red-800 rounded-lg text-red-800 dark:text-red-300;
+  }
+
+  .form-info {
+    @apply bg-amber-50 dark:bg-amber-900 dark:bg-opacity-50 p-4 rounded-md 
+              border border-amber-200 dark:border-amber-800 text-amber-800 
+              dark:text-amber-300 text-sm;
+  }
+
+  /* =========================
+        Button System
+        ========================= */
+  .btn-primary {
+    @apply py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg 
+              shadow-md hover:opacity-90 transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 
+              border-border dark:bg-background hover:bg-secondary;
+  }
+
+  .btn-small {
+    @apply py-2 px-4 font-bold transition-colors;
+  }
+
+  .btn-icon {
+    @apply w-16 h-16 rounded-full flex items-center justify-center 
+              shadow-lg focus:outline-none transition-all duration-300;
+  }
+
+  /* =========================
+        Header & Navigation
+        ========================= */
+  .header-main {
+    @apply dark:bg-background dark:text-foreground shadow-md w-full py-4;
+  }
+
+  .header-container {
+    @apply flex justify-between items-center h-16;
+  }
+
+  .header-logo {
+    @apply flex items-center space-x-4 h-full;
+  }
+
+  .header-nav {
+    @apply flex items-center justify-center space-x-6 text-lg h-full;
+  }
+
+  .header-nav-link {
+    @apply text-foreground dark:text-card-foreground 
+              hover:text-primary-foreground dark:hover:text-primary-foreground 
+              transition-colors duration-200 flex items-center h-full;
+  }
+
+  .header-actions {
+    @apply flex items-center space-x-2;
+  }
+
+  /* =========================
+        Footer
+        ========================= */
+  .footer-container {
+    @apply bg-background text-foreground dark:bg-background 
+              dark:text-card-foreground py-10;
+  }
+
+  .footer-grid {
+    @apply grid md:grid-cols-3 gap-8 items-start md:gap-4 w-full;
+  }
+
+  .footer-column {
+    @apply flex flex-col text-center md:text-left;
+  }
+
+  .footer-title {
+    @apply text-xl font-bold mb-2;
+  }
+
+  .footer-copyright {
+    @apply text-center font-bold mt-8 pt-4 border-t w-full;
+  }
+
+  /* =========================
+        Hero Section
+        ========================= */
+  .hero-section {
+    @apply section-fullscreen bg-no-repeat bg-center bg-cover;
+  }
+
+  .hero-overlay {
+    @apply relative h-screen bg-overlay;
+  }
+
+  .hero-content {
+    @apply flex flex-col items-center justify-center w-full max-w-2xl mx-auto;
+  }
+
+  .hero-text {
+    @apply w-full text-center text-xl/9 text-white mt-10 tracking-wide;
+  }
+
+  .hero-cta {
+    @apply flex items-start mt-8 justify-center;
+  }
+
+  /* =========================
+        Welcome Section
+        ========================= */
+  .welcome-section {
+    @apply section-fullscreen;
+  }
+
+  .welcome-container {
+    @apply flex flex-row h-screen overflow-hidden pt-8 relative;
+  }
+
+  .welcome-text {
+    @apply basis-4/6 overflow-scroll p-4 text-foreground z-content custom-scrollbar;
+  }
+
+  .welcome-content {
+    @apply space-y-4;
+  }
+
+  .welcome-content p {
+    @apply mb-4 leading-relaxed text-xl font-extrabold;
+  }
+
+  .welcome-content ul {
+    @apply pl-6 mb-4 space-y-2 font-extrabold text-xl;
+  }
+
+  .welcome-image {
+    @apply basis-2/6 relative h-full grid place-items-center z-content;
+  }
+
+  /* =========================
+        Services Section
+        ========================= */
+  .services-section {
     @apply min-h-screen w-full px-8 py-8 overflow-hidden;
   }
-  .home-services-container {
+
+  .services-container {
     @apply container mx-auto pr-2 relative z-0;
   }
 
-  .home-services-content {
+  .services-content {
     @apply relative z-[2];
   }
 
-  .home-services-header h2 {
-    @apply text-4xl text-left font-bold mb-4 text-foreground;
-  }
-  .home-services-header p {
-    @apply text-xl text-left max-w-2xl text-foreground;
+  /* =========================
+        Clinic Section
+        ========================= */
+  .clinic-section {
+    @apply w-full h-full flex items-center justify-center;
   }
 
-  .home-services-grid {
-    @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr max-h-[calc(100vh-12rem)];
+  .clinic-container {
+    @apply container h-full my-8;
+  }
+
+  /* =========================
+        Appointment System
+        ========================= */
+  .appointment-section {
+    @apply section-base;
+  }
+
+  .appointment-tabs {
+    @apply grid grid-cols-2 gap-4 mb-8;
+  }
+
+  .appointment-tab {
+    @apply py-3 px-6 rounded-lg font-medium transition-colors;
+  }
+
+  .appointment-tab-active {
+    @apply appointment-tab btn-primary;
+  }
+
+  .appointment-tab-inactive {
+    @apply appointment-tab btn-secondary;
+  }
+
+  .appointment-calendar {
+    @apply max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-4 border-2 border-border;
+  }
+
+  .time-slot-grid {
+    @apply grid grid-cols-3 sm:grid-cols-5 gap-2;
+  }
+
+  .time-slot {
+    @apply py-2 px-4 rounded-md font-bold transition-colors cursor-pointer;
+  }
+
+  .time-slot-available {
+    @apply time-slot btn-secondary;
+  }
+
+  .time-slot-selected {
+    @apply time-slot btn-primary;
+  }
+
+  /* =========================
+        Contact Section
+        ========================= */
+  .contact-section {
+    @apply section-base;
+  }
+
+  .contact-item {
+    @apply flex items-center;
+  }
+
+  .contact-icon {
+    @apply mr-3 text-foreground;
+  }
+
+  .contact-text {
+    @apply text-lg text-foreground;
+  }
+
+  .address-item {
+    @apply flex items-start;
+  }
+
+  .address-icon {
+    @apply mr-3 mt-1 font-bold;
+  }
+
+  /* =========================
+        Admin System
+        ========================= */
+  .admin-layout {
+    @apply min-h-screen flex bg-gray-50 dark:bg-gray-900;
+  }
+
+  .admin-sidebar {
+    @apply w-64 bg-white dark:bg-gray-800 border-r-2 
+              border-gray-200 dark:border-gray-700 min-h-screen relative;
+  }
+
+  .admin-main {
+    @apply flex-1 overflow-auto bg-gray-50 dark:bg-gray-900;
+  }
+
+  .admin-page {
+    @apply p-8;
+  }
+
+  .admin-page-header {
+    @apply mb-8;
+  }
+
+  .admin-page-title {
+    @apply text-3xl font-bold text-foreground;
+  }
+
+  .admin-page-description {
+    @apply text-muted-foreground mt-2;
+  }
+
+  .admin-stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8;
+  }
+
+  .admin-table {
+    @apply w-full;
+  }
+
+  .admin-table-header {
+    @apply border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .admin-table-row {
+    @apply border-b border-gray-100 dark:border-gray-800 
+              hover:bg-gray-50 dark:hover:bg-gray-900;
+  }
+
+  /* =========================
+        Scrollbar Customizada
+        ========================= */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 0px;
+    width: 5px;
+    background-color: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+/* ============================================
+      UTILITIES LAYER - Utilitários específicos
+      ============================================ */
+@layer utilities {
+  /* Overlays */
+  .bg-overlay {
+    @apply bg-black bg-opacity-50;
+  }
+
+  /* Z-index utilities */
+  .z-content {
+    @apply relative z-[2];
+  }
+
+  .z-decorative {
+    @apply relative z-[1];
+  }
+
+  /* Container utilities */
+  .container-centered {
+    @apply flex items-center justify-center;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 1s ease forwards;
+  }
+
+  .animate-soft-bounce {
+    animation: softBounce 2s ease-in-out infinite;
+  }
+
+  .animate-infinite {
+    animation-iteration-count: infinite;
+  }
+
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ============================================
+      ANIMAÇÕES - Fora das layers do Tailwind
+      ============================================ */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes progressAnimation {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 0;
+  }
+}
+
+@keyframes fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+      MEDIA QUERIES - Ajustes responsivos globais
+      ============================================ */
+@media (max-width: 768px) {
+  .header-nav {
+    @apply hidden;
+  }
+
+  .welcome-container {
+    @apply flex-col;
+  }
+
+  .welcome-text {
+    @apply basis-full;
+  }
+
+  .welcome-image {
+    @apply hidden;
   }
 }

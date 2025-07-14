@@ -1,9 +1,9 @@
+// src/components/common/page-transition/index.tsx - REFATORADO
 "use client";
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import styles from "./transition.module.css";
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -16,16 +16,12 @@ const PageTransition = ({ children, isDarkMode }: PageTransitionProps) => {
   const isFirstRender = useRef(true);
 
   useEffect(() => {
-    // Se for a montagem inicial, apenas marcamos que já passou
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
 
-    // Inicia a transição
     setIsTransitioning(true);
-
-    // Após 3 s, finaliza a transição
     const timer = setTimeout(() => {
       setIsTransitioning(false);
     }, 1000);
@@ -35,33 +31,37 @@ const PageTransition = ({ children, isDarkMode }: PageTransitionProps) => {
 
   return (
     <>
-      {/* Conteúdo normal, com fade */}
+      {/* Conteúdo com fade */}
       <div
-        className={`${styles.content} ${
-          isTransitioning ? styles.contentHidden : styles.contentVisible
+        className={`transition-opacity duration-500 w-full ${
+          isTransitioning ? "opacity-0" : "opacity-100"
         }`}
       >
         {children}
       </div>
 
-      {/* Loader só aparece durante a transição */}
+      {/* Loader durante transição */}
       {isTransitioning && (
-        <div className={styles.loader}>
-          <div className={styles.progressBar}>
+        <div className="fixed inset-0 z-50 bg-background flex items-center justify-center top-20 overflow-hidden">
+          {/* Barra de progresso */}
+          <div className="absolute top-0 left-0 w-full h-full z-0 overflow-hidden">
             <div
-              className={`${styles.progress} ${
-                isDarkMode ? styles.darkProgress : styles.lightProgress
+              className={`absolute top-0 left-0 w-full h-full animate-progressBarAnimation ${
+                isDarkMode ? "bg-[#c4d6ed]" : "bg-[#ffbf9e]"
               }`}
+              style={{ left: "-100%" }}
             />
           </div>
-          <div className={styles.logoContainer}>
+
+          {/* Logo */}
+          <div className="relative w-64 h-64 flex items-center justify-center z-10">
             <Image
               src="/PsiLogo2.svg"
               alt="Logo"
               width={180}
               height={180}
               priority
-              className={styles.fadeIn}
+              className="animate-fade-in"
             />
           </div>
         </div>

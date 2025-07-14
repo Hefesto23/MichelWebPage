@@ -1,5 +1,4 @@
-// components/common/Header/index.tsx
-
+// src/components/common/header.tsx - REFATORADO
 import { robotoSlab } from "@/app/fonts";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -7,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Moon, Sun } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./header.module.css";
 
 export const Header = ({
   isDarkMode,
@@ -19,10 +17,10 @@ export const Header = ({
   toggleDarkMode: () => void;
 }) => {
   return (
-    <header className={cn(styles.header, robotoSlab.className)}>
+    <header className={cn("header-main", robotoSlab.className)}>
       <div className="content-container">
-        <div className={styles.container}>
-          <div className={`${styles.logoContainer} stretch`}>
+        <div className="header-container">
+          <div className="header-logo">
             {isDarkMode ? (
               <Image
                 src="/logo2.svg"
@@ -42,40 +40,34 @@ export const Header = ({
             )}
           </div>
 
-          <nav className={styles.navigation}>
-            <Link href="/" className={styles.navLink}>
+          <nav className="header-nav">
+            <Link href="/" className="header-nav-link">
               Home
             </Link>
-            <Link href="/about" className={styles.navLink}>
+            <Link href="/about" className="header-nav-link">
               Sobre
             </Link>
-            <Link href="/terapias" className={styles.navLink}>
+            <Link href="/terapias" className="header-nav-link">
               Terapias
             </Link>
-            <Link href="/avaliacoes" className={styles.navLink}>
+            <Link href="/avaliacoes" className="header-nav-link">
               Avaliações
             </Link>
-            <Link href="/agendamento" className={styles.navLink}>
+            <Link href="/agendamento" className="header-nav-link">
               Agendamento
             </Link>
-            <Link href="/contato" className={styles.navLink}>
+            <Link href="/contato" className="header-nav-link">
               Contato
             </Link>
 
             {isAdminLogged ? (
-              <Link
-                href="/admin/dashboard"
-                className={`${styles.navLink} hover:text-primary`}
-              >
+              <Link href="/admin/dashboard" className="header-nav-link">
                 <Button variant="default" className="h-9">
                   Área Admin
                 </Button>
               </Link>
             ) : (
-              <Link
-                href="/admin/login"
-                className={`${styles.navLink} hover:text-primary`}
-              >
+              <Link href="/admin/login" className="header-nav-link">
                 <Button variant="default" className="h-9">
                   Admin Login
                 </Button>
@@ -83,14 +75,14 @@ export const Header = ({
             )}
           </nav>
 
-          <div className={styles.darkModeToggle}>
+          <div className="header-actions">
             {isDarkMode ? (
-              <span className={styles.iconContainer}>
-                <Sun className={styles.darkModeIcon} />
+              <span className="inline-flex items-center font-extrabold">
+                <Sun className="mr-1 h-5 w-5 text-primary-foreground" />
               </span>
             ) : (
-              <span className={styles.iconContainer}>
-                <Moon className={styles.lightModeIcon} />
+              <span className="inline-flex items-center font-extrabold">
+                <Moon className="mr-1 h-5 w-5 text-foreground" />
               </span>
             )}
             <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />

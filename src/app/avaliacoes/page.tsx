@@ -1,8 +1,8 @@
+// src/app/avaliacoes/page.tsx - REFATORADO
 "use client";
 
 import { ImageCard } from "@/components/ui/cards/ServiceCard";
 import Divisor from "@/components/ui/divisor";
-import styles from "@/styles/pages/avaliacoes.module.css";
 
 export default function Assessment() {
   const testModalities = [
@@ -24,12 +24,12 @@ export default function Assessment() {
 
   return (
     <section>
-      <div className={styles.assessmentSection}>
+      <div className="section-fullscreen w-full py-16 overflow-hidden relative z-0">
         <div className="content-container">
-          <div className={styles.container}>
-            <div className={styles.header}>
-              <h2 className={styles.headerTitle}>Testes Psicológicos</h2>
-              <p className={styles.headerDescription}>
+          <div className="relative z-10">
+            <div className="section-header">
+              <h2 className="section-title">Testes Psicológicos</h2>
+              <p className="section-description">
                 Instrumentos técnicos e científicos que auxiliam na compreensão
                 de aspectos específicos da saúde mental e cognitiva. Cada teste
                 oferece insights importantes sobre diferentes dimensões
@@ -37,7 +37,7 @@ export default function Assessment() {
               </p>
             </div>
 
-            <div className={styles.avaliacaoGrid}>
+            <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-4 z-content">
               {testModalities.map((test, index) => (
                 <ImageCard
                   key={index}

@@ -27,10 +27,10 @@ const config: Config = {
         },
       },
       animation: {
+        progressBarAnimation: "progressAnimation 1s ease-in-out forwards",
         fade: "fade 12s infinite", // Duração de 2 segundos, repetição infinita
         softBounce: "softBounce 1.5s infinite",
       },
-
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

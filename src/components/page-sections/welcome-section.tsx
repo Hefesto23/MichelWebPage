@@ -1,16 +1,16 @@
+// src/components/page-sections/welcome-section/index.tsx - REFATORADO
 import Image from "next/image";
-import styles from "./welcome.module.css";
 
 export default function WelcomeSection() {
   return (
-    <section id="saiba-mais" className={styles.welcomeSection}>
+    <section id="saiba-mais" className="welcome-section">
       <div className="content-container">
-        <div className={styles.welcomeContainer}>
-          <div className={styles.welcomeText}>
-            <div className={styles.welcomeHeader}>
-              <h1>Seja Bem-Vindo!</h1>
+        <div className="welcome-container">
+          <div className="welcome-text">
+            <div className="section-header">
+              <h1 className="section-title">Seja Bem-Vindo!</h1>
             </div>
-            <div className={styles.welcomeContent}>
+            <div className="welcome-content">
               <article>
                 <p>
                   Sentir-se sobrecarregado, ansioso ou constantemente em alerta
@@ -88,7 +88,7 @@ export default function WelcomeSection() {
             </div>
           </div>
 
-          <div className={styles.welcomeImage}>
+          <div className="welcome-image">
             <Image
               src="/assets/michel1.svg"
               alt="Foto de Michel Psicologo Clinico"

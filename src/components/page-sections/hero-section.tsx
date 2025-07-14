@@ -1,10 +1,10 @@
+// src/components/page-sections/hero-section/index.tsx - REFATORADO
 "use client";
 
 import { Button } from "@/components/ui/button";
 import useScrollToSection from "@/hooks/useScrollToSection";
 import { ArrowDown } from "lucide-react";
 import Link from "next/link";
-import styles from "./hero.module.css";
 
 const heroSubtitles = {
   text1:
@@ -17,12 +17,12 @@ export default function HeroSection() {
   return (
     <section
       id="hero"
-      className={`bg-[url('/assets/horizonte.jpg')] ${styles.heroSection}`}
+      className="hero-section bg-[url('/assets/horizonte.jpg')]"
     >
-      <div className={`${styles.heroOverlay} section-padding bg-overlay`}>
+      <div className="hero-overlay section-padding">
         <div className="content-container">
-          <div className={`${styles.heroContent} max-w-2xl mx-auto`}>
-            <h1 className={styles.heroText}>
+          <div className="hero-content">
+            <h1 className="hero-text">
               {heroSubtitles.text1}
               <div className="mt-4">
                 Agende sua consulta e comece a reescrever sua história hoje
@@ -39,14 +39,14 @@ export default function HeroSection() {
             </h1>
           </div>
         </div>
-        <div className={styles.heroCta}>
+        <div className="hero-cta">
           <Button
             variant="outline"
             onClick={scrollToSaibaMais}
             aria-label="Saiba mais sobre o Psicólogo e sua especialidade"
-            className={`${styles.heroCtaButton} group animate-softBounce animate-infinite`}
+            className="w-16 h-16 rounded-full text-white border-white text-sm flex items-center justify-center shadow-lg focus:outline-none group animate-softBounce"
           >
-            <ArrowDown className="w-6 h-6 group-hover:stroke-[3] group-hover:stroke-current dark:group-hover:stroke-background" />
+            <ArrowDown className="w-6 h-6 group-hover:stroke-[3]" />
           </Button>
         </div>
       </div>

@@ -1,7 +1,6 @@
+// src/components/page-sections/services-section/index.tsx - REFATORADO
 import { ImageCard } from "@/components/ui/cards/ServiceCard";
-import styles from "./services.module.css";
 
-// Array de serviços - poderia ser extraído para um arquivo próprio ou CMS
 const services = [
   {
     imageUrl: "/assets/terapias1.jpg",
@@ -44,19 +43,18 @@ const services = [
 
 export default function ServicesSection() {
   return (
-    <section id="primeiros-passos" className={styles.servicesSection}>
+    <section id="primeiros-passos" className="services-section">
       <div className="content-container">
-        <div className={styles.servicesContainer}>
-          <div className={styles.servicesContent}>
-            <div className={styles.servicesHeader}>
-              <h2>Primeiros Passos</h2>
-              <p>
-                Navegue pelos serviços e descubra como posso ajudar você em sua
-                jornada de bem-estar emocional.
+        <div className="services-container">
+          <div className="services-content">
+            <div className="section-header">
+              <h2 className="section-title">Primeiros Passos</h2>
+              <p className="section-description">
+                Navegue pelos serviços e descubra como posso ajudar você...
               </p>
             </div>
 
-            <div className={styles.servicesGrid}>
+            <div className="grid-services max-h-[calc(100vh-12rem)]">
               {services.map((service, index) => (
                 <ImageCard
                   key={index}

@@ -1,7 +1,8 @@
+// src/app/contato/page.tsx - REFATORADO
 "use client";
+
 import { ContactCard } from "@/components/ui/cards/ServiceCard";
 import Divisor from "@/components/ui/divisor";
-import styles from "@/styles/pages/contato.module.css";
 import { Clock, Mail, MapPin, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -12,12 +13,12 @@ export default function Contact() {
 
   return (
     <div>
-      <section className={styles.contactSection}>
+      <section className="contact-section">
         <div className="content-container">
-          <div className={styles.container}>
-            <h1 className={styles.title}>Contato</h1>
+          <div className="relative z-10">
+            <h1 className="section-title">Contato</h1>
 
-            <div className={styles.contatoGrid}>
+            <div className="grid-contact">
               {/* Contact Information Card */}
               <ContactCard title="Informações de Contato">
                 <div className="space-y-6">
@@ -26,18 +27,14 @@ export default function Contact() {
                     href="https://wa.me/5515997646421"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${styles.contactItem} group`}
+                    className="contact-item group"
                   >
-                    <div
-                      className={`${styles.contactItemWrapper} hover:-translate-x-1 transition-transform duration-300`}
-                    >
+                    <div className="flex items-center w-full hover:-translate-x-1 transition-transform duration-300">
                       <IoLogoWhatsapp
-                        className={`${styles.contactIcon} group-hover:scale-110 transition-transform duration-300`}
+                        className="contact-icon group-hover:scale-110 transition-transform duration-300"
                         size={24}
                       />
-                      <span
-                        className={`${styles.contactText} group-hover:text-foreground/80 transition-colors`}
-                      >
+                      <span className="contact-text group-hover:text-foreground/80 transition-colors">
                         +55 (15) 99764-6421
                       </span>
                     </div>
@@ -46,15 +43,15 @@ export default function Contact() {
                   {/* Email */}
                   <Link
                     href="mailto:michelcamargo.psi@gmail.com"
-                    className={styles.contactItem}
+                    className="contact-item"
                   >
-                    <div className={styles.contactItemWrapper}>
+                    <div className="flex items-center w-full">
                       <Mail
-                        className={styles.contactIcon}
+                        className="contact-icon"
                         size={24}
                         strokeWidth={3}
                       />
-                      <span className={styles.contactText}>
+                      <span className="contact-text">
                         michelcamargo.psi@gmail.com
                       </span>
                     </div>
@@ -64,38 +61,27 @@ export default function Contact() {
 
               {/* Location and Hours Card */}
               <ContactCard title="Atendimento">
-                {/* Address */}
                 <div className="space-y-6">
-                  <div className={`${styles.addressItem} group`}>
+                  <div className="address-item group">
                     <MapPin
-                      className={`${styles.addressIcon}  group-hover:scale-110 transition-transform duration-300`}
+                      className="address-icon group-hover:scale-110 transition-transform duration-300"
                       size={24}
                       strokeWidth={3}
                     />
-                    <div
-                      className={`${styles.addressContent} hover:-translate-x-1 transition-transform duration-300`}
-                    >
-                      <p className={styles.addressText}>
-                        Rua Antônio Ferreira, 171
-                      </p>
-                      <p className={styles.addressText}>
-                        Parque Campolim, Sorocaba SP
-                      </p>
-                      <p className={styles.addressText}>18047-636, Brasil</p>
+                    <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
+                      <p className="text-lg">Rua Antônio Ferreira, 171</p>
+                      <p className="text-lg">Parque Campolim, Sorocaba SP</p>
+                      <p className="text-lg">18047-636, Brasil</p>
                     </div>
                   </div>
 
                   {/* Hours */}
-                  <div className={styles.addressItem}>
-                    <Clock
-                      className={styles.addressIcon}
-                      size={24}
-                      strokeWidth={3}
-                    />
-                    <div className={styles.addressContent}>
-                      <p className={styles.addressText}>Segunda à Sexta</p>
-                      <p className={styles.addressText}>Das 8:00 as 21:00</p>
-                      <p className={styles.note}>
+                  <div className="address-item">
+                    <Clock className="address-icon" size={24} strokeWidth={3} />
+                    <div className="text-foreground">
+                      <p className="text-lg">Segunda à Sexta</p>
+                      <p className="text-lg">Das 8:00 as 21:00</p>
+                      <p className="text-sm text-muted-foreground mt-2 italic">
                         Obs: As consultas necessitam ser previamente agendadas.
                       </p>
                     </div>
@@ -107,8 +93,8 @@ export default function Contact() {
             {/* Map Card */}
             <ContactCard title="Localização no Mapa">
               <div
-                className={`${styles.map} transition-all duration-300 ${
-                  isMapExpanded ? styles.mapExpanded : styles.mapCollapsed
+                className={`relative overflow-hidden transition-all duration-300 ${
+                  isMapExpanded ? "h-[500px]" : "h-64"
                 }`}
               >
                 <iframe
@@ -120,16 +106,16 @@ export default function Contact() {
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Mapa da Clínica"
-                  className={styles.mapFrame}
+                  className="rounded-lg"
                 />
               </div>
               <button
                 onClick={() => setIsMapExpanded(!isMapExpanded)}
-                className={`${styles.mapButton} hover:text-foreground/80 transition-colors group`}
+                className="mt-4 flex items-center hover:text-foreground/80 transition-colors group"
               >
                 <Maximize2
                   size={20}
-                  className={`${styles.mapButtonIcon} group-hover:scale-110 transition-transform duration-300`}
+                  className="mr-2 group-hover:scale-110 transition-transform duration-300"
                 />
                 {isMapExpanded ? "Reduzir mapa" : "Expandir mapa"}
               </button>

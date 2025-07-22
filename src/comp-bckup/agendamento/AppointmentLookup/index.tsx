@@ -1,18 +1,10 @@
 // components/scheduling/AppointmentLookup/index.tsx
-import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/ui/button";
+import { ContactCard } from "@/components/ui/cards/ServiceCard";
 
 interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
   codigoConfirmacao: string;
-  primeiraConsulta: boolean;
+  [key: string]: unknown;
 }
 
 interface AppointmentLookupProps {

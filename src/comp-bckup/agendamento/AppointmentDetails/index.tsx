@@ -1,6 +1,6 @@
 // components/scheduling/AppointmentDetails/index.tsx
-import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/ui/button";
+import { ContactCard } from "@/components/ui/cards/ServiceCard";
 import { Calendar, Clock } from "lucide-react";
 
 interface FormData {
@@ -10,10 +10,8 @@ interface FormData {
   dataSelecionada: string;
   horarioSelecionado: string;
   modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
   codigoConfirmacao: string;
-  primeiraConsulta: boolean;
+  [key: string]: any;
 }
 
 interface AppointmentDetailsProps {

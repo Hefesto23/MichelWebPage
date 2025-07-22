@@ -1,7 +1,7 @@
 // components/scheduling/AppointmentConfirmation/index.tsx
 import { caveat } from "@/app/fonts";
+import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/ui/button";
-import { ContactCard } from "@/components/ui/cards/ServiceCard";
 import { cn } from "@/lib/utils";
 import { IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5";
 
@@ -13,7 +13,7 @@ interface FormData {
   horarioSelecionado: string;
   modalidade: string;
   codigoAgendamento: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AppointmentConfirmationProps {

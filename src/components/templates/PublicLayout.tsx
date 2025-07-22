@@ -3,13 +3,13 @@
 // ============================================
 "use client";
 
-import { Header, Footer, PageTransition } from "@/components/layout";
+import { Footer, Header } from "@/components/layout";
 import {
-  WhatsAppButton,
   SectionNavigator,
+  WhatsAppButton,
 } from "@/components/shared/navigation";
-import { useDarkMode } from "@/hooks/useDarkMode";
 import { useAuth } from "@/hooks/useAuth";
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 interface PublicLayoutProps {
   children: React.ReactNode;

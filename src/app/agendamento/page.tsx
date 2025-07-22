@@ -1,11 +1,11 @@
 // src/app/agendamento/page.tsx - REFATORADO
 "use client";
 
-import AppointmentConfirmation from "@/components/agendamento/AppointmentConfirmation";
-import AppointmentDetails from "@/components/agendamento/AppointmentDetails";
-import AppointmentForm from "@/components/agendamento/AppointmentForm";
-import AppointmentLookup from "@/components/agendamento/AppointmentLookup";
-import InfoCards from "@/components/agendamento/InfoCards";
+import AppointmentConfirmation from "@/components/agendamento2/AppointmentConfirmation";
+import AppointmentDetails from "@/components/agendamento2/AppointmentDetails";
+import AppointmentForm from "@/components/agendamento2/AppointmentForm";
+import AppointmentLookup from "@/components/agendamento2/AppointmentLookup";
+import InfoCards from "@/components/agendamento2/InfoCards";
 import Divisor from "@/components/ui/divisor";
 import { useState } from "react";
 import { IoCloseCircle } from "react-icons/io5";

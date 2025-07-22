@@ -3,7 +3,7 @@
 "use client";
 
 import { roboto } from "@/app/fonts";
-import { AdminSidebar } from "@/components/admin/Sidebar";
+import { AdminSidebar } from "@/components/pages/admin/Sidebar";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

@@ -1,7 +1,7 @@
 import React from "react";
-import Confirmation from "./steps/Confirmation";
-import ContactInfo from "./steps/ContactInfo";
-import DateTimeSelection from "./steps/DateTimeSelection";
+import Confirmation from "../../pages/agendamento/steps/Confirmation";
+import ContactInfo from "../../pages/agendamento/steps/ContactInfo";
+import DateTimeSelection from "../../pages/agendamento/steps/DateTimeSelection";
 
 interface FormData {
   nome: string;

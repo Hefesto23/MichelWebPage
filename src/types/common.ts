@@ -81,3 +81,4 @@ export interface RouteConfig {
   layout?: string;
   protected?: boolean;
 }
+

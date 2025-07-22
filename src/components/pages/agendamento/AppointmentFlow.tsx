@@ -5,12 +5,12 @@ import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { useState } from "react";
 
 // Importa seus componentes atuais (SEM ALTERAR NADA!)
-import AppointmentConfirmation from "@/components/agendamento/AppointmentConfirmation";
-import AppointmentDetails from "@/components/agendamento/AppointmentDetails";
-import Confirmation from "@/components/agendamento/AppointmentForm/steps/Confirmation";
-import ContactInfo from "@/components/agendamento/AppointmentForm/steps/ContactInfo";
-import DateTimeSelection from "@/components/agendamento/AppointmentForm/steps/DateTimeSelection";
-import AppointmentLookup from "@/components/agendamento/AppointmentLookup";
+import AppointmentConfirmation from "@/components/agendamento2/AppointmentConfirmation";
+import AppointmentDetails from "@/components/agendamento2/AppointmentDetails";
+import AppointmentLookup from "@/components/agendamento2/AppointmentLookup";
+import Confirmation from "@/components/pages/agendamento/steps/Confirmation";
+import ContactInfo from "@/components/pages/agendamento/steps/ContactInfo";
+import DateTimeSelection from "@/components/pages/agendamento/steps/DateTimeSelection";
 
 interface AppointmentFormData {
   nome: string;

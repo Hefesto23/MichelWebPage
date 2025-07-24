@@ -1,5 +1,5 @@
 // src/components/shared/cards/BaseCard.tsx
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import Image from "next/image";
 import Link from "next/link";
 

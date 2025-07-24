@@ -1,23 +1,11 @@
-// components/scheduling/AppointmentDetails/index.tsx
+// components/agendamento/AppointmentDetails.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shared/ui/button";
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import { Calendar, Clock } from "lucide-react";
 
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
-  codigoConfirmacao: string;
-  primeiraConsulta: boolean;
-}
-
 interface AppointmentDetailsProps {
-  formData: FormData;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
   setCancelar: (status: boolean) => void;
   setEnviado: (status: boolean) => void;
   carregando: boolean;
@@ -33,7 +21,7 @@ export default function AppointmentDetails({
   setCarregando,
   handleError,
 }: AppointmentDetailsProps) {
-  // Função para formatar a data
+  // Função para formatar a data - ✅ MANTIDA EXATAMENTE ORIGINAL
   const formatarData = (dataString: string): string => {
     const data = new Date(dataString);
     const options: Intl.DateTimeFormatOptions = {
@@ -45,7 +33,7 @@ export default function AppointmentDetails({
     return data.toLocaleDateString("pt-BR", options);
   };
 
-  // Função para confirmar cancelamento
+  // Função para confirmar cancelamento - ✅ MANTIDA EXATAMENTE ORIGINAL
   const confirmarCancelamento = async () => {
     setCarregando(true);
 

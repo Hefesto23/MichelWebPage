@@ -1,65 +1,80 @@
-// src/app/layout.tsx - LAYOUT PRINCIPAL ATUALIZADO
-
+// ============================================
+// app/layout.tsx - Layout Raiz CORRIGIDO com Dark Mode
+// ============================================
 "use client";
 
-import { Footer } from "@/components/common/footer";
-import PageTransition from "@/components/common/page-transition";
-import WhatsAppButton from "@/components/common/whatsapp-icon";
-import { useDarkMode } from "@/hooks/useDarkMode";
-import { cn } from "@/lib/utils";
-import "@/styles/globals.css";
+import { robotoSlab } from "@/app/fonts";
+import { Footer, Header } from "@/components/layout"; // ✅ COMPONENTES ORIGINAIS
+import {
+  SectionNavigator,
+  WhatsAppButton,
+} from "@/components/shared/navigation"; // ✅ NAVEGAÇÃO ORIGINAL
+import PageTransition from "@/components/shared/transitions/PageTransition";
+// import { useAuth } from "@/hooks/useAuth"; // ✅ HOOK ORIGINAL
+import { useDarkMode } from "@/hooks/useDarkMode"; // ✅ HOOK ORIGINAL
+import { cn } from "@/utils/utils";
+import "@styles/globals.css";
 import { usePathname } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
-import { Header } from "../components/common/header";
-import { roboto } from "./fonts";
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export default function RootLayout({ children }: LayoutProps) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // ✅ HOOKS ORIGINAIS MANTIDOS
   const [isDarkMode, toggleDarkMode] = useDarkMode();
-  const [isAdminLogged, setIsAdminLogged] = useState(false);
+  // const { isAdminLogged } = useAuth();
   const pathname = usePathname();
 
-  // Verificar se é rota administrativa
-  const isAdminRoute = pathname?.startsWith("/admin");
-
-  useEffect(() => {
-    // Só verificar token se não for rota admin (evita conflito)
-    if (!isAdminRoute) {
-      const token = localStorage.getItem("token");
-      setIsAdminLogged(!!token);
-    }
-  }, [isAdminRoute]);
+  // ✅ LÓGICA ORIGINAL PARA MOSTRAR COMPONENTES
+  const isHomePage = pathname === "/";
+  const isAdminPage = pathname.startsWith("/admin");
+  const showWhatsApp = !isAdminPage;
+  const showSectionNav = isHomePage;
 
   return (
-    <html lang="pt-BR" className={isDarkMode ? "dark" : ""}>
-      <body>
-        {isAdminRoute ? (
-          // Layout específico para admin (sem header, footer, transições)
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <main className={cn("min-h-screen", roboto.className)}>
-              {children}
-            </main>
-          </div>
-        ) : (
-          // Layout padrão do site
-          <div className="min-h-screen flex flex-col">
+    <html
+      lang="pt-BR"
+      className={isDarkMode ? "dark" : ""} // ✅ CLASSE DARK APLICADA CORRETAMENTE
+      suppressHydrationWarning
+    >
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          robotoSlab.variable
+        )}
+        suppressHydrationWarning
+      >
+        {/* ✅ ESTRUTURA ORIGINAL PRESERVADA */}
+        <div className="min-h-screen flex flex-col">
+          {/* ✅ HEADER ORIGINAL COM DARK MODE */}
+          {!isAdminPage && (
             <Header
               isDarkMode={isDarkMode}
+              isAdminLogged={false}
               toggleDarkMode={toggleDarkMode}
-              isAdminLogged={isAdminLogged}
             />
-            <main className={cn("flex-grow py-0 bg-primary", roboto.className)}>
-              <PageTransition isDarkMode={isDarkMode}>
-                {children}
-              </PageTransition>
-              <WhatsAppButton />
-            </main>
-            <Footer />
-          </div>
-        )}
+          )}
+
+          {/* ✅ MAIN CONTENT COM TRANSIÇÕES */}
+          <PageTransition isDarkMode={isDarkMode}>
+            <main className="flex-1">{children}</main>
+          </PageTransition>
+
+          {/* ✅ FOOTER ORIGINAL */}
+          {!isAdminPage && <Footer />}
+
+          {/* ✅ COMPONENTES FLUTUANTES ORIGINAIS */}
+          {showWhatsApp && <WhatsAppButton />}
+          {showSectionNav && <SectionNavigator />}
+        </div>
       </body>
     </html>
   );

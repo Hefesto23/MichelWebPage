@@ -1,8 +1,8 @@
 // src/app/contato/page.tsx - REFATORADO
 "use client";
 
-import { ContactCard } from "@/components/ui/cards/ServiceCard";
-import Divisor from "@/components/ui/divisor";
+import { ContactCard } from "@/components/shared/cards/BaseCard";
+import Divisor from "@/components/shared/ui/divisor";
 import { Clock, Mail, MapPin, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

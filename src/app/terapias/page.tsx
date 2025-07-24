@@ -1,8 +1,8 @@
 // src/app/terapias/page.tsx - REFATORADO
 "use client";
 
-import { ImageCard } from "@/components/ui/cards/ServiceCard";
-import Divisor from "@/components/ui/divisor";
+import { ImageCard } from "@/components/shared/cards/BaseCard";
+import Divisor from "@/components/shared/ui/divisor";
 
 export default function Therapies() {
   const therapyModalities = [

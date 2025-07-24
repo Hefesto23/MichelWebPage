@@ -1,44 +1,18 @@
-// src/app/agendamento/page.tsx - REFATORADO
-"use client";
+// ============================================
+// src/app/agendamento/page.tsx - REFATORADO COMPLETO
+// ============================================
+import { AppointmentFlow, InfoCards } from "@/components/pages/agendamento"; // ✅ NOVO IMPORT
+import Divisor from "@/components/shared/ui/divisor";
+import { Metadata } from "next";
 
-import AppointmentConfirmation from "@/components/agendamento2/AppointmentConfirmation";
-import AppointmentDetails from "@/components/agendamento2/AppointmentDetails";
-import AppointmentForm from "@/components/agendamento2/AppointmentForm";
-import AppointmentLookup from "@/components/agendamento2/AppointmentLookup";
-import InfoCards from "@/components/agendamento2/InfoCards";
-import Divisor from "@/components/ui/divisor";
-import { useState } from "react";
-import { IoCloseCircle } from "react-icons/io5";
+export const metadata: Metadata = {
+  title: "Agendamento de Consulta | Michel de Camargo - Psicólogo",
+  description:
+    "Agende sua consulta de psicologia online ou presencial. Atendimento especializado em ansiedade.",
+  keywords: "agendamento, consulta psicológica, psicólogo Sorocaba, ansiedade",
+};
 
 export default function Agendamento() {
-  const [step, setStep] = useState(1);
-  const [enviado, setEnviado] = useState(false);
-  const [cancelar, setCancelar] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(false);
-
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    dataSelecionada: "",
-    horarioSelecionado: "",
-    modalidade: "presencial",
-    mensagem: "",
-    codigoAgendamento: "",
-    codigoConfirmacao: "",
-    primeiraConsulta: false,
-  });
-
-  const updateFormData = (newData: Partial<typeof formData>) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-  };
-
-  const handleError = (errorMessage: string) => {
-    setErro(errorMessage);
-    window.scrollTo(0, 0);
-  };
-
   return (
     <div>
       <section className="appointment-section">
@@ -46,84 +20,11 @@ export default function Agendamento() {
           <div className="z-content">
             <h1 className="section-title">Agendamento de Consultas</h1>
 
-            {/* Mensagem de erro */}
-            {erro && (
-              <div className="form-error">
-                <p className="flex items-center">
-                  <IoCloseCircle className="mr-2" size={20} />
-                  {erro}
-                </p>
-              </div>
-            )}
+            {/* ✅ COMPONENTE REFATORADO - TODA A LÓGICA ENCAPSULADA */}
+            <AppointmentFlow mode="manage" />
 
-            {!enviado ? (
-              <>
-                {/* Abas */}
-                <div className="appointment-tabs">
-                  <button
-                    className={
-                      step !== 0
-                        ? "appointment-tab-active"
-                        : "appointment-tab-inactive"
-                    }
-                    onClick={() => setStep(1)}
-                  >
-                    Novo Agendamento
-                  </button>
-                  <button
-                    className={
-                      step === 0
-                        ? "appointment-tab-active"
-                        : "appointment-tab-inactive"
-                    }
-                    onClick={() => setStep(0)}
-                  >
-                    Meus Agendamentos
-                  </button>
-                </div>
-
-                {step === 0 ? (
-                  <AppointmentLookup
-                    formData={formData}
-                    updateFormData={updateFormData}
-                    setCarregando={setCarregando}
-                    setCancelar={setCancelar}
-                    handleError={handleError}
-                    carregando={carregando}
-                  />
-                ) : (
-                  <AppointmentForm
-                    step={step}
-                    setStep={setStep}
-                    formData={formData}
-                    updateFormData={updateFormData}
-                    setEnviado={setEnviado}
-                    carregando={carregando}
-                    setCarregando={setCarregando}
-                    handleError={handleError}
-                  />
-                )}
-
-                {cancelar && (
-                  <AppointmentDetails
-                    formData={formData}
-                    setCancelar={setCancelar}
-                    setEnviado={setEnviado}
-                    carregando={carregando}
-                    setCarregando={setCarregando}
-                    handleError={handleError}
-                  />
-                )}
-              </>
-            ) : (
-              <AppointmentConfirmation
-                formData={formData}
-                cancelar={cancelar}
-              />
-            )}
-
-            {/* Informações adicionais */}
-            {!enviado && <InfoCards />}
+            {/* ✅ COMPONENTE ORIGINAL MANTIDO */}
+            <InfoCards />
           </div>
         </div>
       </section>

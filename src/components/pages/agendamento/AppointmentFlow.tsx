@@ -1,78 +1,134 @@
+"use client";
 // ============================================
-// src/components/pages/appointment/AppointmentFlow.tsx
+// src/components/pages/appointment/AppointmentFlow.tsx - MELHORADO
 // ============================================
 import { ContactCard } from "@/components/shared/cards/BaseCard";
+import {
+  AppointmentFormData,
+  AppointmentFormState,
+  AppointmentModality,
+  AppointmentStep,
+} from "@/types/appointment";
+import { isFutureDate, isValidEmail, isValidPhone } from "@/utils/validators";
 import { useState } from "react";
 
-// Importa seus componentes atuais (SEM ALTERAR NADA!)
-import AppointmentConfirmation from "@/components/agendamento2/AppointmentConfirmation";
-import AppointmentDetails from "@/components/agendamento2/AppointmentDetails";
-import AppointmentLookup from "@/components/agendamento2/AppointmentLookup";
+// Importa componentes refatorados
+import AppointmentConfirmation from "@/components/pages/agendamento/AppointmentConfirmation";
+import AppointmentDetails from "@/components/pages/agendamento/AppointmentDetails";
+import AppointmentLookup from "@/components/pages/agendamento/AppointmentLookup";
 import Confirmation from "@/components/pages/agendamento/steps/Confirmation";
 import ContactInfo from "@/components/pages/agendamento/steps/ContactInfo";
 import DateTimeSelection from "@/components/pages/agendamento/steps/DateTimeSelection";
-
-interface AppointmentFormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
-  codigoConfirmacao: string;
-  primeiraConsulta: boolean;
-}
 
 interface AppointmentFlowProps {
   mode?: "schedule" | "manage";
 }
 
+// Estado inicial do formulário usando tipo centralizado
+const initialFormData: AppointmentFormData = {
+  nome: "",
+  email: "",
+  telefone: "",
+  dataSelecionada: "",
+  horarioSelecionado: "",
+  modalidade: AppointmentModality.PRESENCIAL,
+  mensagem: "",
+  codigoAgendamento: "",
+  codigoConfirmacao: "",
+  primeiraConsulta: false,
+};
+
+// Estado inicial da aplicação
+const initialState: AppointmentFormState = {
+  step: AppointmentStep.DATE_TIME,
+  enviado: false,
+  cancelar: false,
+  carregando: false,
+  erro: null,
+};
+
 export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
   mode = "schedule",
 }) => {
-  const [step, setStep] = useState(mode === "manage" ? 0 : 1);
-  const [enviado, setEnviado] = useState(false);
-  const [cancelar, setCancelar] = useState(false);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState("");
-
-  const [formData, setFormData] = useState<AppointmentFormData>({
-    nome: "",
-    email: "",
-    telefone: "",
-    dataSelecionada: "",
-    horarioSelecionado: "",
-    modalidade: "",
-    mensagem: "",
-    codigoAgendamento: "",
-    codigoConfirmacao: "",
-    primeiraConsulta: false,
+  // Estados usando tipos centralizados
+  const [formData, setFormData] =
+    useState<AppointmentFormData>(initialFormData);
+  const [state, setState] = useState<AppointmentFormState>({
+    ...initialState,
+    step:
+      mode === "manage" ? AppointmentStep.LOOKUP : AppointmentStep.DATE_TIME,
   });
 
+  // Funções auxiliares para atualizar estado
   const updateFormData = (data: Partial<AppointmentFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
+  const updateState = (newState: Partial<AppointmentFormState>) => {
+    setState((prev) => ({ ...prev, ...newState }));
+  };
+
   const handleError = (message: string) => {
-    setErro(message);
-    setTimeout(() => setErro(""), 5000);
+    updateState({ erro: message });
+    setTimeout(() => updateState({ erro: null }), 5000);
+  };
+
+  // Validação centralizada usando utilitários
+  const validateStep = (step: AppointmentStep): boolean => {
+    switch (step) {
+      case AppointmentStep.DATE_TIME:
+        if (
+          !formData.dataSelecionada ||
+          !isFutureDate(formData.dataSelecionada)
+        ) {
+          handleError("Selecione uma data válida.");
+          return false;
+        }
+        if (!formData.horarioSelecionado) {
+          handleError("Selecione um horário.");
+          return false;
+        }
+        if (!formData.modalidade) {
+          handleError("Selecione a modalidade da consulta.");
+          return false;
+        }
+        return true;
+
+      case AppointmentStep.CONTACT_INFO:
+        if (!formData.nome.trim()) {
+          handleError("Nome é obrigatório.");
+          return false;
+        }
+        if (!isValidEmail(formData.email)) {
+          handleError("E-mail inválido.");
+          return false;
+        }
+        if (!isValidPhone(formData.telefone)) {
+          handleError("Telefone inválido.");
+          return false;
+        }
+        return true;
+
+      default:
+        return true;
+    }
   };
 
   const proximoPasso = () => {
-    setStep(step + 1);
-    window.scrollTo(0, 0);
+    if (validateStep(state.step)) {
+      updateState({ step: state.step + 1 });
+      window.scrollTo(0, 0);
+    }
   };
 
   const passoAnterior = () => {
-    setStep(step - 1);
+    updateState({ step: state.step - 1 });
     window.scrollTo(0, 0);
   };
 
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCarregando(true);
+    updateState({ carregando: true });
 
     try {
       const response = await fetch("/api/calendario/agendar", {
@@ -86,6 +142,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           horario: formData.horarioSelecionado,
           modalidade: formData.modalidade,
           mensagem: formData.mensagem,
+          primeiraConsulta: formData.primeiraConsulta,
         }),
       });
 
@@ -96,7 +153,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       }
 
       updateFormData({ codigoAgendamento: data.codigo });
-      setEnviado(true);
+      updateState({ enviado: true });
       window.scrollTo(0, 0);
     } catch (error) {
       console.error("Erro ao agendar consulta:", error);
@@ -105,7 +162,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           "Ocorreu um erro ao agendar sua consulta. Por favor, tente novamente."
       );
     } finally {
-      setCarregando(false);
+      updateState({ carregando: false });
     }
   };
 
@@ -116,11 +173,10 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       <div className="grid grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => {
-            setStep(0);
-            setCancelar(false);
+            updateState({ step: AppointmentStep.LOOKUP, cancelar: false });
           }}
           className={`py-3 px-6 rounded-lg font-medium transition-colors ${
-            step === 0
+            state.step === AppointmentStep.LOOKUP
               ? "bg-primary-foreground text-btnFg shadow-md"
               : "border-2 border-border hover:bg-secondary"
           }`}
@@ -129,11 +185,10 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
         </button>
         <button
           onClick={() => {
-            setStep(1);
-            setCancelar(false);
+            updateState({ step: AppointmentStep.DATE_TIME, cancelar: false });
           }}
           className={`py-3 px-6 rounded-lg font-medium transition-colors ${
-            step >= 1 && !cancelar
+            state.step >= AppointmentStep.DATE_TIME && !state.cancelar
               ? "bg-primary-foreground text-btnFg shadow-md"
               : "border-2 border-border hover:bg-secondary"
           }`}
@@ -145,14 +200,14 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
   };
 
   const renderCurrentStep = () => {
-    if (erro) {
+    if (state.erro) {
       return (
         <ContactCard title="Erro">
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg text-red-800 dark:text-red-300">
-            {erro}
+            {state.erro}
           </div>
           <button
-            onClick={() => setErro("")}
+            onClick={() => updateState({ erro: null })}
             className="py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg shadow-md"
           >
             Tentar Novamente
@@ -161,68 +216,71 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       );
     }
 
-    if (enviado) {
+    if (state.enviado) {
       return (
-        <AppointmentConfirmation formData={formData} cancelar={cancelar} />
+        <AppointmentConfirmation
+          formData={formData}
+          cancelar={state.cancelar}
+        />
       );
     }
 
-    if (cancelar && step > 0) {
+    if (state.cancelar && state.step > AppointmentStep.LOOKUP) {
       return (
         <AppointmentDetails
           formData={formData}
-          setCancelar={setCancelar}
-          setEnviado={setEnviado}
-          carregando={carregando}
-          setCarregando={setCarregando}
+          setCancelar={(status) => updateState({ cancelar: status })}
+          setEnviado={(status) => updateState({ enviado: status })}
+          carregando={state.carregando}
+          setCarregando={(status) => updateState({ carregando: status })}
           handleError={handleError}
         />
       );
     }
 
-    switch (step) {
-      case 0:
+    switch (state.step) {
+      case AppointmentStep.LOOKUP:
         return (
           <AppointmentLookup
             formData={formData}
             updateFormData={updateFormData}
-            setCarregando={setCarregando}
-            setCancelar={setCancelar}
+            setCarregando={(status) => updateState({ carregando: status })}
+            setCancelar={(status) => updateState({ cancelar: status })}
             handleError={handleError}
-            carregando={carregando}
+            carregando={state.carregando}
           />
         );
 
-      case 1:
+      case AppointmentStep.DATE_TIME:
         return (
           <DateTimeSelection
             formData={formData}
             updateFormData={updateFormData}
             proximoPasso={proximoPasso}
-            carregando={carregando}
-            setCarregando={setCarregando}
+            carregando={state.carregando}
+            setCarregando={(status) => updateState({ carregando: status })}
             handleError={handleError}
           />
         );
 
-      case 2:
+      case AppointmentStep.CONTACT_INFO:
         return (
           <ContactInfo
             formData={formData}
             updateFormData={updateFormData}
             proximoPasso={proximoPasso}
             passoAnterior={passoAnterior}
-            carregando={carregando}
+            carregando={state.carregando}
           />
         );
 
-      case 3:
+      case AppointmentStep.CONFIRMATION:
         return (
           <Confirmation
             formData={formData}
             passoAnterior={passoAnterior}
             enviarFormulario={enviarFormulario}
-            carregando={carregando}
+            carregando={state.carregando}
           />
         );
 

@@ -1,7 +1,7 @@
 // ============================================
 // src/components/shared/forms/FormField.tsx
 // ============================================
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 interface FormFieldProps {
   label: string;

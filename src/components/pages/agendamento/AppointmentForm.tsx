@@ -2,24 +2,13 @@ import React from "react";
 import Confirmation from "../../pages/agendamento/steps/Confirmation";
 import ContactInfo from "../../pages/agendamento/steps/ContactInfo";
 import DateTimeSelection from "../../pages/agendamento/steps/DateTimeSelection";
-
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
-  codigoConfirmacao: string;
-}
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 
 interface AppointmentFormProps {
   step: number;
   setStep: (step: number) => void;
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
+  updateFormData: (data: Partial<AppointmentFormData>) => void;
   setEnviado: (status: boolean) => void;
   carregando: boolean;
   setCarregando: (status: boolean) => void;
@@ -36,19 +25,19 @@ export default function AppointmentForm({
   setCarregando,
   handleError,
 }: AppointmentFormProps) {
-  // Função para avançar ao próximo passo
+  // Função para avançar ao próximo passo - ✅ MANTIDA EXATAMENTE ORIGINAL
   const proximoPasso = () => {
     setStep(step + 1);
     window.scrollTo(0, 0);
   };
 
-  // Função para voltar ao passo anterior
+  // Função para voltar ao passo anterior - ✅ MANTIDA EXATAMENTE ORIGINAL
   const passoAnterior = () => {
     setStep(step - 1);
     window.scrollTo(0, 0);
   };
 
-  // Função para enviar o formulário
+  // Função para enviar o formulário - ✅ MANTIDA EXATAMENTE ORIGINAL
   const enviarFormulario = async (e: React.FormEvent) => {
     e.preventDefault();
     setCarregando(true);
@@ -90,7 +79,7 @@ export default function AppointmentForm({
     }
   };
 
-  // Renderizar o passo atual
+  // Renderizar o passo atual - ✅ MANTIDA EXATAMENTE ORIGINAL
   return (
     <>
       {step === 1 && (

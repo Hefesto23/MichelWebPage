@@ -1,8 +1,8 @@
 // src/components/common/header.tsx
 import { robotoSlab } from "@/app/fonts";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/shared/ui/button";
+import { Switch } from "@/components/shared/ui/switch";
+import { cn } from "@/utils/utils";
 import { Moon, Sun } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

@@ -4,7 +4,7 @@
 
 import { roboto } from "@/app/fonts";
 import { AdminSidebar } from "@/components/pages/admin/Sidebar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

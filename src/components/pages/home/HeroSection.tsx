@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shared/ui/button";
 import useScrollToSection from "@/hooks/useScrollToSection";
 import { ArrowDown } from "lucide-react";
 import Link from "next/link";

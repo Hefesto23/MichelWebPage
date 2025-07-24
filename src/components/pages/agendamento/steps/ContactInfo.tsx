@@ -1,21 +1,12 @@
 // components/agendamento/AppointmentForm/steps/ContactInfo.tsx
-import { ContactCard } from "@/components/ui/cards/ServiceCard";
+import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO ORIGINAL
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import React from "react";
-import appointmentStyles from "../form.module.css";
-
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  mensagem: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-}
+import appointmentStyles from "../form.module.css"; // ✅ MANTIDO ORIGINAL
 
 interface ContactInfoProps {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
+  updateFormData: (data: Partial<AppointmentFormData>) => void;
   proximoPasso: () => void;
   passoAnterior: () => void;
   carregando: boolean;

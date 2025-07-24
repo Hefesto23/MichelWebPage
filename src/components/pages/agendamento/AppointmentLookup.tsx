@@ -1,23 +1,11 @@
 // components/scheduling/AppointmentLookup/index.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard";
-import { Button } from "@/components/ui/button";
-
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  codigoAgendamento: string;
-  codigoConfirmacao: string;
-  primeiraConsulta: boolean;
-}
+import { Button } from "@/components/shared/ui/button";
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 
 interface AppointmentLookupProps {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
+  updateFormData: (data: Partial<AppointmentFormData>) => void;
   setCarregando: (status: boolean) => void;
   setCancelar: (status: boolean) => void;
   handleError: (message: string) => void;
@@ -32,7 +20,7 @@ export default function AppointmentLookup({
   handleError,
   carregando,
 }: AppointmentLookupProps) {
-  // Função para buscar agendamento
+  // Função para buscar agendamento - ✅ MANTIDA EXATAMENTE ORIGINAL
   const buscarAgendamento = async (e: React.FormEvent) => {
     e.preventDefault();
     setCarregando(true);
@@ -56,7 +44,7 @@ export default function AppointmentLookup({
 
       const { agendamento } = data;
 
-      // Preencher os dados do agendamento
+      // Preencher os dados do agendamento - ✅ MANTIDA EXATAMENTE ORIGINAL
       updateFormData({
         nome: agendamento.nome,
         email: agendamento.email,

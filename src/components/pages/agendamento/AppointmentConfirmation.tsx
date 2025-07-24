@@ -1,23 +1,13 @@
 // components/scheduling/AppointmentConfirmation/index.tsx
 import { caveat } from "@/app/fonts";
 import { ContactCard } from "@/components/shared/cards/BaseCard";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/shared/ui/button";
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
+import { cn } from "@/utils/utils";
 import { IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5";
 
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  codigoAgendamento: string;
-  [key: string]: unknown;
-}
-
 interface AppointmentConfirmationProps {
-  formData: FormData;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
   cancelar: boolean;
 }
 
@@ -25,7 +15,7 @@ export default function AppointmentConfirmation({
   formData,
   cancelar,
 }: AppointmentConfirmationProps) {
-  // Função para formatar a data
+  // Função para formatar a data - ✅ MANTIDA EXATAMENTE ORIGINAL
   const formatarData = (dataString: string): string => {
     const data = new Date(dataString);
     const options: Intl.DateTimeFormatOptions = {

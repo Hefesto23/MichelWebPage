@@ -1,7 +1,13 @@
 // src/app/about/page.tsx - REFATORADO
-import Divisor from "@/components/ui/divisor";
+import Divisor from "@/components/shared/ui/divisor";
+import { Metadata } from "next";
 import Image from "next/image";
 
+export const metadata: Metadata = {
+  title: "Sobre Michel de Camargo | Psicólogo Clínico CRP 06/174807",
+  description:
+    "Conheça a trajetória, formação e abordagem terapêutica do psicólogo Michel de Camargo, especialista em ansiedade.",
+};
 export default function About() {
   return (
     <div>

@@ -1,5 +1,5 @@
 // ============================================
-// src/components/pages/appointment/InfoCards.tsx
+// src/components/pages/appointment/InfoCards.tsx - EXATO ORIGINAL
 // ============================================
 import { ContactCard } from "@/components/shared/cards/BaseCard";
 

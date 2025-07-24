@@ -1,5 +1,5 @@
 // ============================================
-// src/components/templates/AdminLayout.tsx
+// components/templates/AdminLayout.tsx - CORRIGIDO
 // ============================================
 "use client";
 
@@ -69,6 +69,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     return null;
   }
 
+  // ✅ LAYOUT ADMIN SEM DUPLICAR ESTRUTURA
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
       <AdminSidebar />

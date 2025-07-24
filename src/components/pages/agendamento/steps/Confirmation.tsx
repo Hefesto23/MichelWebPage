@@ -1,5 +1,6 @@
 // components/agendamento/AppointmentForm/steps/Confirmation.tsx
-import { ContactCard } from "@/components/ui/cards/ServiceCard";
+import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO ORIGINAL
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -11,21 +12,10 @@ import {
   Phone,
   User,
 } from "lucide-react";
-import appointmentStyles from "../form.module.css";
-
-interface FormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  mensagem: string;
-  primeiraConsulta: boolean;
-}
+import appointmentStyles from "../form.module.css"; // ✅ MANTIDO ORIGINAL
 
 interface ConfirmationProps {
-  formData: FormData;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
   passoAnterior: () => void;
   enviarFormulario: (e: React.FormEvent) => void;
   carregando: boolean;
@@ -37,7 +27,7 @@ export default function Confirmation({
   enviarFormulario,
   carregando,
 }: ConfirmationProps) {
-  // Formatar a data em português para exibição
+  // Formatar a data em português para exibição - ✅ MANTIDO ORIGINAL
   const dataFormatada = formData.dataSelecionada
     ? format(
         new Date(formData.dataSelecionada),
@@ -221,7 +211,7 @@ export default function Confirmation({
   );
 }
 
-// Componente de VideoIcon para reutilização
+// Componente de VideoIcon para reutilização - ✅ MANTIDO ORIGINAL
 function VideoIcon({ size = 24 }: { size?: number }) {
   return (
     <svg

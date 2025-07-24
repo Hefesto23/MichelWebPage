@@ -1,7 +1,8 @@
 // components/agendamento/AppointmentForm/steps/DateTimeSelection.tsx
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { ContactCard } from "@/components/ui/cards/ServiceCard";
+import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO ORIGINAL
+import { Button } from "@/components/shared/ui/button";
+import { Calendar } from "@/components/shared/ui/calendar";
+import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import {
   addMonths,
   format,
@@ -13,18 +14,11 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
-import formStyles from "../form.module.css";
-
-interface FormData {
-  dataSelecionada: string;
-  horarioSelecionado: string;
-  modalidade: string;
-  primeiraConsulta: boolean; // Nova propriedade adicionada
-}
+import formStyles from "../form.module.css"; // ✅ MANTIDO ORIGINAL
 
 interface DateTimeSelectionProps {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
+  updateFormData: (data: Partial<AppointmentFormData>) => void;
   proximoPasso: () => void;
   carregando: boolean;
   setCarregando: (status: boolean) => void;
@@ -118,6 +112,7 @@ export default function DateTimeSelection({
   const togglePrimeiraConsulta = () => {
     updateFormData({ primeiraConsulta: !formData.primeiraConsulta });
   };
+
   // Função para validar e avançar para o próximo passo
   const validarEAvancar = () => {
     if (!formData.dataSelecionada) {
@@ -138,7 +133,7 @@ export default function DateTimeSelection({
     proximoPasso();
   };
 
-  // Formatar a data em português para exibição
+  // Formatar a data em português para exibição - ✅ MANTIDO ORIGINAL
   const dataFormatada = formData.dataSelecionada
     ? format(
         new Date(formData.dataSelecionada),
@@ -216,7 +211,6 @@ export default function DateTimeSelection({
         </div>
 
         {/* Calendário */}
-
         <label className={formStyles.formLabel}>
           Selecione uma data para a consulta
         </label>
@@ -230,13 +224,11 @@ export default function DateTimeSelection({
             endMonth={fimProximoMes}
             timeZone="America/Sao_Paulo"
             locale={ptBR}
-            // largura total do wrapper
-            // className="w-full h-full rounded-md"
             classNames={{
               // Cabeçalho (mês e ano)
               month_caption:
-                "flex w-full pb-6 border-b border-border items-baseline justify-center", // Adicionado items-baseline e justify-center
-              caption_label: "text-3xl font-bold capitalize text-center", // Removido mx-auto para não interferir no alinhamento
+                "flex w-full pb-6 border-b border-border items-baseline justify-center",
+              caption_label: "text-3xl font-bold capitalize text-center",
               // Navegação
               nav: "flex justify-between w-full",
               nav_button:
@@ -249,16 +241,12 @@ export default function DateTimeSelection({
               weekday: "font-extrabold text-xl text-center h-16",
               months: "w-full",
               month: "grid grid-cols-1", // o grupo de semanas cresce
-              // table: "w-full", // cada semana ocupa fatia igual
-              // chevron: "fill-foreground dark:fill-primary-foreground w-10 h-10",
               day: "h-14 w-14 text-center",
               day_button: "font-extrabold text-xl",
               today: "border-b-4 border-primary-foreground",
               // Personalizar apenas a cor do dia selecionado
               selected:
                 "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",
-              // years_dropdown: "text-xl font-bold",
-              // months_dropdown: "text-xl font-bold",
             }}
             footer={
               <div className="mt-3 pt-3 border-t border-border">
@@ -273,8 +261,6 @@ export default function DateTimeSelection({
             }
           />
         </div>
-
-        {/* Exibir mensagem de data inválida */}
 
         {/* Exibir data selecionada */}
         {formData.dataSelecionada && (

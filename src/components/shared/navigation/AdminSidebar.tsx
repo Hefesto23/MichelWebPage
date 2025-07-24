@@ -1,7 +1,7 @@
 // ============================================
 // src/components/shared/navigation/AdminSidebar.tsx
 // ============================================
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import {
   BarChart3,
   Calendar,

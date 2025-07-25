@@ -1,7 +1,8 @@
-// src/components/common/header.tsx
+// src/components/layout/Header.tsx
 import { robotoSlab } from "@/app/fonts";
 import { Button } from "@/components/shared/ui/button";
 import { Switch } from "@/components/shared/ui/switch";
+import { ROUTES } from "@/utils/constants"; // ✅ ÚNICA MUDANÇA: usar constants
 import { cn } from "@/utils/utils";
 import { Moon, Sun } from "lucide-react";
 import Image from "next/image";
@@ -41,33 +42,34 @@ export const Header = ({
           </div>
 
           <nav className="header-nav">
-            <Link href="/" className="header-nav-link">
+            {/* ✅ USANDO CONSTANTS EM VEZ DE STRINGS HARDCODED */}
+            <Link href={ROUTES.HOME} className="header-nav-link">
               Home
             </Link>
-            <Link href="/about" className="header-nav-link">
+            <Link href={ROUTES.ABOUT} className="header-nav-link">
               Sobre
             </Link>
-            <Link href="/terapias" className="header-nav-link">
+            <Link href={ROUTES.SERVICES} className="header-nav-link">
               Terapias
             </Link>
             <Link href="/avaliacoes" className="header-nav-link">
               Avaliações
             </Link>
-            <Link href="/agendamento" className="header-nav-link">
+            <Link href={ROUTES.APPOINTMENT} className="header-nav-link">
               Agendamento
             </Link>
-            <Link href="/contato" className="header-nav-link">
+            <Link href={ROUTES.CONTACT} className="header-nav-link">
               Contato
             </Link>
 
             {isAdminLogged ? (
-              <Link href="/admin/dashboard" className="header-nav-link">
+              <Link href={ROUTES.ADMIN.DASHBOARD} className="header-nav-link">
                 <Button variant="default" className="h-9">
                   Área Admin
                 </Button>
               </Link>
             ) : (
-              <Link href="/admin/login" className="header-nav-link">
+              <Link href={ROUTES.ADMIN.LOGIN} className="header-nav-link">
                 <Button variant="default" className="h-9">
                   Admin Login
                 </Button>

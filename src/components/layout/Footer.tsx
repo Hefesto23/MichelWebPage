@@ -1,4 +1,5 @@
 // src/components/common/footer.tsx - REFATORADO
+import { CONTACT_INFO, WORKING_HOURS } from "@/utils/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { IoLogoWhatsapp } from "react-icons/io";
@@ -11,22 +12,26 @@ export const Footer = () => {
           <div className="footer-grid">
             {/* First Column */}
             <div className="footer-column">
-              <h3 className="footer-title">Michel de Camargo</h3>
-              <p className="text-base font-bold mb-2">CRP 06/174807</p>
+              <h3 className="footer-title">{CONTACT_INFO.PSYCHOLOGIST_NAME}</h3>{" "}
+              {/* ✅ USANDO CONSTANT */}
+              <p className="text-base font-bold mb-2">
+                {CONTACT_INFO.CRP}
+              </p>{" "}
+              {/* ✅ USANDO CONSTANT */}
               <div className="flex items-center font-bold justify-center md:justify-start mb-4">
                 <IoLogoWhatsapp className="mr-2" size={24} />
                 <Link
-                  href="https://wa.me/5515997646421"
+                  href={`https://wa.me/${CONTACT_INFO.WHATSAPP_NUMBER}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base hover:text-gray-500 text-foreground transition-colors"
                 >
-                  +55 (15) 99764-6421
+                  {CONTACT_INFO.PHONE_DISPLAY} {/* ✅ USANDO CONSTANT */}
                 </Link>
               </div>
             </div>
 
-            {/* Middle Column */}
+            {/* Middle Column - MANTIDO EXATAMENTE IGUAL */}
             <div className="flex justify-center items-start mt-0 pt-1">
               <Image
                 src="/logo.svg"
@@ -41,7 +46,9 @@ export const Footer = () => {
             <div className="footer-column text-center md:text-right">
               <h3 className="footer-title">Horário de Atendimento</h3>
               <p className="text-base font-bold mb-2">
-                Segunda à Sexta das 8:00 as 21:00
+                {/* ✅ USANDO CONSTANTS EM VEZ DE STRINGS HARDCODED */}
+                Segunda à Sexta das {WORKING_HOURS.START}:00 às{" "}
+                {WORKING_HOURS.END}:00
               </p>
               <p className="text-base font-bold mb-2">
                 Obs: As consultas necessitam ser previamente agendadas.
@@ -54,7 +61,8 @@ export const Footer = () => {
 
           {/* Copyright */}
           <div className="footer-copyright">
-            &copy; 2024 Consultório de Psicologia. Todos os direitos reservados.
+            &copy; 2024 {CONTACT_INFO.COMPANY_NAME}. Todos os direitos
+            reservados. {/* ✅ USANDO CONSTANT */}
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
 // components/agendamento/AppointmentForm/steps/DateTimeSelection.tsx
-import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO ORIGINAL
+import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
 import { Calendar } from "@/components/shared/ui/calendar";
-import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
+import { AppointmentFormData } from "@/types/appointment";
+import { MODALITY } from "@/utils/constants"; // ✅ ÚNICA MUDANÇA: usar constants
 import {
   addMonths,
   format,
@@ -14,10 +15,10 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
-import formStyles from "../form.module.css"; // ✅ MANTIDO ORIGINAL
+import formStyles from "../form.module.css";
 
 interface DateTimeSelectionProps {
-  formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
+  formData: AppointmentFormData;
   updateFormData: (data: Partial<AppointmentFormData>) => void;
   proximoPasso: () => void;
   carregando: boolean;
@@ -60,16 +61,13 @@ export default function DateTimeSelection({
       (formData.dataSelecionada &&
         selectedDate.toISOString().split("T")[0] === formData.dataSelecionada)
     ) {
-      return; // Não fazer nada se a data for a mesma ou undefined
+      return;
     }
 
     setDate(selectedDate);
-
-    // Carregar os horários aqui, em vez de usar o useEffect
     setCarregando(true);
 
     try {
-      // Simular uma chamada à API
       const horariosPadrao = [
         "08:00",
         "09:00",
@@ -90,10 +88,9 @@ export default function DateTimeSelection({
         setHorariosDisponiveis(horariosPadrao);
         setCarregando(false);
 
-        // Atualizar o formData depois de carregar os horários
         updateFormData({
           dataSelecionada: format(selectedDate, "yyyy-MM-dd"),
-          horarioSelecionado: "", // Limpar o horário quando a data muda
+          horarioSelecionado: "",
         });
       }, 500);
     } catch (error: unknown) {
@@ -133,7 +130,7 @@ export default function DateTimeSelection({
     proximoPasso();
   };
 
-  // Formatar a data em português para exibição - ✅ MANTIDO ORIGINAL
+  // Formatar a data em português para exibição
   const dataFormatada = formData.dataSelecionada
     ? format(
         new Date(formData.dataSelecionada),
@@ -147,29 +144,29 @@ export default function DateTimeSelection({
   return (
     <ContactCard title="Escolha a Data e Horário">
       <div className="space-y-6">
-        {/* Seleção de modalidade */}
+        {/* Seleção de modalidade - ✅ USANDO CONSTANTS */}
         <div>
           <label className={formStyles.formLabel}>Modalidade da Consulta</label>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               className={`${
-                formData.modalidade === "presencial"
+                formData.modalidade === MODALITY.IN_PERSON
                   ? formStyles.primaryButton
                   : formStyles.secondaryButton
               }`}
-              onClick={() => updateFormData({ modalidade: "presencial" })}
+              onClick={() => updateFormData({ modalidade: MODALITY.IN_PERSON })}
             >
               Presencial
             </button>
             <button
               type="button"
               className={`${
-                formData.modalidade === "online"
+                formData.modalidade === MODALITY.ONLINE
                   ? formStyles.primaryButton
                   : formStyles.secondaryButton
               }`}
-              onClick={() => updateFormData({ modalidade: "online" })}
+              onClick={() => updateFormData({ modalidade: MODALITY.ONLINE })}
             >
               Online
             </button>
@@ -225,11 +222,9 @@ export default function DateTimeSelection({
             timeZone="America/Sao_Paulo"
             locale={ptBR}
             classNames={{
-              // Cabeçalho (mês e ano)
               month_caption:
                 "flex w-full pb-6 border-b border-border items-baseline justify-center",
               caption_label: "text-3xl font-bold capitalize text-center",
-              // Navegação
               nav: "flex justify-between w-full",
               nav_button:
                 "flex items-center justify-center focus:outline-none focus:ring-0",
@@ -240,11 +235,10 @@ export default function DateTimeSelection({
 
               weekday: "font-extrabold text-xl text-center h-16",
               months: "w-full",
-              month: "grid grid-cols-1", // o grupo de semanas cresce
+              month: "grid grid-cols-1",
               day: "h-14 w-14 text-center",
               day_button: "font-extrabold text-xl",
               today: "border-b-4 border-primary-foreground",
-              // Personalizar apenas a cor do dia selecionado
               selected:
                 "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",
             }}

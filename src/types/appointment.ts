@@ -1,76 +1,229 @@
-// src/types/appointment.ts
+// src/types/appointment.ts - VERSÃO REFATORADA
 
-export interface Appointment {
-  id: number;
+import { BaseEntity } from "./common";
+
+// ============================================
+// 📅 TIPOS BASE DE AGENDAMENTO
+// ============================================
+export interface Appointment extends BaseEntity {
   nome: string;
   email: string;
   telefone: string;
-  dataSelecionada: string; // Formato ISO: YYYY-MM-DD
-  horarioSelecionado: string; // Formato HH:MM
-  modalidade: "presencial" | "online";
+  dataSelecionada: string; // YYYY-MM-DD
+  horarioSelecionado: string; // HH:MM
+  modalidade: AppointmentModality;
   primeiraConsulta: boolean;
   mensagem?: string;
   codigo: string;
-  status: "agendado" | "confirmado" | "cancelado" | "realizado";
+  status: AppointmentStatus;
   googleEventId?: string;
-  createdAt: string; // ISO string
-  updatedAt: string; // ISO string
 }
 
+// ============================================
+// 📝 TIPOS DE FORMULÁRIO
+// ============================================
 export interface AppointmentFormData {
+  // Dados pessoais
   nome: string;
   email: string;
   telefone: string;
+
+  // Dados do agendamento
   dataSelecionada: string;
   horarioSelecionado: string;
-  modalidade: "presencial" | "online";
+  modalidade: AppointmentModality;
   primeiraConsulta: boolean;
   mensagem?: string;
+
+  // Códigos
   codigoAgendamento?: string;
   codigoConfirmacao?: string;
 }
 
-export interface AppointmentSlot {
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
-  available: boolean;
+export interface AppointmentFormState {
+  step: AppointmentStep;
+  enviado: boolean;
+  cancelar: boolean;
+  carregando: boolean;
+  erro: string | null;
 }
 
+// ============================================
+// 🔄 ENUMS
+// ============================================
+export enum AppointmentStep {
+  LOOKUP = 0,
+  DATE_TIME = 1,
+  CONTACT_INFO = 2,
+  CONFIRMATION = 3,
+}
+
+export enum AppointmentStatus {
+  SCHEDULED = "agendado",
+  CONFIRMED = "confirmado",
+  CANCELLED = "cancelado",
+  COMPLETED = "realizado",
+}
+
+export enum AppointmentModality {
+  PRESENCIAL = "presencial",
+  ONLINE = "online",
+}
+
+// ============================================
+// 📊 TIPOS DE DADOS
+// ============================================
+export interface AppointmentSlot {
+  date: string;
+  time: string;
+  available: boolean;
+  duration?: number;
+}
+
+export interface AppointmentDay {
+  date: string;
+  dayOfWeek: string;
+  isBlocked: boolean;
+  slots: AppointmentSlot[];
+}
+
+export interface AppointmentCalendar {
+  month: number;
+  year: number;
+  days: AppointmentDay[];
+}
+
+// ============================================
+// 🔍 TIPOS DE FILTRO E BUSCA
+// ============================================
+export interface AppointmentFilters {
+  status?: AppointmentStatus;
+  modality?: AppointmentModality;
+  dateFrom?: string;
+  dateTo?: string;
+  searchTerm?: string;
+  onlyFirstAppointments?: boolean;
+}
+
+export interface AppointmentSearchResult {
+  appointment: Appointment;
+  matchScore?: number;
+}
+
+// ============================================
+// 📧 TIPOS DE NOTIFICAÇÃO
+// ============================================
+export interface AppointmentNotification {
+  type: "confirmation" | "reminder" | "cancellation" | "rescheduling";
+  appointment: Appointment;
+  sendEmail: boolean;
+  sendSMS: boolean;
+  sendWhatsApp: boolean;
+  scheduledFor?: string;
+}
+
+// ============================================
+// 📊 TIPOS DE ESTATÍSTICA
+// ============================================
+export interface AppointmentStats {
+  total: number;
+  scheduled: number;
+  confirmed: number;
+  completed: number;
+  cancelled: number;
+  noShow: number;
+
+  byModality: {
+    presencial: number;
+    online: number;
+  };
+
+  byPeriod: {
+    today: number;
+    thisWeek: number;
+    thisMonth: number;
+  };
+
+  averageDuration: number;
+  cancellationRate: number;
+  noShowRate: number;
+  completionRate: number;
+}
+
+// ============================================
+// 🗓️ TIPOS DO GOOGLE CALENDAR
+// ============================================
 export interface GoogleCalendarEvent {
   id: string;
   summary: string;
   description: string;
-  start: { dateTime: string; timeZone: string };
-  end: { dateTime: string; timeZone: string };
-  status: string;
-}
-
-export interface AppointmentConfirmation {
-  nome: string;
-  email: string;
-  data: string;
-  horario: string;
-  modalidade: "presencial" | "online";
-  codigo: string;
+  location?: string;
+  start: {
+    dateTime: string;
+    timeZone: string;
+  };
+  end: {
+    dateTime: string;
+    timeZone: string;
+  };
+  attendees?: Array<{
+    email: string;
+    displayName?: string;
+    responseStatus?: "needsAction" | "declined" | "tentative" | "accepted";
+  }>;
+  status: "confirmed" | "tentative" | "cancelled";
+  colorId?: string;
 }
 
 // ============================================
-// 📱 PROPS ESPECÍFICAS POR COMPONENT
+// ✅ TIPOS DE VALIDAÇÃO
 // ============================================
-
-// Para AppointmentForm principal
-export interface AppointmentFormProps {
-  step: number;
-  setStep: (step: number) => void;
-  formData: AppointmentFormData;
-  updateFormData: (data: Partial<AppointmentFormData>) => void;
-  setEnviado: (status: boolean) => void;
-  carregando: boolean;
-  setCarregando: (status: boolean) => void;
-  handleError: (message: string) => void;
+export interface ValidationErrors {
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  dataSelecionada?: string;
+  horarioSelecionado?: string;
+  modalidade?: string;
+  mensagem?: string;
 }
 
-// Para DateTimeSelection step
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationErrors;
+}
+
+// ============================================
+// 🎯 TIPOS DE AÇÃO
+// ============================================
+export type AppointmentAction =
+  | { type: "SET_STEP"; payload: AppointmentStep }
+  | { type: "UPDATE_FORM"; payload: Partial<AppointmentFormData> }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_SUBMITTED"; payload: boolean }
+  | { type: "SET_CANCELLING"; payload: boolean }
+  | { type: "RESET_FORM" };
+
+// ============================================
+// 🔧 TIPOS DE CONFIGURAÇÃO
+// ============================================
+export interface AppointmentConfig {
+  allowWeekends: boolean;
+  allowHolidays: boolean;
+  minAdvanceDays: number;
+  maxAdvanceDays: number;
+  defaultDuration: number;
+  firstAppointmentDuration: number;
+  timeSlotInterval: number; // em minutos
+  bufferTime: number; // tempo entre consultas
+  cancellationDeadline: number; // horas antes
+  reminderTime: number; // horas antes
+}
+
+// ============================================
+// 📱 TIPOS DE COMPONENTE
+// ============================================
 export interface DateTimeSelectionProps {
   formData: AppointmentFormData;
   updateFormData: (data: Partial<AppointmentFormData>) => void;
@@ -80,7 +233,6 @@ export interface DateTimeSelectionProps {
   handleError: (message: string) => void;
 }
 
-// Para ContactInfo step
 export interface ContactInfoProps {
   formData: AppointmentFormData;
   updateFormData: (data: Partial<AppointmentFormData>) => void;
@@ -89,7 +241,6 @@ export interface ContactInfoProps {
   carregando: boolean;
 }
 
-// Para Confirmation step
 export interface ConfirmationProps {
   formData: AppointmentFormData;
   passoAnterior: () => void;
@@ -97,13 +248,6 @@ export interface ConfirmationProps {
   carregando: boolean;
 }
 
-// Para AppointmentConfirmation
-export interface AppointmentConfirmationProps {
-  formData: AppointmentFormData;
-  cancelar: boolean;
-}
-
-// Para AppointmentDetails
 export interface AppointmentDetailsProps {
   formData: AppointmentFormData;
   setCancelar: (status: boolean) => void;
@@ -113,7 +257,6 @@ export interface AppointmentDetailsProps {
   handleError: (message: string) => void;
 }
 
-// Para AppointmentLookup
 export interface AppointmentLookupProps {
   formData: AppointmentFormData;
   updateFormData: (data: Partial<AppointmentFormData>) => void;
@@ -123,71 +266,42 @@ export interface AppointmentLookupProps {
   carregando: boolean;
 }
 
-export interface DateTimeSelectionProps {
-  formData: AppointmentFormData;
-  updateFormData: (data: Partial<AppointmentFormData>) => void;
-  proximoPasso: () => void;
-  carregando: boolean;
-  setCarregando: (status: boolean) => void;
-  handleError: (message: string) => void;
+// ============================================
+// 🔄 TIPOS DE RESPOSTA
+// ============================================
+export interface AppointmentResponse {
+  success: boolean;
+  appointment?: Appointment;
+  message?: string;
+  code?: string;
 }
 
-export interface ContactInfoProps {
-  formData: AppointmentFormData;
-  updateFormData: (data: Partial<AppointmentFormData>) => void;
-  proximoPasso: () => void;
-  passoAnterior: () => void;
-  carregando: boolean;
+export interface AvailableSlotsResponse {
+  date: string;
+  slots: Array<{
+    time: string;
+    available: boolean;
+  }>;
 }
 
-export interface ConfirmationProps {
-  formData: AppointmentFormData;
-  passoAnterior: () => void;
-  enviarFormulario: (e: React.FormEvent) => void;
-  carregando: boolean;
+export interface AppointmentListResponse {
+  appointments: Appointment[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
-// Para estados do formulário
-export interface AppointmentFormState {
-  step: number;
-  enviado: boolean;
-  cancelar: boolean;
-  carregando: boolean;
-  erro: string | null;
-}
+// Type guards
+export const isAppointmentStatus = (
+  value: unknown
+): value is AppointmentStatus => {
+  return Object.values(AppointmentStatus).includes(value as AppointmentStatus);
+};
 
-// Para slots de horário
-export interface TimeSlot {
-  time: string;
-  available: boolean;
-  blocked?: boolean;
-}
-
-// Para validações
-export interface ValidationErrors {
-  nome?: string;
-  email?: string;
-  telefone?: string;
-  dataSelecionada?: string;
-  horarioSelecionado?: string;
-  modalidade?: string;
-}
-
-export enum AppointmentStep {
-  LOOKUP = 0,
-  DATE_TIME = 1,
-  CONTACT_INFO = 2,
-  CONFIRMATION = 3,
-}
-
-export enum AppointmentModality {
-  PRESENCIAL = "presencial",
-  ONLINE = "online",
-}
-
-export enum AppointmentStatus {
-  AGENDADO = "agendado",
-  CONFIRMADO = "confirmado",
-  CANCELADO = "cancelado",
-  REALIZADO = "realizado",
-}
+export const isAppointmentModality = (
+  value: unknown
+): value is AppointmentModality => {
+  return Object.values(AppointmentModality).includes(
+    value as AppointmentModality
+  );
+};

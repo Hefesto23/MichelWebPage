@@ -1,10 +1,11 @@
-// src/app/admin/layout.tsx - LAYOUT GERAL PARA TODA ÁREA ADMIN (EXCETO LOGIN)
-
+// ============================================
+// 10. src/app/admin/layout.tsx
+// ============================================
 "use client";
 
 import { roboto } from "@/app/fonts";
-import { AdminSidebar } from "@/components/pages/admin/Sidebar";
-import { cn } from "@/utils/utils";
+import { AdminSidebar } from "@/components/pages/admin";
+import { cn } from "@/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

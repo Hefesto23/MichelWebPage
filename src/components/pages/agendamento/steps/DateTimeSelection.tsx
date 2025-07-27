@@ -2,8 +2,7 @@
 import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
 import { Calendar } from "@/components/shared/ui/calendar";
-import { AppointmentFormData } from "@/types/appointment";
-import { MODALITY } from "@/utils/constants"; // ✅ ÚNICA MUDANÇA: usar constants
+import { AppointmentFormData, AppointmentModality } from "@/types/appointment";
 import {
   addMonths,
   format,
@@ -17,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 import { useState } from "react";
 import formStyles from "../form.module.css";
 
+const MODALITY = AppointmentModality; // ✅ ÚNICA MUDANÇA: usar constants
 interface DateTimeSelectionProps {
   formData: AppointmentFormData;
   updateFormData: (data: Partial<AppointmentFormData>) => void;

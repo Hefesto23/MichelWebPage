@@ -33,6 +33,7 @@ export default function HomePage() {
       <ServicesSection />
       <Divisor index={1} />
       <ClinicSection />
+      <Divisor index={2} />
     </>
   );
 }

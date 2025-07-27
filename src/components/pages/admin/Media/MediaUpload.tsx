@@ -1,9 +1,10 @@
-// src/components/admin/ImageUpload.tsx
+"use client";
+// src/components/pages/admin/Media/MediaUpload.tsx
 
+import { AdminCard } from "@/components/shared/cards/BaseCard";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { AdminCard } from "./AdminCard";
 
 interface UploadedImage {
   id: number;
@@ -15,16 +16,18 @@ interface UploadedImage {
   height?: number;
   alt?: string;
   category?: string;
+  status: "uploading" | "success" | "error";
+  error?: string;
 }
 
-interface ImageUploadProps {
+interface MediaUploadProps {
   category?: string;
   onUploadSuccess?: (image: UploadedImage) => void;
   maxFiles?: number;
   accept?: string;
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({
+export const MediaUpload: React.FC<MediaUploadProps> = ({
   category,
   onUploadSuccess,
   maxFiles = 5,

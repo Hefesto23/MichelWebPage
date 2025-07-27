@@ -1,5 +1,5 @@
 // src/components/admin/Sidebar.tsx
-
+"use client";
 import { cn } from "@/utils/utils";
 import {
   BarChart3,

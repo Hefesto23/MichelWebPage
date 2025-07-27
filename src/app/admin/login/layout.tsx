@@ -1,5 +1,6 @@
-// src/app/admin/login/layout.tsx - LAYOUT DE LOGIN CORRIGIDO
-
+// ============================================
+// 11. src/app/admin/login/layout.tsx
+// ============================================
 "use client";
 
 import { roboto } from "@/app/fonts";

@@ -7,7 +7,7 @@ export const ROUTES = {
   HOME: "/",
   ABOUT: "/about",
   SERVICES: "/terapias",
-  EVALUATIONS: "/avaliacoes",
+  AVALIACOES: "/avaliacoes",
   APPOINTMENT: "/agendamento",
   CONTACT: "/contato",
   ARTICLES: "/artigos",

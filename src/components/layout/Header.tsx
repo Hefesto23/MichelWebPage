@@ -52,7 +52,7 @@ export const Header = ({
             <Link href={ROUTES.SERVICES} className="header-nav-link">
               Terapias
             </Link>
-            <Link href="/avaliacoes" className="header-nav-link">
+            <Link href={ROUTES.AVALIACOES} className="header-nav-link">
               Avaliações
             </Link>
             <Link href={ROUTES.APPOINTMENT} className="header-nav-link">

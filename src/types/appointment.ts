@@ -66,7 +66,7 @@ export enum AppointmentStatus {
 }
 
 export enum AppointmentModality {
-  PRESENCIAL = "presencial",
+  IN_PERSON = "presencial",
   ONLINE = "online",
 }
 

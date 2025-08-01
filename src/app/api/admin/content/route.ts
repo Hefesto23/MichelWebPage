@@ -1,8 +1,8 @@
 // src/app/api/admin/content/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/jwt";
+import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const page = searchParams.get("page");
     const section = searchParams.get("section");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = { isActive: true };
     if (page) where.page = page;
     if (section) where.section = section;

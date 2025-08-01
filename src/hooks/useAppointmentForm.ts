@@ -18,7 +18,7 @@ const initialFormData: AppointmentFormData = {
   telefone: "",
   dataSelecionada: "",
   horarioSelecionado: "",
-  modalidade: AppointmentModality.PRESENCIAL,
+  modalidade: AppointmentModality.IN_PERSON,
   mensagem: "",
   codigoAgendamento: "",
   codigoConfirmacao: "",

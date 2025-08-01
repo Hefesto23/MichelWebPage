@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/api/admin/upload/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
-import { UploadService } from "@/lib/upload";
-import prisma from "@/lib/prisma";
 import { verifyToken } from "@/lib/jwt";
+import prisma from "@/lib/prisma";
+import { UploadService } from "@/lib/upload";
+import { NextRequest, NextResponse } from "next/server";
 
 const uploadService = new UploadService();
 
@@ -49,8 +50,8 @@ export async function POST(req: NextRequest) {
       success: true,
       upload: {
         id: upload.id,
-        url: uploadResult.url,
         ...uploadResult,
+        url: uploadResult.url,
       },
     });
   } catch (error: any) {

@@ -1,47 +1,37 @@
-// src/hooks/useAuth.ts
+// src/hooks/useAuth.ts - VERSÃO SIMPLIFICADA
 import {
   type AuthUser,
   getCurrentUser,
   hasValidToken,
   isAuthenticated,
-  loginUser,
   logoutUser,
 } from "@/lib/auth";
 import { useCallback, useEffect, useState } from "react";
 
 // ============================================
-// 🏗️ TIPOS
+// 🏗️ TIPOS SIMPLIFICADOS
 // ============================================
 interface UseAuthReturn {
   // Estado
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: string | null;
 
   // Ações
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  checkAuth: () => void;
-  clearError: () => void;
+  logout: () => Promise<void>;
 }
 
 // ============================================
-// 🎣 HOOK useAuth
+// 🎣 HOOK useAuth SIMPLIFICADO
 // ============================================
 export const useAuth = (): UseAuthReturn => {
-  // Estados
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // ============================================
-  // 🔍 VERIFICAR AUTENTICAÇÃO
+  // 🔍 VERIFICAR AUTENTICAÇÃO (sem auto-logout)
   // ============================================
   const checkAuth = useCallback(() => {
-    setIsLoading(true);
-    setError(null);
-
     try {
       const currentUser = getCurrentUser();
       const authenticated = isAuthenticated();
@@ -50,14 +40,9 @@ export const useAuth = (): UseAuthReturn => {
         setUser(currentUser);
       } else {
         setUser(null);
-        // Se tem token inválido, remove
-        if (!hasValidToken()) {
-          logoutUser();
-        }
       }
     } catch (err) {
       console.error("Erro ao verificar autenticação:", err);
-      setError("Erro ao verificar autenticação");
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -65,109 +50,50 @@ export const useAuth = (): UseAuthReturn => {
   }, []);
 
   // ============================================
-  // 🔐 LOGIN
-  // ============================================
-  const login = useCallback(
-    async (email: string, password: string): Promise<boolean> => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await loginUser(email, password);
-
-        if (result.success) {
-          // Recarrega os dados do usuário após login
-          checkAuth();
-          return true;
-        } else {
-          setError(result.error || "Erro no login");
-          return false;
-        }
-      } catch (err) {
-        console.error("Erro no login:", err);
-        setError("Erro de conexão");
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [checkAuth]
-  );
-
-  // ============================================
   // 🚪 LOGOUT
   // ============================================
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     setUser(null);
-    setError(null);
-    logoutUser(); // Já redireciona
+    await logoutUser();
   }, []);
 
   // ============================================
-  // 🧹 LIMPAR ERRO
-  // ============================================
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-
-  // ============================================
-  // ⚡ EFEITOS
+  // ⚡ EFEITO INICIAL
   // ============================================
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  // Auto-logout quando token expira
-  useEffect(() => {
-    if (!isLoading && user && !hasValidToken()) {
-      logout();
-    }
-  }, [user, isLoading, logout]);
-
-  // ============================================
-  // 📤 RETORNO
-  // ============================================
   return {
-    // Estado
     user,
-    isAuthenticated: !!user && isAuthenticated(),
+    isAuthenticated: !!user && hasValidToken(),
     isLoading,
-    error,
-
-    // Ações
-    login,
     logout,
-    checkAuth,
-    clearError,
   };
 };
 
 // ============================================
-// 🎯 HOOK SIMPLIFICADO (para casos específicos)
+// 🔍 HOOK SIMPLES PARA VERIFICAÇÃO RÁPIDA
 // ============================================
 export const useAuthCheck = () => {
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsAuth(isAuthenticated());
-    setLoading(false);
+    const checkAuth = () => {
+      try {
+        const user = getCurrentUser();
+        const valid = hasValidToken();
+        setIsAuth(user !== null && valid);
+      } catch {
+        setIsAuth(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   return { isAuthenticated: isAuth, loading };
-};
-
-// ============================================
-// 🔐 HOOK PARA PROTEÇÃO DE ROTAS (Client-side)
-// ============================================
-export const useAuthGuard = (redirectTo: string = "/admin/login") => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      window.location.href = redirectTo;
-    }
-  }, [isAuthenticated, isLoading, redirectTo]);
-
-  return { isAuthenticated, isLoading };
 };

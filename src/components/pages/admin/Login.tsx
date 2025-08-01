@@ -1,46 +1,34 @@
 // src/components/pages/admin/Login.tsx
 "use client";
 
+import { useAuthLogin } from "@/hooks/useAuthLogin";
 import { ArrowLeft, Eye, EyeOff, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
+  const { login, error, isLoading, isAuthenticated } = useAuthLogin();
+
+  // Redireciona se já estiver logado
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/admin/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (res.ok) {
-        const { token } = await res.json();
-        localStorage.setItem("token", token);
-        router.push("/admin/dashboard");
-      } else {
-        const errorData = await res.json();
-        setError(errorData.error || "Credenciais inválidas");
-      }
-    } catch (err: unknown) {
-      console.error(err);
-      setError("Erro no servidor. Tente novamente.");
-    } finally {
-      setLoading(false);
+    
+    const success = await login(email, password);
+    if (success) {
+      // Usar window.location em vez de router.push para forçar reload completo
+      window.location.href = "/admin/dashboard";
     }
   };
 
@@ -140,10 +128,10 @@ export const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full py-3 bg-primary-foreground text-white rounded-lg hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {isLoading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 

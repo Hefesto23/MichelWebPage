@@ -22,7 +22,7 @@ interface MediaFile {
 
 export const MediaManager = () => {
   const [files, setFiles] = useState<MediaFile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [fetchingFiles, setFetchingFiles] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const categories = [
@@ -38,6 +38,7 @@ export const MediaManager = () => {
   }, []);
 
   const fetchFiles = async () => {
+    setFetchingFiles(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("/api/admin/media", {
@@ -53,7 +54,7 @@ export const MediaManager = () => {
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error);
     } finally {
-      setLoading(false);
+      setFetchingFiles(false);
     }
   };
 
@@ -135,15 +136,10 @@ export const MediaManager = () => {
 
       {/* Files Grid */}
       <AdminCard title={`Arquivos (${filteredFiles.length})`}>
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-video bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-1"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            ))}
+        {fetchingFiles ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Carregando arquivos...</span>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -198,7 +194,7 @@ export const MediaManager = () => {
           </div>
         )}
 
-        {!loading && filteredFiles.length === 0 && (
+        {!fetchingFiles && filteredFiles.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Nenhum arquivo encontrado</p>
           </div>

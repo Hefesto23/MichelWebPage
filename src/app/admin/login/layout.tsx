@@ -4,6 +4,7 @@
 "use client";
 
 import { roboto } from "@/app/fonts";
+import { AdminLoginTransition } from "@/components/shared/transitions";
 import { cn } from "@/utils/utils";
 
 interface AdminLoginLayoutProps {
@@ -18,7 +19,9 @@ export default function AdminLoginLayout({ children }: AdminLoginLayoutProps) {
         roboto.className
       )}
     >
-      {children}
+      <AdminLoginTransition>
+        {children}
+      </AdminLoginTransition>
     </div>
   );
 }

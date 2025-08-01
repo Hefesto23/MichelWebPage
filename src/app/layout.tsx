@@ -9,8 +9,7 @@ import {
   SectionNavigator,
   WhatsAppButton,
 } from "@/components/shared/navigation"; // ✅ NAVEGAÇÃO ORIGINAL
-import PageTransition from "@/components/shared/transitions/PageTransition";
-// import { useAuth } from "@/hooks/useAuth"; // ✅ HOOK ORIGINAL
+import { PageTransition } from "@/components/shared/transitions";
 import { useDarkMode } from "@/hooks/useDarkMode"; // ✅ HOOK ORIGINAL
 import { cn } from "@/utils/utils";
 import "@styles/globals.css";
@@ -23,14 +22,16 @@ export default function RootLayout({
 }) {
   // ✅ HOOKS ORIGINAIS MANTIDOS
   const [isDarkMode, toggleDarkMode] = useDarkMode();
-  // const { isAdminLogged } = useAuth();
   const pathname = usePathname();
-
+  
   // ✅ LÓGICA ORIGINAL PARA MOSTRAR COMPONENTES
   const isHomePage = pathname === "/";
   const isAdminPage = pathname.startsWith("/admin");
   const showWhatsApp = !isAdminPage;
   const showSectionNav = isHomePage;
+  
+  // Por enquanto, desabilitar detecção de admin no header (middleware já protege)
+  const isAdminLogged = false;
 
   return (
     <html
@@ -58,15 +59,21 @@ export default function RootLayout({
           {!isAdminPage && (
             <Header
               isDarkMode={isDarkMode}
-              isAdminLogged={false}
+              isAdminLogged={isAdminLogged}
               toggleDarkMode={toggleDarkMode}
             />
           )}
 
           {/* ✅ MAIN CONTENT COM TRANSIÇÕES */}
-          <PageTransition isDarkMode={isDarkMode}>
+          {isAdminPage ? (
+            // Páginas admin não usam PageTransition (têm suas próprias transições)
             <main className="flex-1">{children}</main>
-          </PageTransition>
+          ) : (
+            // Páginas públicas usam PageTransition
+            <PageTransition isDarkMode={isDarkMode}>
+              <main className="flex-1">{children}</main>
+            </PageTransition>
+          )}
 
           {/* ✅ FOOTER ORIGINAL */}
           {!isAdminPage && <Footer />}

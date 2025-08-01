@@ -1,6 +1,6 @@
 // src/app/api/admin/content/route.ts
 
-import { verifyToken } from "@/lib/jwt";
+import { verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 

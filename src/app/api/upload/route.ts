@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/api/admin/upload/route.ts
 
-import { verifyToken } from "@/lib/jwt";
+import { verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { UploadService } from "@/lib/upload";
 import { NextRequest, NextResponse } from "next/server";

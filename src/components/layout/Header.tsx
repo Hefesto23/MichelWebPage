@@ -1,5 +1,6 @@
 // src/components/layout/Header.tsx
 import { robotoSlab } from "@/app/fonts";
+import { LogoutButton } from "@/components/shared/navigation";
 import { Button } from "@/components/shared/ui/button";
 import { Switch } from "@/components/shared/ui/switch";
 import { ROUTES } from "@/utils/constants"; // ✅ ÚNICA MUDANÇA: usar constants
@@ -63,11 +64,14 @@ export const Header = ({
             </Link>
 
             {isAdminLogged ? (
-              <Link href={ROUTES.ADMIN.DASHBOARD} className="header-nav-link">
-                <Button variant="default" className="h-9">
-                  Área Admin
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link href={ROUTES.ADMIN.DASHBOARD} className="header-nav-link">
+                  <Button variant="default" className="h-9">
+                    Área Admin
+                  </Button>
+                </Link>
+                <LogoutButton />
+              </div>
             ) : (
               <Link href={ROUTES.ADMIN.LOGIN} className="header-nav-link">
                 <Button variant="default" className="h-9">

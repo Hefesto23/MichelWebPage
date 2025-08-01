@@ -55,12 +55,32 @@ export const isTokenExpired = (token: string): boolean => {
 export const saveToken = (token: string): void => {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    // Também salva em cookie para SSR
+    document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=${60 * 60}; SameSite=Strict; Secure=${
+      window.location.protocol === "https:"
+    }`;
   }
 };
 
 export const getToken = (): string | null => {
   if (typeof window !== "undefined") {
-    return localStorage.getItem(TOKEN_KEY);
+    // Primeiro tenta localStorage
+    let token = localStorage.getItem(TOKEN_KEY);
+    
+    // Se não tiver no localStorage, tenta cookie
+    if (!token) {
+      const cookies = document.cookie.split(";");
+      const tokenCookie = cookies.find(cookie => 
+        cookie.trim().startsWith(`${TOKEN_KEY}=`)
+      );
+      if (tokenCookie) {
+        token = tokenCookie.split("=")[1];
+        // Sincroniza com localStorage
+        localStorage.setItem(TOKEN_KEY, token);
+      }
+    }
+    
+    return token;
   }
   return null;
 };
@@ -68,12 +88,17 @@ export const getToken = (): string | null => {
 export const removeToken = (): void => {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    // Remove cookie também
+    document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict`;
   }
 };
 
 export const hasValidToken = (): boolean => {
   const token = getToken();
-  return token ? !isTokenExpired(token) : false;
+  const expired = token ? isTokenExpired(token) : true;
+  const isValid = token ? !expired : false;
+  console.log("hasValidToken - Token:", token ? "existe" : "não existe", "Expired:", expired, "Valid:", isValid);
+  return isValid;
 };
 
 // ============================================
@@ -103,10 +128,21 @@ export const loginUser = async (
   }
 };
 
-export const logoutUser = (): void => {
-  removeToken();
-  if (typeof window !== "undefined") {
-    window.location.href = "/admin/login";
+export const logoutUser = async (): Promise<void> => {
+  try {
+    // Chama API de logout para limpar cookies do servidor
+    await fetch("/api/auth/logout", { 
+      method: "POST",
+      headers: createAuthHeaders(),
+    });
+  } catch (error) {
+    console.error("Erro ao fazer logout no servidor:", error);
+  } finally {
+    // Remove token local independente do resultado da API
+    removeToken();
+    if (typeof window !== "undefined") {
+      window.location.href = "/admin/login";
+    }
   }
 };
 
@@ -163,16 +199,20 @@ export const fetchWithAuth = async (
 // ============================================
 export const getCurrentUser = (): AuthUser | null => {
   const token = getToken();
+  console.log("getCurrentUser - Token:", token ? "existe" : "não existe");
   if (!token) return null;
 
   const payload = verifyToken(token);
+  console.log("getCurrentUser - Payload:", payload);
   if (!payload) return null;
 
-  return {
+  const user = {
     id: payload.adminId,
     email: payload.email || "",
-    role: "admin", // Por enquanto fixo, pode vir do token depois
+    role: "admin",
   };
+  console.log("getCurrentUser - User:", user);
+  return user;
 };
 
 export const isAuthenticated = (): boolean => {

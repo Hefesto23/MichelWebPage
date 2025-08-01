@@ -1,4 +1,5 @@
 // middleware.ts - MIDDLEWARE NEXT.JS
+import { verifyToken } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // ============================================
@@ -6,19 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 // ============================================
 function verifyJWT(token: string): boolean {
   try {
-    // Decodificação simples para verificar estrutura
-    const parts = token.split(".");
-    if (parts.length !== 3) return false;
-
-    // Decodifica o payload
-    const payload = JSON.parse(atob(parts[1]));
-
-    // Verifica se não expirou
-    if (payload.exp && Date.now() >= payload.exp * 1000) {
-      return false;
-    }
-
-    return true;
+    const payload = verifyToken(token);
+    return payload !== null;
   } catch {
     return false;
   }
@@ -66,14 +56,31 @@ export function middleware(request: NextRequest) {
 
   // Para rotas admin (exceto login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const token =
-      request.cookies.get("token")?.value ||
-      request.headers.get("authorization")?.replace("Bearer ", "");
+    const cookieToken = request.cookies.get("token")?.value;
+    const headerToken = request.headers.get("authorization")?.replace("Bearer ", "");
+    const token = cookieToken || headerToken;
 
-    if (!token || !verifyJWT(token)) {
+    console.log("Middleware - Rota admin:", pathname);
+    console.log("Middleware - Cookie token:", cookieToken ? "existe" : "não existe");
+    console.log("Middleware - Header token:", headerToken ? "existe" : "não existe");
+    console.log("Middleware - Token final:", token ? "existe" : "não existe");
+
+    if (!token) {
+      console.log("Middleware - Sem token, redirecionando para login");
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
+
+    const isValidToken = verifyJWT(token);
+    console.log("Middleware - Token válido:", isValidToken);
+
+    if (!isValidToken) {
+      console.log("Middleware - Token inválido, redirecionando para login");
+      const loginUrl = new URL("/admin/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    console.log("Middleware - Token válido, permitindo acesso");
   }
 
   // Para APIs admin

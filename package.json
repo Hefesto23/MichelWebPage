@@ -37,7 +37,11 @@
     "setup:dev": "npm run docker:up && sleep 10 && npm run db:migrate && npm run db:seed",
     "setup:fresh": "npm run docker:down && npm run docker:up && sleep 15 && npm run db:migrate:reset && npm run db:seed",
     "dev:full": "npm run docker:up && npm run db:generate && npm run dev",
-    "reset": "npm run docker:down && npm run docker:clean && npm run setup"
+    "reset": "npm run docker:down && npm run docker:clean && npm run setup",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
+    "test:appointment": "cypress run --spec 'cypress/e2e/appointment-*.cy.ts'",
+    "test:appointment:open": "cypress open --e2e --spec 'cypress/e2e/appointment-*.cy.ts'"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -79,6 +83,7 @@
     "@types/react-datepicker": "^7.0.0",
     "@types/react-dom": "^18",
     "@types/react-image-gallery": "^1.2.4",
+    "cypress": "^14.5.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
     "postcss": "^8",

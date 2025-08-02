@@ -15,14 +15,16 @@ export default function AppointmentConfirmation({
   formData,
   cancelar,
 }: AppointmentConfirmationProps) {
-  // Função para formatar a data - ✅ MANTIDA EXATAMENTE ORIGINAL
+  // Função para formatar a data com timezone correto
   const formatarData = (dataString: string): string => {
-    const data = new Date(dataString);
+    // Adicionar hora meio-dia para evitar problemas de timezone
+    const data = new Date(dataString + "T12:00:00");
     const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       day: "numeric",
       month: "long",
       year: "numeric",
+      timeZone: "America/Sao_Paulo",
     };
     return data.toLocaleDateString("pt-BR", options);
   };
@@ -90,6 +92,7 @@ export default function AppointmentConfirmation({
           <Button
             variant="outline"
             onClick={() => (window.location.href = "/")}
+            className="bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md transition-all duration-200"
           >
             Voltar para Home
           </Button>

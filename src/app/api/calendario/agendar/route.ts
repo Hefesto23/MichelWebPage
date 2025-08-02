@@ -21,8 +21,18 @@ export async function POST(request: Request) {
 
     const calendar = google.calendar({ version: "v3", auth });
 
-    // Criar data e hora de início e fim
-    const dataHoraInicio = new Date(`${data}T${horario}`);
+    // Debug: log dos dados recebidos
+    console.log("🔍 Dados recebidos:", { data, horario });
+    
+    // Forçar interpretação como horário brasileiro (UTC-3)
+    const dataHoraInicioString = `${data}T${horario}:00-03:00`;
+    console.log("📅 String da data com timezone:", dataHoraInicioString);
+    
+    // Criar data com timezone brasileiro explícito
+    const dataHoraInicio = new Date(dataHoraInicioString);
+    console.log("⏰ Data criada com timezone:", dataHoraInicio.toISOString());
+    console.log("📍 Data no Brasil:", dataHoraInicio.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }));
+    
     const dataHoraFim = new Date(dataHoraInicio);
     dataHoraFim.setMinutes(dataHoraFim.getMinutes() + 50); // Consulta de 50 minutos
 

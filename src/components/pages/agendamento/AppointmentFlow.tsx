@@ -121,7 +121,17 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
   };
 
   const passoAnterior = () => {
-    updateState({ step: state.step - 1 });
+    const novoStep = state.step - 1;
+    
+    // Se voltando para DATE_TIME, limpar dados de data e horário
+    if (novoStep === AppointmentStep.DATE_TIME) {
+      updateFormData({
+        dataSelecionada: "",
+        horarioSelecionado: "",
+      });
+    }
+    
+    updateState({ step: novoStep });
     window.scrollTo(0, 0);
   };
 
@@ -293,7 +303,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-testid="appointment-container">
       {renderTabNavigation()}
       {renderCurrentStep()}
     </div>

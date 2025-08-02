@@ -14,7 +14,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface Appointment {
   id: number;
@@ -49,7 +49,7 @@ export const Appointments = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [appointments, filterStatus, searchTerm, selectedDate]);
+  }, [appointments, filterStatus, searchTerm, selectedDate, applyFilters]);
 
   const fetchAppointments = async () => {
     try {
@@ -91,7 +91,7 @@ export const Appointments = () => {
     }
   };
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...appointments];
 
     // Filtrar por status
@@ -124,7 +124,7 @@ export const Appointments = () => {
 
     setFilteredAppointments(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, [appointments, filterStatus, searchTerm, selectedDate]);
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", {

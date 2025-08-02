@@ -27,10 +27,10 @@ export default function Confirmation({
   enviarFormulario,
   carregando,
 }: ConfirmationProps) {
-  // Formatar a data em português para exibição - ✅ MANTIDO ORIGINAL
+  // Formatar a data em português para exibição com timezone correto
   const dataFormatada = formData.dataSelecionada
     ? format(
-        new Date(formData.dataSelecionada),
+        new Date(formData.dataSelecionada + "T12:00:00"),
         "EEEE, dd 'de' MMMM 'de' yyyy",
         {
           locale: ptBR,

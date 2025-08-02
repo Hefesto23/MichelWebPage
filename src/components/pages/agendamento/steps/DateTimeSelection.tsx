@@ -13,7 +13,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import formStyles from "../form.module.css";
 
 const MODALITY = AppointmentModality; // ✅ ÚNICA MUDANÇA: usar constants
@@ -37,8 +37,16 @@ export default function DateTimeSelection({
   // Estado para os horários disponíveis
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
   const [date, setDate] = useState<Date | undefined>(
-    formData.dataSelecionada ? new Date(formData.dataSelecionada) : undefined
+    formData.dataSelecionada ? new Date(formData.dataSelecionada + "T12:00:00") : undefined
   );
+
+  // Limpar estado local quando dados do formulário são resetados
+  useEffect(() => {
+    if (!formData.dataSelecionada) {
+      setDate(undefined);
+      setHorariosDisponiveis([]);
+    }
+  }, [formData.dataSelecionada]);
 
   // Definir o intervalo de datas permitidas
   const hoje = startOfDay(new Date());
@@ -88,8 +96,13 @@ export default function DateTimeSelection({
         setHorariosDisponiveis(horariosPadrao);
         setCarregando(false);
 
+        // Garantir que a data seja formatada corretamente
+        const dataFormatada = format(selectedDate, "yyyy-MM-dd");
+        console.log("📅 Frontend - Data selecionada:", selectedDate);
+        console.log("📄 Frontend - Data formatada:", dataFormatada);
+        
         updateFormData({
-          dataSelecionada: format(selectedDate, "yyyy-MM-dd"),
+          dataSelecionada: dataFormatada,
           horarioSelecionado: "",
         });
       }, 500);
@@ -133,7 +146,7 @@ export default function DateTimeSelection({
   // Formatar a data em português para exibição
   const dataFormatada = formData.dataSelecionada
     ? format(
-        new Date(formData.dataSelecionada),
+        new Date(formData.dataSelecionada + "T12:00:00"),
         "EEEE, dd 'de' MMMM 'de' yyyy",
         {
           locale: ptBR,
@@ -211,7 +224,7 @@ export default function DateTimeSelection({
         <label className={formStyles.formLabel}>
           Selecione uma data para a consulta
         </label>
-        <div className="max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-4 border-2 border-border">
+        <div className="max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-4 border-2 border-border" data-testid="calendar">
           <Calendar
             mode="single"
             selected={date}
@@ -261,6 +274,7 @@ export default function DateTimeSelection({
           <div className={formStyles.dataDisplay}>
             <p
               className={`${formStyles.formText} flex items-center justify-center`}
+              data-testid="selected-date"
             >
               <span className="mr-2">Data selecionada:</span>
               <strong className="capitalize">{dataFormatada}</strong>
@@ -307,6 +321,7 @@ export default function DateTimeSelection({
                         : formStyles.secondaryButton
                     }`}
                     onClick={() => selecionarHorario(horario)}
+                    data-testid="time-slot"
                   >
                     {horario}
                   </button>

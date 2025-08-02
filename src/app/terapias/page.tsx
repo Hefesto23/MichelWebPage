@@ -1,7 +1,7 @@
 // src/app/terapias/page.tsx - REFATORADO
 "use client";
 
-import { ImageCard } from "@/components/shared/cards/BaseCard";
+import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
 import Divisor from "@/components/shared/ui/divisor";
 
 export default function Therapies() {
@@ -43,9 +43,9 @@ export default function Therapies() {
               </p>
             </div>
 
-            <div className="grid-services max-h-[calc(100vh-12rem)] relative z-[3]">
+            <div className="grid-pages relative z-[3]">
               {therapyModalities.map((modality, index) => (
-                <ImageCard
+                <ImageLargeCard
                   key={index}
                   imageUrl={modality.imageUrl}
                   title={modality.title}

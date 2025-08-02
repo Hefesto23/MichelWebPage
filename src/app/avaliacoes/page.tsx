@@ -1,6 +1,6 @@
 // src/app/avaliacoes/page.tsx - REFATORADO
 
-import { ImageCard } from "@/components/shared/cards/BaseCard";
+import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
 import Divisor from "@/components/shared/ui/divisor";
 import { Metadata } from "next";
 
@@ -177,9 +177,9 @@ export default function Assessment() {
               </p>
             </div>
 
-            <div className="pt-8 grid grid-cols-1 md:grid-cols-2 gap-4 z-content">
+            <div className="grid-pages-2col z-content">
               {testModalities.map((test, index) => (
-                <ImageCard
+                <ImageLargeCard
                   key={index}
                   imageUrl={test.imageUrl}
                   title={test.title}

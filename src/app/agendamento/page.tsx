@@ -18,10 +18,18 @@ export default function Agendamento() {
       <section className="appointment-section">
         <div className="content-container">
           <div className="z-content">
-            <h1 className="section-title">Agendamento de Consultas</h1>
+            <div className="mb-12">
+              <h1 className="section-title">Agendamento de Consultas</h1>
+              <p className="section-description max-w-3xl">
+                Agende sua consulta de forma rápida e segura. Escolha entre
+                atendimento presencial ou online.
+              </p>
+            </div>
 
-            {/* ✅ COMPONENTE REFATORADO - TODA A LÓGICA ENCAPSULADA */}
-            <AppointmentFlow mode="manage" />
+            <div className="w-full mb-16">
+              {/* ✅ COMPONENTE REFATORADO - TODA A LÓGICA ENCAPSULADA */}
+              <AppointmentFlow mode="manage" />
+            </div>
 
             {/* ✅ COMPONENTE ORIGINAL MANTIDO */}
             <InfoCards />

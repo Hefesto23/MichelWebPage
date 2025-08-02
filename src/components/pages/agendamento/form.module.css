@@ -13,13 +13,30 @@
   @apply text-sm text-muted-foreground;
 }
 
-/* Estilos de Botões */
+/* Estilos de Botões - Usando as mesmas classes Tailwind das abas */
 .primaryButton {
-  @apply py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg shadow-md;
+  @apply py-3 px-6 rounded-lg font-bold shadow-md bg-primary-foreground text-btnFg border-2 border-primary-foreground;
+}
+
+/* Modo escuro: mesmas cores das abas ativas */
+@media (prefers-color-scheme: dark) {
+  .primaryButton {
+    @apply bg-btn text-btnFg;
+    border-color: var(--btn-border);
+  }
 }
 
 .secondaryButton {
   @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:bg-secondary;
+}
+
+/* Efeito hover para botões secundários no modo escuro */
+@media (prefers-color-scheme: dark) {
+  .secondaryButton:hover {
+    background-color: hsl(var(--btn));
+    color: hsl(var(--btn-fg));
+    border-color: hsl(var(--btn-border));
+  }
 }
 
 .smallButton {

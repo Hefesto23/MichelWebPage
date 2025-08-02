@@ -56,7 +56,7 @@ export const ServicesSection = () => {
               </p>
             </div>
 
-            <div className="grid-services max-h-[calc(100vh-12rem)]">
+            <div className="grid-services">
               {services.map((service, index) => (
                 <ImageCard
                   key={index}

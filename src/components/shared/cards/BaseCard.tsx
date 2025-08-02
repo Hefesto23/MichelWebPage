@@ -5,7 +5,7 @@ import Link from "next/link";
 
 // Tipos simples
 interface BaseCardProps {
-  variant?: "contact" | "admin" | "stats" | "image" | "service";
+  variant?: "contact" | "admin" | "stats" | "image" | "image-large" | "service";
   title?: string;
   children?: React.ReactNode;
   className?: string;
@@ -87,8 +87,8 @@ export const BaseCard: React.FC<BaseCardProps> = ({
 
       case "image":
         const ImageCardContent = () => (
-          <div className="flex flex-col w-full overflow-hidden">
-            <div className="relative w-full h-48">
+          <div className="flex flex-col w-full h-full overflow-hidden">
+            <div className="relative w-full h-24 flex-shrink-0 overflow-hidden rounded-t-xl">
               <Image
                 src={imageUrl!}
                 alt={title!}
@@ -96,23 +96,61 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
-            <div className="flex flex-col p-6">
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors duration-300">
-                {title}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
-                {description}
-              </p>
+            <div className="flex flex-col flex-grow p-3 justify-between">
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-foreground transition-colors duration-300 leading-tight">
+                  {title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                  {description}
+                </p>
+              </div>
             </div>
           </div>
         );
 
         return href ? (
-          <Link href={href} className="group flex flex-col">
+          <Link href={href} className="group flex flex-col h-full">
             <ImageCardContent />
           </Link>
         ) : (
-          <ImageCardContent />
+          <div className="h-full">
+            <ImageCardContent />
+          </div>
+        );
+
+      case "image-large":
+        const ImageLargeCardContent = () => (
+          <div className="flex flex-col w-full h-full overflow-hidden">
+            <div className="relative w-full h-48 flex-shrink-0 overflow-hidden rounded-t-xl">
+              <Image
+                src={imageUrl!}
+                alt={title!}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <div className="flex flex-col flex-grow p-6 justify-between">
+              <div>
+                <h3 className="text-xl font-semibold mb-3 text-foreground transition-colors duration-300 leading-tight">
+                  {title}
+                </h3>
+                <p className="text-base text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+        return href ? (
+          <Link href={href} className="group flex flex-col h-full">
+            <ImageLargeCardContent />
+          </Link>
+        ) : (
+          <div className="h-full">
+            <ImageLargeCardContent />
+          </div>
         );
 
       case "service":
@@ -164,7 +202,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
   }
 
   return (
-    <div className={baseClasses} {...props}>
+    <div className={cn(baseClasses, (variant === "image" || variant === "image-large") && "h-full")} {...props}>
       {renderContent()}
     </div>
   );
@@ -195,6 +233,14 @@ export const ImageCard: React.FC<
     href: string;
   }
 > = (props) => <BaseCard variant="image" interactive {...props} />;
+
+export const ImageLargeCard: React.FC<
+  Omit<BaseCardProps, "variant"> & {
+    imageUrl: string;
+    description: string;
+    href: string;
+  }
+> = (props) => <BaseCard variant="image-large" interactive {...props} />;
 
 export const ServiceCard: React.FC<
   Omit<BaseCardProps, "variant"> & {

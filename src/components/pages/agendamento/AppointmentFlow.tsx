@@ -55,8 +55,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     useState<AppointmentFormData>(initialFormData);
   const [state, setState] = useState<AppointmentFormState>({
     ...initialState,
-    step:
-      mode === "manage" ? AppointmentStep.LOOKUP : AppointmentStep.DATE_TIME,
+    step: AppointmentStep.DATE_TIME, // Sempre inicia com "Novo Agendamento"
   });
 
   // Funções auxiliares para atualizar estado
@@ -173,27 +172,27 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       <div className="grid grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => {
-            updateState({ step: AppointmentStep.LOOKUP, cancelar: false });
-          }}
-          className={`py-3 px-6 rounded-lg font-medium transition-colors ${
-            state.step === AppointmentStep.LOOKUP
-              ? "bg-primary-foreground text-btnFg shadow-md"
-              : "border-2 border-border hover:bg-secondary"
-          }`}
-        >
-          Buscar Agendamento
-        </button>
-        <button
-          onClick={() => {
             updateState({ step: AppointmentStep.DATE_TIME, cancelar: false });
           }}
-          className={`py-3 px-6 rounded-lg font-medium transition-colors ${
+          className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
             state.step >= AppointmentStep.DATE_TIME && !state.cancelar
-              ? "bg-primary-foreground text-btnFg shadow-md"
-              : "border-2 border-border hover:bg-secondary"
+              ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
+              : "bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
           }`}
         >
           Novo Agendamento
+        </button>
+        <button
+          onClick={() => {
+            updateState({ step: AppointmentStep.LOOKUP, cancelar: false });
+          }}
+          className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+            state.step === AppointmentStep.LOOKUP
+              ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
+              : "bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
+          }`}
+        >
+          Buscar Agendamento
         </button>
       </div>
     );
@@ -208,7 +207,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           </div>
           <button
             onClick={() => updateState({ erro: null })}
-            className="py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg shadow-md"
+            className="py-3 px-6 rounded-lg font-bold bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
           >
             Tentar Novamente
           </button>
@@ -294,7 +293,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       {renderTabNavigation()}
       {renderCurrentStep()}
     </div>

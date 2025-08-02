@@ -169,7 +169,38 @@
         Grid Systems
         ========================= */
   .grid-services {
-    @apply pt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr;
+    @apply pt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+    grid-auto-rows: minmax(220px, 1fr);
+    max-height: calc(100vh - 16rem);
+  }
+
+  .grid-services > * {
+    min-height: 220px;
+    max-height: 240px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Grid para páginas internas (Terapias, Avaliações) */
+  .grid-pages {
+    @apply pt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .grid-pages > * {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Grid para páginas com 2 colunas (Avaliações) */
+  .grid-pages-2col {
+    @apply pt-8 grid grid-cols-1 md:grid-cols-2 gap-8;
+  }
+
+  .grid-pages-2col > * {
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
   }
 
   .grid-cards {

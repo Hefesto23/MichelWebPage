@@ -80,10 +80,19 @@ export async function enviarEmailConfirmacao(
 
   try {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log("Simulando envio de email (modo de desenvolvimento)");
-      console.log("Para:", dados.to);
-      console.log("Assunto: Confirmação de Agendamento de Consulta");
-      console.log("Conteúdo:", htmlContent.substring(0, 150) + "...");
+      console.log("\n🧪 === MODO DE DESENVOLVIMENTO - SIMULAÇÃO DE EMAIL ===");
+      console.log("📧 Para:", dados.to);
+      console.log("📋 Assunto: Confirmação de Agendamento de Consulta");
+      console.log("📄 Detalhes do agendamento:");
+      console.log("   👤 Nome:", dados.nome);
+      console.log("   📅 Data:", dataFormatada);
+      console.log("   ⏰ Horário:", dados.horario);
+      console.log("   🏥 Modalidade:", dados.modalidade);
+      console.log("   🔢 Código:", dados.codigo);
+      console.log("✅ Email simulado enviado com sucesso!");
+      console.log("🔗 Preview HTML salvo no console abaixo:");
+      console.log(htmlContent);
+      console.log("=".repeat(60));
       return true;
     }
 
@@ -143,10 +152,18 @@ export async function enviarEmailCancelamento(
 
   try {
     if (!process.env.SENDGRID_API_KEY) {
-      console.log("Simulando envio de email (modo de desenvolvimento)");
-      console.log("Para:", dados.to);
-      console.log("Assunto: Confirmação de Cancelamento de Consulta");
-      console.log("Conteúdo:", htmlContent.substring(0, 150) + "...");
+      console.log("\n🧪 === MODO DE DESENVOLVIMENTO - SIMULAÇÃO DE EMAIL CANCELAMENTO ===");
+      console.log("📧 Para:", dados.to);
+      console.log("📋 Assunto: Confirmação de Cancelamento de Consulta");
+      console.log("📄 Detalhes do cancelamento:");
+      console.log("   👤 Nome:", dados.nome);
+      console.log("   📅 Data:", dataFormatada);
+      console.log("   ⏰ Horário:", dados.horario);
+      console.log("   🏥 Modalidade:", dados.modalidade);
+      console.log("✅ Email de cancelamento simulado enviado com sucesso!");
+      console.log("🔗 Preview HTML salvo no console abaixo:");
+      console.log(htmlContent);
+      console.log("=".repeat(60));
       return true;
     }
 

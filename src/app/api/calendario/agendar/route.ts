@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
-import { enviarEmailConfirmacao } from "@/lib/email";
+import { enviarEmailConfirmacaoGmail } from "@/lib/email-gmail";
 
 export async function POST(request: Request) {
   try {
@@ -72,15 +72,22 @@ export async function POST(request: Request) {
       },
     });
 
-    // Aqui você poderia adicionar código para enviar e-mail/WhatsApp de confirmação
-    await enviarEmailConfirmacao({
+    // Enviar email de confirmação usando Gmail SMTP
+    console.log("📧 Enviando emails de confirmação (Gmail SMTP)...");
+    
+    const emailEnviado = await enviarEmailConfirmacaoGmail({
       to: email,
       nome,
       data,
       horario,
       modalidade,
       codigo,
+      telefone,
     });
+
+    if (!emailEnviado) {
+      console.log("⚠️  Falha no envio de email, mas agendamento criado com sucesso");
+    }
 
     // Responder com sucesso
     return NextResponse.json({

@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 
 export function useDarkMode() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setIsDarkMode(savedTheme === "dark");
-      document.documentElement.classList.add(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
     }
   }, []);
 
@@ -18,5 +20,5 @@ export function useDarkMode() {
     localStorage.setItem("theme", newTheme);
   };
 
-  return [isDarkMode, toggleDarkMode] as const;
+  return [mounted ? isDarkMode : false, toggleDarkMode] as const;
 }

@@ -1,6 +1,7 @@
 // components/agendamento/AppointmentDetails.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
+import { LoadingSpinner } from "@/components/shared/ui/LoadingSpinner";
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import { Calendar, Clock } from "lucide-react";
 
@@ -71,15 +72,6 @@ export default function AppointmentDetails({
     <div className="mt-12">
       <ContactCard title="Detalhes do Agendamento">
         <div className="space-y-6">
-          <div className="flex justify-end">
-            <button
-              onClick={() => setCancelar(false)}
-              className="text-sm text-primary-foreground hover:underline"
-            >
-              Voltar
-            </button>
-          </div>
-
           <div className="bg-background p-6 rounded-lg border border-border">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex items-start">
@@ -126,16 +118,23 @@ export default function AppointmentDetails({
             </div>
           </div>
 
-          <div className="flex gap-4 justify-end">
-            <Button variant="outline" onClick={() => setCancelar(false)}>
+          <div className="flex justify-between mt-8">
+            <Button
+              variant="secondary"
+              onClick={() => setCancelar(false)}
+              size="lg"
+            >
               Voltar
             </Button>
             <Button
               variant="destructive"
               onClick={confirmarCancelamento}
               disabled={carregando}
+              size="lg"
+              className="flex items-center gap-2"
             >
-              {carregando ? "Processando..." : "Cancelar Agendamento"}
+              {carregando && <LoadingSpinner size="sm" />}
+              {carregando ? "Cancelando..." : "Cancelar Agendamento"}
             </Button>
           </div>
         </div>

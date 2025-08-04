@@ -67,14 +67,11 @@ export const SectionNavigator = () => {
       flex flex-col items-center
       py-4 px-2
       rounded-full
-      bg-black/35
-      border border-black/50
-      shadow-lg
-      dark:bg-white/45
-      dark:border-white/50
-      backdrop-blur-sm
+      bg-black border border-border
+      dark:bg-card dark:border-card-foreground/40
+      shadow-lg backdrop-blur-sm
       transition-all duration-300
-      ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"}
+      ${isVisible ? "opacity-70 translate-x-0" : "opacity-0 translate-x-full"}
     `}
     >
       {sections.map((section) => (
@@ -84,7 +81,7 @@ export const SectionNavigator = () => {
           className="group relative"
           aria-label={`Ir para seção ${section.label}`}
         >
-          <span className="absolute right-8 top-1/2 -translate-y-1/2 px-3 py-1 rounded-md bg-[var(--foreground)] text-[var(--background)] text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 dark:bg-[var(--btn)] dark:text-[var(--btn-fg)]">
+          <span className="absolute right-10 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-black text-card-foreground font-bold dark:bg-secondary dark:text-secondary-foreground text-sm whitespace-nowrap opacity-0 group-hover:opacity-90 pointer-events-none transition-all duration-300 ease-out shadow-xl border border-card/50 dark:border-secondary/50 backdrop-blur-sm transform group-hover:scale-105">
             {section.label}
           </span>
 
@@ -96,8 +93,8 @@ export const SectionNavigator = () => {
             transition-all duration-300
             ${
               activeSection === section.id
-                ? "bg-[var(--btn)] dark:bg-primary scale-125"
-                : "bg-[var(--foreground)] dark:bg-[#ffbf9e] hover:scale-110"
+                ? "bg-primary-foreground hover:bg-primary-foreground opacity-80 scale-125"
+                : "bg-foreground opacity-70 hover:bg-foreground hover:scale-110"
             }
           `}
           />

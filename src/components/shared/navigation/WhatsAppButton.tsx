@@ -24,12 +24,12 @@ export const WhatsAppButton = () => {
 
       {/* Tooltip */}
       <span
-        className="absolute left-full ml-4 px-4 py-2 
+        className="absolute left-full ml-6 px-4 py-2 
                        bg-white dark:bg-gray-800 text-gray-800 dark:text-white 
-                       text-sm font-medium rounded-lg shadow-lg whitespace-nowrap 
+                       text-sm font-medium rounded-full shadow-xl whitespace-nowrap 
                        opacity-0 group-hover:opacity-100 pointer-events-none
-                       transition-opacity duration-300
-                       border border-gray-200 dark:border-gray-700"
+                       transition-all duration-300 ease-out backdrop-blur-sm
+                       border border-gray-200 dark:border-gray-700 transform group-hover:scale-105"
       >
         Fale conosco no WhatsApp
       </span>

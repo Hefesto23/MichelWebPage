@@ -234,7 +234,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       );
     }
 
-    if (state.cancelar && state.step > AppointmentStep.LOOKUP) {
+    if (state.cancelar && state.step >= AppointmentStep.LOOKUP) {
       return (
         <AppointmentDetails
           formData={formData}

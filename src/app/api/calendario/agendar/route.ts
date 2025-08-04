@@ -2,6 +2,9 @@ import crypto from "crypto";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 import { enviarEmailConfirmacaoGmail } from "@/lib/email-gmail";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -72,6 +75,29 @@ export async function POST(request: Request) {
       },
     });
 
+    // Salvar agendamento no banco de dados
+    console.log("💾 Salvando agendamento no banco de dados...");
+    
+    const agendamentoDB = await prisma.appointment.create({
+      data: {
+        nome,
+        email,
+        telefone,
+        dataSelecionada: new Date(dataHoraInicio),
+        horarioSelecionado: horario,
+        modalidade,
+        primeiraConsulta: true, // Assumindo que é primeira consulta
+        mensagem: mensagem || null,
+        codigo,
+        status: "CONFIRMADO",
+        googleEventId: evento.data.id || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    });
+
+    console.log("✅ Agendamento salvo no BD com ID:", agendamentoDB.id);
+
     // Enviar email de confirmação usando Gmail SMTP
     console.log("📧 Enviando emails de confirmação (Gmail SMTP)...");
     
@@ -94,6 +120,7 @@ export async function POST(request: Request) {
       success: true,
       codigo,
       eventoId: evento.data.id,
+      appointmentId: agendamentoDB.id,
     });
   } catch (error) {
     console.error("Erro ao agendar consulta:", error);

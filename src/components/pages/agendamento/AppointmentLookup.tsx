@@ -1,6 +1,7 @@
 // components/scheduling/AppointmentLookup/index.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
+import { LoadingSpinner } from "@/components/shared/ui/LoadingSpinner";
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 
 interface AppointmentLookupProps {
@@ -93,7 +94,9 @@ export default function AppointmentLookup({
           <Button
             type="submit"
             disabled={carregando || !formData.codigoConfirmacao}
+            className="flex items-center gap-2"
           >
+            {carregando && <LoadingSpinner size="sm" />}
             {carregando ? "Buscando..." : "Buscar Agendamento"}
           </Button>
         </div>

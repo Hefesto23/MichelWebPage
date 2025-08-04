@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import {
   Calendar,
   Clock,
+  Loader2,
   Mail,
   MapPin,
   MessageSquare,
@@ -40,7 +41,24 @@ export default function Confirmation({
 
   return (
     <ContactCard title="Confirme seus Dados">
-      <div className="space-y-6">
+      <div className="relative space-y-6">
+        {/* Loading Overlay */}
+        {carregando && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="text-center">
+                <p className="text-sm font-medium text-foreground">
+                  Processando seu agendamento...
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aguarde enquanto confirmamos seus dados
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <h3 className={appointmentStyles.sectionSubtitle}>
           Revise as informações do agendamento
         </h3>

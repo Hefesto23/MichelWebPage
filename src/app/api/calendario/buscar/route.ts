@@ -2,6 +2,9 @@
 
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +17,40 @@ export async function POST(request: Request) {
       );
     }
 
-    // Configuração do cliente OAuth2
+    console.log("🔍 Buscando agendamento com código:", codigo);
+
+    // Primeiro, buscar no banco de dados
+    const agendamentoDB = await prisma.appointment.findUnique({
+      where: {
+        codigo: codigo
+      }
+    });
+
+    if (agendamentoDB) {
+      console.log("✅ Agendamento encontrado no banco de dados");
+      
+      // Formatar dados do banco
+      const dadosAgendamento = {
+        id: agendamentoDB.id.toString(),
+        nome: agendamentoDB.nome,
+        email: agendamentoDB.email,
+        telefone: agendamentoDB.telefone,
+        data: agendamentoDB.dataSelecionada.toISOString().split("T")[0],
+        horario: agendamentoDB.horarioSelecionado,
+        modalidade: agendamentoDB.modalidade,
+        mensagem: agendamentoDB.mensagem || "",
+        status: agendamentoDB.status,
+      };
+
+      return NextResponse.json({
+        success: true,
+        agendamento: dadosAgendamento,
+      });
+    }
+
+    console.log("⚠️ Agendamento não encontrado no BD, buscando no Google Calendar...");
+
+    // Fallback: buscar no Google Calendar (para agendamentos antigos)
     const auth = new google.auth.GoogleAuth({
       credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),
       scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
@@ -45,6 +81,8 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
+
+    console.log("✅ Agendamento encontrado no Google Calendar");
 
     // Extrair informações do evento
     const dadosEvento = {

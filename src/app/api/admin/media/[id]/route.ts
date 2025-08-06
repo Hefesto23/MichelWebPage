@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import path from "path";
 
 // DELETE - Deletar arquivo específico
-export const DELETE = withAuth(async (req: NextRequest, _userId: string) => {
+export const DELETE = withAuth(async (req: NextRequest) => {
   try {
     const url = new URL(req.url);
     const id = parseInt(url.pathname.split("/").pop() || "0");

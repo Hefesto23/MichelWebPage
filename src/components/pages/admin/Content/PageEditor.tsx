@@ -5,7 +5,7 @@ import { AdminCard } from "@/components/shared/cards/BaseCard";
 import { ArrowLeft, Eye, Save, Upload } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface ContentItem {
   id: number;
@@ -36,11 +36,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const [changes, setChanges] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPageContent();
-  }, [page]);
-
-  const loadPageContent = async () => {
+  const loadPageContent = useCallback(async () => {
     try {
       setError(null);
 
@@ -55,7 +51,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    loadPageContent();
+  }, [loadPageContent]);
 
   const getPageSections = (pageKey: string): PageSection[] => {
     switch (pageKey) {

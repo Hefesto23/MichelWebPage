@@ -43,6 +43,41 @@ export const Appointments = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const applyFilters = useCallback(() => {
+    let filtered = [...appointments];
+
+    // Filtrar por status
+    if (filterStatus !== "todos") {
+      filtered = filtered.filter((apt) => apt.status === filterStatus);
+    }
+
+    // Filtrar por termo de busca
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (apt) =>
+          apt.nome.toLowerCase().includes(term) ||
+          apt.email.toLowerCase().includes(term) ||
+          apt.codigo.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtrar por data
+    if (selectedDate) {
+      filtered = filtered.filter((apt) => apt.dataSelecionada === selectedDate);
+    }
+
+    // Ordenar por data (mais recentes primeiro)
+    filtered.sort(
+      (a, b) =>
+        new Date(b.dataSelecionada).getTime() -
+        new Date(a.dataSelecionada).getTime()
+    );
+
+    setFilteredAppointments(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [appointments, filterStatus, searchTerm, selectedDate]);
+
   useEffect(() => {
     fetchAppointments();
   }, []);
@@ -90,41 +125,6 @@ export const Appointments = () => {
       setLoading(false);
     }
   };
-
-  const applyFilters = useCallback(() => {
-    let filtered = [...appointments];
-
-    // Filtrar por status
-    if (filterStatus !== "todos") {
-      filtered = filtered.filter((apt) => apt.status === filterStatus);
-    }
-
-    // Filtrar por termo de busca
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (apt) =>
-          apt.nome.toLowerCase().includes(term) ||
-          apt.email.toLowerCase().includes(term) ||
-          apt.codigo.toLowerCase().includes(term)
-      );
-    }
-
-    // Filtrar por data
-    if (selectedDate) {
-      filtered = filtered.filter((apt) => apt.dataSelecionada === selectedDate);
-    }
-
-    // Ordenar por data (mais recentes primeiro)
-    filtered.sort(
-      (a, b) =>
-        new Date(b.dataSelecionada).getTime() -
-        new Date(a.dataSelecionada).getTime()
-    );
-
-    setFilteredAppointments(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
-  }, [appointments, filterStatus, searchTerm, selectedDate]);
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", {

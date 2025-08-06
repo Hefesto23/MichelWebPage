@@ -13,19 +13,25 @@ const PageTransition = ({ children, isDarkMode }: PageTransitionProps) => {
   const pathname = usePathname();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const isFirstRender = useRef(true);
+  const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      previousPathnameRef.current = pathname;
       return;
     }
 
-    setIsTransitioning(true);
-    const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 1000);
+    // Só ativa transição se realmente mudou de página (não refresh)
+    if (previousPathnameRef.current !== pathname) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 1000);
 
-    return () => clearTimeout(timer);
+      previousPathnameRef.current = pathname;
+      return () => clearTimeout(timer);
+    }
   }, [pathname]);
 
   return (
@@ -41,7 +47,7 @@ const PageTransition = ({ children, isDarkMode }: PageTransitionProps) => {
 
       {/* Loader durante transição */}
       {isTransitioning && (
-        <div className="fixed inset-0 z-50 bg-background flex items-center justify-center top-20 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-background flex items-center justify-center top-24 overflow-hidden">
           {/* Barra de progresso */}
           <div className="absolute top-0 left-0 w-full h-full z-0 overflow-hidden">
             <div

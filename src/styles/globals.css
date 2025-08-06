@@ -69,22 +69,109 @@
   body {
     font-family: var(--font-roboto), sans-serif;
     @apply bg-background text-foreground;
+    overflow-x: hidden;
   }
 
-  /* Tipografia Base */
+  /* Previne flash de conteúdo não estilizado */
+  .no-flash {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Garante que imagens não causem layout shift */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Previne hidratação e layout shifts */
+  [data-hydration-safe] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Reserva espaço para logo durante hidratação */
+  .header-logo > div {
+    min-width: 200px;
+    min-height: 75px;
+  }
+
+  /* Estabiliza switch durante hidratação */
+  .header-actions {
+    min-width: 80px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Switch com transições suaves - sem hydration mismatch */
+
+  /* ============================================
+     SISTEMA DE THEME COM NEXT-THEMES
+     ============================================ */
+
+  /* CSS-only logo switching */
+  .logo-light {
+    display: block;
+  }
+  
+  .logo-dark {
+    display: none;
+  }
+  
+  .dark .logo-light {
+    display: none;
+  }
+  
+  .dark .logo-dark {
+    display: block;
+  }
+
+  /* CSS-only icon switching */
+  .icon-sun {
+    display: none;
+  }
+  
+  .icon-moon {
+    display: block;
+  }
+  
+  .dark .icon-sun {
+    display: block;
+  }
+  
+  .dark .icon-moon {
+    display: none;
+  }
+
+  /* Remove CSS conflicts e deixa Radix UI controlar totalmente */
+  /* O estado inicial correto já é garantido pelo hook useDarkMode */
+
+  /* Tipografia Base - Responsive */
   h1 {
-    @apply text-3xl md:text-4xl font-bold text-foreground;
+    @apply font-bold text-foreground;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1.2;
   }
   h2 {
-    @apply text-2xl md:text-3xl font-bold text-foreground;
+    @apply font-bold text-foreground;
+    font-size: clamp(1.5rem, 4.5vw, 2rem);
+    line-height: 1.3;
   }
   h3 {
-    @apply text-xl md:text-2xl font-bold text-foreground;
+    @apply font-bold text-foreground;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    line-height: 1.4;
   }
   h4,
   h5,
   h6 {
     @apply font-bold text-foreground;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    line-height: 1.4;
   }
 
   p {
@@ -151,34 +238,117 @@
   }
 
   /* =========================
-        Section Headers
+        Section Headers - Responsive
         ========================= */
   .section-header {
-    @apply mb-8;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
   }
 
   .section-title {
-    @apply text-4xl text-left font-bold mb-4 text-foreground;
+    @apply text-left font-bold text-foreground;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    margin-bottom: clamp(0.75rem, 2vw, 1rem);
+    line-height: 1.2;
   }
 
   .section-description {
-    @apply text-xl text-left font-bold max-w-2xl text-foreground;
+    @apply text-left font-bold max-w-2xl text-foreground;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    line-height: 1.4;
   }
 
   /* =========================
         Grid Systems
         ========================= */
   .grid-services {
-    @apply pt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-    grid-auto-rows: minmax(220px, 1fr);
-    max-height: calc(100vh - 16rem);
+    @apply grid gap-4;
+    padding-top: clamp(1rem, 3vw, 1.5rem);
+    grid-template-columns: repeat(1, 1fr);
+    gap: clamp(0.75rem, 2vw, 1rem);
   }
 
   .grid-services > * {
-    min-height: 220px;
-    max-height: 240px;
     display: flex;
     flex-direction: column;
+    min-height: clamp(200px, 25vw, 220px);
+    max-height: clamp(240px, 30vw, 280px);
+  }
+
+  /* Responsive grid layouts for 6 cards */
+  @media (min-width: 640px) {
+    .grid-services {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .grid-services {
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(1rem, 2.5vw, 1.5rem);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-services {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid-services {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    
+    .grid-services > * {
+      min-height: 220px;
+      max-height: 260px;
+    }
+  }
+
+  /* For very large screens, optimize layout */
+  @media (min-width: 1536px) {
+    .grid-services {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+  }
+
+  /* Mobile portrait optimizations */
+  @media (max-width: 480px) and (orientation: portrait) {
+    .services-section {
+      padding: clamp(1.5rem, 4vw, 2rem) 1rem;
+    }
+    
+    .grid-services > * {
+      min-height: clamp(180px, 35vw, 200px);
+      max-height: clamp(220px, 40vw, 240px);
+    }
+  }
+
+  /* Mobile landscape optimizations */
+  @media (max-width: 1199px) and (orientation: landscape) and (max-height: 600px) {
+    .services-section {
+      padding: 1rem;
+      min-height: auto;
+    }
+    
+    .grid-services {
+      grid-template-columns: repeat(3, 1fr);
+      padding-top: 0.5rem;
+    }
+    
+    .grid-services > * {
+      min-height: 150px;
+      max-height: 180px;
+    }
+  }
+
+  /* Tablet specific adjustments */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .services-section {
+      padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2rem);
+    }
   }
 
   /* Grid para páginas internas (Terapias, Avaliações) */
@@ -271,12 +441,31 @@
     @apply flex justify-between items-center h-16;
   }
 
+  /* Mobile header adjustments */
+  @media (max-width: 1199px) {
+    .header-container {
+      @apply flex justify-between items-center;
+    }
+  }
+
+  /* Mobile menu animations */
+  .mobile-menu-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  .mobile-menu-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms ease-out, transform 300ms ease-out;
+  }
+
   .header-logo {
     @apply flex items-center space-x-4 h-full;
   }
 
   .header-nav {
-    @apply flex items-center justify-center space-x-6 text-lg h-full;
+    @apply items-center justify-center space-x-6 text-lg h-full;
   }
 
   .header-nav-link {
@@ -347,8 +536,40 @@
     @apply text-center font-bold mt-8 pt-4 border-t w-full;
   }
 
+  /* Footer responsive optimizations */
+  @media (max-width: 768px) {
+    .footer-container {
+      @apply py-6;
+    }
+
+    .footer-grid {
+      @apply gap-6;
+    }
+
+    .footer-title {
+      @apply text-lg mb-1;
+    }
+
+    /* Logo size optimization for mobile */
+    .footer-grid img {
+      width: clamp(180px, 50vw, 220px) !important;
+      height: auto !important;
+    }
+
+    .footer-copyright {
+      @apply mt-6 pt-3 text-sm;
+    }
+  }
+
+  /* Hide section navigator on touch devices */
+  @media (max-width: 1200px) {
+    nav[class*="fixed right-6"] {
+      display: none !important;
+    }
+  }
+
   /* =========================
-        Hero Section
+        Hero Section - Responsive
         ========================= */
   .hero-section {
     @apply section-fullscreen bg-no-repeat bg-center bg-cover;
@@ -359,30 +580,144 @@
   }
 
   .hero-content {
-    @apply flex flex-col items-center justify-center w-full max-w-2xl mx-auto;
+    @apply flex flex-col items-center w-full mx-auto;
+    /* Perfect vertical centering */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    max-width: 85%;
+    padding: 0 clamp(1rem, 3vw, 2rem);
+    /* Better content spacing */
+    display: flex;
+    text-align: center;
   }
 
   .hero-text {
-    @apply w-full text-center text-xl/9 text-white mt-10 tracking-wide;
+    @apply w-full text-center text-white tracking-wide;
+    /* Improved responsive font sizes and line spacing for better readability */
+    font-size: clamp(1rem, 2.8vw, 1.375rem);
+    line-height: clamp(1.8, 3.6vw, 2.2);
+    margin-top: 0;
+    /* Enhanced text spacing for maximum legibility */
+    letter-spacing: 0.025em;
+    word-spacing: 0.12em;
+    /* Better paragraph spacing */
+    margin-bottom: clamp(0.5rem, 2vw, 1rem);
+    /* Reset font weight to normal (remove bold from h1) */
+    font-weight: normal;
   }
 
   .hero-cta {
-    @apply flex items-start mt-8 justify-center;
+    @apply flex items-start justify-center;
+    margin-top: clamp(1rem, 3vw, 2rem);
+  }
+
+  /* Responsive adjustments for better vertical centering and readability */
+  @media (min-width: 640px) {
+    .hero-content {
+      max-width: 80%;
+      padding: 0 clamp(1.5rem, 4vw, 2.5rem);
+    }
+    
+    .hero-text {
+      line-height: clamp(1.9, 3.8vw, 2.3);
+      word-spacing: 0.14em;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .hero-content {
+      max-width: 75%;
+      padding: 0 clamp(2rem, 5vw, 3rem);
+    }
+    
+    .hero-text {
+      line-height: clamp(2.0, 4.0vw, 2.4);
+      word-spacing: 0.16em;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-content {
+      max-width: 70%;
+      padding: 0 clamp(2.5rem, 6vw, 4rem);
+    }
+    
+    .hero-text {
+      line-height: 2.1;
+      letter-spacing: 0.015em;
+      word-spacing: 0.13em;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .hero-content {
+      max-width: 65%;
+      padding: 0 3rem;
+    }
+    
+    .hero-text {
+      line-height: 2.0;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      letter-spacing: 0.01em;
+      word-spacing: 0.11em;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .hero-content {
+      max-width: 60%;
+    }
+  }
+
+  /* Mobile portrait adjustments for better vertical centering */
+  @media (max-width: 480px) and (orientation: portrait) {
+    .hero-content {
+      max-width: 95%;
+      padding: 0 1rem;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .hero-text {
+      font-size: clamp(0.875rem, 4.2vw, 1.125rem);
+      line-height: clamp(1.7, 4.2vw, 1.9);
+      word-spacing: 0.09em;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  /* Tablet landscape adjustments */
+  @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .hero-overlay {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    
+    .hero-content {
+      max-width: 85%;
+    }
   }
 
   /* =========================
-        Welcome Section
+        Welcome Section - Responsive
         ========================= */
   .welcome-section {
     @apply section-fullscreen;
   }
 
   .welcome-container {
-    @apply flex flex-row h-screen overflow-hidden pt-8 relative;
+    @apply flex flex-row h-screen overflow-hidden relative;
+    padding-top: clamp(1rem, 3vw, 2rem);
   }
 
   .welcome-text {
-    @apply basis-4/6 overflow-scroll p-4 text-foreground z-content custom-scrollbar;
+    @apply basis-4/6 overflow-scroll text-foreground z-content custom-scrollbar;
+    padding: clamp(0.75rem, 2vw, 1rem);
   }
 
   .welcome-content {
@@ -390,26 +725,73 @@
   }
 
   .welcome-content p {
-    @apply mb-4 leading-relaxed text-xl font-extrabold;
+    @apply mb-4 leading-relaxed font-extrabold;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
 
   .welcome-content ul {
-    @apply pl-6 mb-4 space-y-2 font-extrabold text-xl;
+    @apply pl-6 mb-4 space-y-2 font-extrabold;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
 
   .welcome-image {
     @apply basis-2/6 relative h-full grid place-items-center z-content;
   }
 
+  /* Responsive adjustments by screen size */
+  @media (min-width: 640px) {
+    .welcome-text {
+      padding: clamp(1rem, 2.5vw, 1.5rem);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .welcome-container {
+      padding-top: clamp(1.5rem, 3.5vw, 2.5rem);
+    }
+    
+    .welcome-text {
+      basis: 65%;
+    }
+    
+    .welcome-image {
+      basis: 35%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .welcome-text {
+      basis: 66.666667%; /* 2/3 */
+    }
+    
+    .welcome-image {
+      basis: 33.333333%; /* 1/3 */
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .welcome-container {
+      padding-top: 2rem;
+    }
+    
+    .welcome-text {
+      padding: 1rem 2rem;
+    }
+  }
+
   /* =========================
-        Services Section
+        Services Section - Responsive
         ========================= */
   .services-section {
-    @apply min-h-screen w-full px-8 py-8 overflow-hidden;
+    @apply w-full relative;
+    min-height: 100vh;
+    padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem);
   }
 
   .services-container {
-    @apply container mx-auto pr-2 relative z-0;
+    @apply container mx-auto relative z-0;
+    max-width: 100%;
+    padding-right: clamp(0.5rem, 2vw, 1rem);
   }
 
   .services-content {
@@ -425,6 +807,157 @@
 
   .clinic-container {
     @apply container h-full my-8;
+  }
+
+  /* Image Gallery centering for all devices */
+  .image-gallery-container {
+    @apply w-full flex justify-center items-center;
+  }
+
+  .custom-gallery {
+    @apply w-full max-w-none;
+  }
+
+  /* Image Gallery text styling for better readability */
+  .image-description {
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    border-radius: 0 0 0.375rem 0.375rem;
+    min-height: auto;
+    max-height: none;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    text-align: center;
+  }
+
+  .image-title {
+    font-size: clamp(1.125rem, 3vw, 1.5rem);
+    font-weight: 700;
+    margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+    line-height: 1.3;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .image-text {
+    font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Mobile/Tablet specific adjustments for carousel */
+  @media (max-width: 1200px) {
+    .clinic-container {
+      @apply px-4 mx-auto;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .image-gallery-container {
+      @apply w-full px-0 mx-0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .custom-gallery .image-gallery-slide img,
+    .custom-gallery .image-gallery-image {
+      margin: 0 auto;
+      display: block;
+    }
+
+    .custom-gallery .image-gallery-content {
+      text-align: center;
+    }
+
+    /* Enhanced text readability for mobile/tablet */
+    .image-description {
+      padding: clamp(0.5rem, 3vw, 1rem);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      /* Allow text to expand vertically */
+      min-height: auto;
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+
+    .image-title {
+      font-size: clamp(1rem, 4vw, 1.25rem);
+      margin-bottom: clamp(0.25rem, 1.5vw, 0.5rem);
+      /* Better line wrapping for mobile */
+      line-height: 1.2;
+      max-width: 100%;
+    }
+
+    .image-text {
+      font-size: clamp(0.75rem, 3.5vw, 1rem);
+      line-height: 1.4;
+      /* Ensure text wraps properly */
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  /* Mobile portrait specific optimizations */
+  @media (max-width: 480px) and (orientation: portrait) {
+    .image-description {
+      padding: clamp(0.5rem, 4vw, 0.75rem);
+      background: rgba(0, 0, 0, 0.8);
+      /* More vertical space for text on mobile */
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+
+    .image-title {
+      font-size: clamp(0.875rem, 5vw, 1.125rem);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+      /* Better text wrapping */
+      word-spacing: -0.05em;
+    }
+
+    .image-text {
+      font-size: clamp(0.75rem, 4vw, 0.875rem);
+      line-height: 1.3;
+      /* Compact text with better readability */
+      word-spacing: -0.02em;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  /* Mobile landscape optimizations */
+  @media (max-width: 1200px) and (orientation: landscape) and (max-height: 600px) {
+    .image-description {
+      padding: clamp(0.375rem, 2vw, 0.5rem);
+      background: rgba(0, 0, 0, 0.85);
+      /* Limited height for landscape but still scrollable */
+      max-height: 35vh;
+      overflow-y: auto;
+    }
+
+    .image-title {
+      font-size: clamp(0.875rem, 3vw, 1rem);
+      margin-bottom: 0.125rem;
+      line-height: 1.1;
+      /* Tight spacing for landscape */
+      word-spacing: -0.03em;
+    }
+
+    .image-text {
+      font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+      line-height: 1.2;
+      /* Very compact for landscape */
+      word-spacing: -0.02em;
+      letter-spacing: -0.01em;
+    }
   }
 
   /* =========================
@@ -662,20 +1195,72 @@
 /* ============================================
       MEDIA QUERIES - Ajustes responsivos globais
       ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  /* Mobile/Tablet layout adjustments */
   .header-nav {
     @apply hidden;
   }
 
   .welcome-container {
     @apply flex-col;
+    padding: 0;
+    margin: 0;
   }
 
   .welcome-text {
     @apply basis-full;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    margin: 0;
+    max-height: 100vh;
+    height: 100vh;
+    width: 100%;
   }
 
   .welcome-image {
     @apply hidden;
+  }
+
+  .welcome-section {
+    padding: 0;
+    margin: 0;
+  }
+
+  .welcome-section .content-container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Divisor text size optimization for mobile/tablet */
+  .font-serif {
+    font-size: clamp(0.875rem, 2.5vw, 1.125rem) !important;
+  }
+
+  /* Mobile portrait specific adjustments */
+  @media (max-width: 480px) and (orientation: portrait) {
+    .welcome-text {
+      padding: clamp(0.75rem, 2.5vw, 1.25rem);
+      max-height: 100vh;
+      height: 100vh;
+    }
+    
+    .welcome-content p,
+    .welcome-content ul {
+      font-size: clamp(0.875rem, 4vw, 1rem);
+    }
+  }
+
+  /* Mobile landscape adjustments */
+  @media (max-width: 1200px) and (orientation: landscape) and (max-height: 600px) {
+    .welcome-container {
+      padding: 0;
+    }
+    
+    .welcome-text {
+      max-height: 100vh;
+      height: 100vh;
+      padding: clamp(0.5rem, 2vw, 1rem);
+    }
   }
 }

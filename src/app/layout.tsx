@@ -5,6 +5,7 @@
 
 import { robotoSlab } from "@/app/fonts";
 import { Footer, Header } from "@/components/layout"; // ✅ COMPONENTES ORIGINAIS
+import { ThemeProvider } from "@/components/providers";
 import {
   SectionNavigator,
   WhatsAppButton,
@@ -15,41 +16,60 @@ import { cn } from "@/utils/utils";
 import "@styles/globals.css";
 import { usePathname } from "next/navigation";
 
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const { isDarkMode, toggleDarkMode, mounted } = useDarkMode();
+  const pathname = usePathname();
+
+  const isHomePage = pathname === "/";
+  const isAdminPage = pathname.startsWith("/admin");
+  const showWhatsApp = !isAdminPage;
+  const showSectionNav = isHomePage;
+
+  const isAdminLogged = false;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {!isAdminPage && (
+        <Header
+          isDarkMode={isDarkMode}
+          isAdminLogged={isAdminLogged}
+          toggleDarkMode={toggleDarkMode}
+          mounted={mounted}
+        />
+      )}
+
+      {isAdminPage ? (
+        <main className="flex-1">{children}</main>
+      ) : (
+        <PageTransition isDarkMode={isDarkMode}>
+          <main className="flex-1">{children}</main>
+        </PageTransition>
+      )}
+
+      {!isAdminPage && <Footer />}
+
+      {showWhatsApp && <WhatsAppButton />}
+      {showSectionNav && <SectionNavigator />}
+    </div>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // ✅ HOOKS ORIGINAIS MANTIDOS
-  const [isDarkMode, toggleDarkMode] = useDarkMode();
-  const pathname = usePathname();
-  
-  // ✅ LÓGICA ORIGINAL PARA MOSTRAR COMPONENTES
-  const isHomePage = pathname === "/";
-  const isAdminPage = pathname.startsWith("/admin");
-  const showWhatsApp = !isAdminPage;
-  const showSectionNav = isHomePage;
-  
-  // Por enquanto, desabilitar detecção de admin no header (middleware já protege)
-  const isAdminLogged = false;
-
   return (
-    <html
-      lang="pt-BR"
-      suppressHydrationWarning
-    >
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme');
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
+              try {
+                const theme = localStorage.getItem('theme') || 
+                             (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+              } catch {}
             `,
           }}
         />
@@ -66,35 +86,14 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
-        {/* ✅ ESTRUTURA ORIGINAL PRESERVADA */}
-        <div className="min-h-screen flex flex-col">
-          {/* ✅ HEADER ORIGINAL COM DARK MODE */}
-          {!isAdminPage && (
-            <Header
-              isDarkMode={isDarkMode}
-              isAdminLogged={isAdminLogged}
-              toggleDarkMode={toggleDarkMode}
-            />
-          )}
-
-          {/* ✅ MAIN CONTENT COM TRANSIÇÕES */}
-          {isAdminPage ? (
-            // Páginas admin não usam PageTransition (têm suas próprias transições)
-            <main className="flex-1">{children}</main>
-          ) : (
-            // Páginas públicas usam PageTransition
-            <PageTransition isDarkMode={isDarkMode}>
-              <main className="flex-1">{children}</main>
-            </PageTransition>
-          )}
-
-          {/* ✅ FOOTER ORIGINAL */}
-          {!isAdminPage && <Footer />}
-
-          {/* ✅ COMPONENTES FLUTUANTES ORIGINAIS */}
-          {showWhatsApp && <WhatsAppButton />}
-          {showSectionNav && <SectionNavigator />}
-        </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          disableTransitionOnChange={false}
+        >
+          <LayoutContent>{children}</LayoutContent>
+        </ThemeProvider>
       </body>
     </html>
   );

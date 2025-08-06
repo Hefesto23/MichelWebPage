@@ -34,25 +34,27 @@ export const ImageGalleryComponent: React.FC<ImageGalleryProps> = ({
           className="object-cover w-full h-full rounded-md"
         />
         <div className="image-description absolute bottom-0 w-full bg-black bg-opacity-50 left-1/2 transform -translate-x-1/2">
-          <h3 className="image-title text-white">{item.originalTitle}</h3>
-          <p className="image-text text-white">{item.description}</p>
+          <h3 className="image-title text-white break-words hyphens-auto">{item.originalTitle}</h3>
+          <p className="image-text text-white break-words hyphens-auto whitespace-normal">{item.description}</p>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="image-gallery-container">
-      <ImageGallery
-        items={images}
-        showThumbnails={true}
-        showFullscreenButton={true}
-        showPlayButton={false}
-        autoPlay={false}
-        lazyLoad={true}
-        renderItem={(item) => renderCustomItem(item)}
-        additionalClass="custom-gallery bg-black"
-      />
+    <div className="image-gallery-container w-full flex justify-center items-center">
+      <div className="w-full max-w-full mx-auto">
+        <ImageGallery
+          items={images}
+          showThumbnails={true}
+          showFullscreenButton={true}
+          showPlayButton={false}
+          autoPlay={false}
+          lazyLoad={true}
+          renderItem={(item) => renderCustomItem(item)}
+          additionalClass="custom-gallery bg-black w-full"
+        />
+      </div>
     </div>
   );
 };

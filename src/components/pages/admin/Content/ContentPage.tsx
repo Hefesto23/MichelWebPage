@@ -22,52 +22,52 @@ interface ContentPage {
   lastUpdated: string;
 }
 
+const contentPages: ContentPage[] = [
+  {
+    key: "home",
+    name: "Página Inicial",
+    description: "Hero, welcome, serviços e seções principais",
+    icon: Home,
+    sections: 4,
+    lastUpdated: "2024-05-20T10:30:00Z",
+  },
+  {
+    key: "about",
+    name: "Sobre Mim",
+    description: "Biografia, formação e abordagem terapêutica",
+    icon: User,
+    sections: 3,
+    lastUpdated: "2024-05-18T14:20:00Z",
+  },
+  {
+    key: "services",
+    name: "Terapias",
+    description: "Serviços oferecidos e metodologias",
+    icon: Briefcase,
+    sections: 2,
+    lastUpdated: "2024-05-15T16:45:00Z",
+  },
+  {
+    key: "contact",
+    name: "Contato",
+    description: "Informações de contato e localização",
+    icon: MessageCircle,
+    sections: 2,
+    lastUpdated: "2024-05-10T09:15:00Z",
+  },
+  {
+    key: "testimonials",
+    name: "Avaliações",
+    description: "Depoimentos e testemunhos",
+    icon: Star,
+    sections: 1,
+    lastUpdated: "2024-05-12T11:00:00Z",
+  },
+];
+
 export const ContentPage = () => {
   const [pages, setPages] = useState<ContentPage[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const contentPages: ContentPage[] = [
-    {
-      key: "home",
-      name: "Página Inicial",
-      description: "Hero, welcome, serviços e seções principais",
-      icon: Home,
-      sections: 4,
-      lastUpdated: "2024-05-20T10:30:00Z",
-    },
-    {
-      key: "about",
-      name: "Sobre Mim",
-      description: "Biografia, formação e abordagem terapêutica",
-      icon: User,
-      sections: 3,
-      lastUpdated: "2024-05-18T14:20:00Z",
-    },
-    {
-      key: "services",
-      name: "Terapias",
-      description: "Serviços oferecidos e metodologias",
-      icon: Briefcase,
-      sections: 2,
-      lastUpdated: "2024-05-15T16:45:00Z",
-    },
-    {
-      key: "contact",
-      name: "Contato",
-      description: "Informações de contato e localização",
-      icon: MessageCircle,
-      sections: 2,
-      lastUpdated: "2024-05-10T09:15:00Z",
-    },
-    {
-      key: "testimonials",
-      name: "Avaliações",
-      description: "Depoimentos e testemunhos",
-      icon: Star,
-      sections: 1,
-      lastUpdated: "2024-05-12T11:00:00Z",
-    },
-  ];
 
   useEffect(() => {
     // Simular carregamento de estatísticas

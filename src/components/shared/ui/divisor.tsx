@@ -54,19 +54,34 @@ const Divisor = ({ index = 0 }) => {
 
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
 
-      <div className="relative h-full flex flex-col items-center justify-center text-center p-8 z-10">
-        <div className="max-w-4xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl p-8">
+      <div className="relative h-full flex flex-col items-center justify-center text-center z-10" 
+           style={{ padding: 'clamp(1rem, 4vw, 2rem)' }}>
+        <div className="max-w-4xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl" 
+             style={{ padding: 'clamp(1.5rem, 4vw, 2rem)' }}>
           <blockquote>
-            <p className="text-2xl md:text-3xl font-serif text-white mb-6 leading-relaxed">
+            <p className="font-serif text-white leading-relaxed" 
+               style={{ 
+                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
+                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
+               }}>
               {quote.info}
             </p>
-            <p className="text-2xl md:text-3xl font-serif text-white mb-6 leading-relaxed">
+            <p className="font-serif text-white leading-relaxed" 
+               style={{ 
+                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
+                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
+               }}>
               {quote?.info2}
             </p>
-            <p className="text-2xl md:text-3xl font-serif text-white mb-6 leading-relaxed">
+            <p className="font-serif text-white leading-relaxed" 
+               style={{ 
+                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
+                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
+               }}>
               {quote?.info3}
             </p>
-            <footer className="text-base md:text-lg text-white/90 font-bold italic">
+            <footer className="text-white/90 font-bold italic" 
+                    style={{ fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)' }}>
               {quote.detail}
             </footer>
           </blockquote>

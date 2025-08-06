@@ -19,7 +19,7 @@ import {
 } from "@/types/appointment";
 import { formatDate, formatPhone } from "@/utils/formatters";
 import { Calendar, Clock, Mail, MapPin, Phone, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface AppointmentAction {
   appointment: Appointment;
@@ -51,6 +51,42 @@ export default function AppointmentsManager() {
     null
   );
 
+  // Aplicar filtros
+  const applyFilters = useCallback(() => {
+    let filtered = [...appointments];
+
+    // Filtrar por status
+    if (filterStatus !== "todos") {
+      filtered = filtered.filter((apt) => apt.status === filterStatus);
+    }
+
+    // Filtrar por termo de busca
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (apt) =>
+          apt.nome.toLowerCase().includes(term) ||
+          apt.email.toLowerCase().includes(term) ||
+          apt.codigo.toLowerCase().includes(term)
+      );
+    }
+
+    // Filtrar por data
+    if (selectedDate) {
+      filtered = filtered.filter((apt) => apt.dataSelecionada === selectedDate);
+    }
+
+    // Ordenar por data (mais recentes primeiro)
+    filtered.sort(
+      (a, b) =>
+        new Date(b.dataSelecionada).getTime() -
+        new Date(a.dataSelecionada).getTime()
+    );
+
+    setFilteredAppointments(filtered);
+    setCurrentPage(1); // Reset para primeira página quando filtros mudam
+  }, [appointments, filterStatus, searchTerm, selectedDate]);
+
   // Efeitos
   useEffect(() => {
     fetchAppointments();
@@ -58,7 +94,7 @@ export default function AppointmentsManager() {
 
   useEffect(() => {
     applyFilters();
-  }, [appointments, filterStatus, searchTerm, selectedDate]);
+  }, [appointments, filterStatus, searchTerm, selectedDate, applyFilters]);
 
   // Buscar agendamentos
   const fetchAppointments = async () => {
@@ -113,42 +149,6 @@ export default function AppointmentsManager() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Aplicar filtros
-  const applyFilters = () => {
-    let filtered = [...appointments];
-
-    // Filtrar por status
-    if (filterStatus !== "todos") {
-      filtered = filtered.filter((apt) => apt.status === filterStatus);
-    }
-
-    // Filtrar por termo de busca
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (apt) =>
-          apt.nome.toLowerCase().includes(term) ||
-          apt.email.toLowerCase().includes(term) ||
-          apt.codigo.toLowerCase().includes(term)
-      );
-    }
-
-    // Filtrar por data
-    if (selectedDate) {
-      filtered = filtered.filter((apt) => apt.dataSelecionada === selectedDate);
-    }
-
-    // Ordenar por data (mais recentes primeiro)
-    filtered.sort(
-      (a, b) =>
-        new Date(b.dataSelecionada).getTime() -
-        new Date(a.dataSelecionada).getTime()
-    );
-
-    setFilteredAppointments(filtered);
-    setCurrentPage(1); // Reset para primeira página quando filtros mudam
   };
 
   // Ações de agendamento

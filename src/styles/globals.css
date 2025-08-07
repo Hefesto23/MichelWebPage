@@ -729,7 +729,8 @@
     font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
 
-  .welcome-content ul {
+  .welcome-content ul,
+  .welcome-content ol {
     @apply pl-6 mb-4 space-y-2 font-extrabold;
     font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
@@ -1246,7 +1247,8 @@
     }
     
     .welcome-content p,
-    .welcome-content ul {
+    .welcome-content ul,
+    .welcome-content ol {
       font-size: clamp(0.875rem, 4vw, 1rem);
     }
   }

@@ -1,91 +1,138 @@
 // ============================================
 // src/components/pages/home/WelcomeSection.tsx
 // ============================================
+"use client";
+
+import { DEFAULT_WELCOME_CONTENT } from "@/utils/default-content";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+
+const parseMarkdownToJSX = (content: string) => {
+  // Converter markdown básico para JSX
+  return content
+    .split('\n\n')
+    .map((paragraph, index) => {
+      const trimmedParagraph = paragraph.trim();
+      
+      if (!trimmedParagraph) return null;
+      
+      // Lista numerada
+      if (trimmedParagraph.match(/^\d\./)) {
+        const listItems = trimmedParagraph
+          .split('\n')
+          .filter(item => item.match(/^\d\./))
+          .map((item, i) => {
+            const text = item.replace(/^\d\.\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+            return `<li>${text}</li>`;
+          });
+        
+        return (
+          <ol key={index} className="list-decimal" dangerouslySetInnerHTML={{
+            __html: listItems.join('')
+          }} />
+        );
+      }
+      
+      // Lista com bullets
+      if (trimmedParagraph.match(/^•/)) {
+        const listItems = trimmedParagraph
+          .split('\n')
+          .filter(item => item.match(/^•/))
+          .map((item, i) => {
+            const text = item.replace(/^•\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+            return `<li>${text}</li>`;
+          });
+        
+        return (
+          <ul key={index} className="list-disc" dangerouslySetInnerHTML={{
+            __html: listItems.join('')
+          }} />
+        );
+      }
+      
+      // Parágrafo normal
+      const formattedText = trimmedParagraph
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      return (
+        <p key={index} dangerouslySetInnerHTML={{ __html: formattedText }} />
+      );
+    })
+    .filter(Boolean);
+};
 
 export const WelcomeSection = () => {
+  const [title, setTitle] = useState(DEFAULT_WELCOME_CONTENT.title);
+  const [content, setContent] = useState(DEFAULT_WELCOME_CONTENT.content);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Buscar conteúdo personalizado do banco
+    const fetchWelcomeContent = async () => {
+      try {
+        console.log("🔄 WelcomeSection: Buscando conteúdo...");
+        const response = await fetch('/api/admin/content/home');
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📥 WelcomeSection: Dados recebidos:", data);
+          
+          if (data.content?.welcome) {
+            console.log("✅ WelcomeSection: Usando conteúdo personalizado");
+            
+            // Atualizar title se existir
+            if (data.content.welcome.title) {
+              setTitle(data.content.welcome.title);
+            }
+            
+            // Atualizar content se existir
+            if (data.content.welcome.content) {
+              setContent(data.content.welcome.content);
+            }
+          } else {
+            console.log("ℹ️ WelcomeSection: Usando conteúdo padrão (nenhum salvo)");
+          }
+        } else {
+          console.log("⚠️ WelcomeSection: Resposta não OK, usando padrão");
+        }
+      } catch (error) {
+        console.log("❌ WelcomeSection: Erro ao buscar, usando padrão:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWelcomeContent();
+  }, []);
   return (
     <section id="saiba-mais" className="welcome-section">
       <div className="content-container">
         <div className="welcome-container">
           <div className="welcome-text">
             <div className="section-header">
-              <h1 className="section-title">Seja Bem-Vindo!</h1>
+              <h1 className="section-title">
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                    <span>Carregando...</span>
+                  </div>
+                ) : (
+                  title
+                )}
+              </h1>
             </div>
             <div className="welcome-content">
               <article>
-                <p>
-                  Sentir-se sobrecarregado, ansioso ou constantemente em alerta
-                  pode parecer um fardo solitário, mas saiba que você não está
-                  sozinho. A ansiedade é uma reação natural do corpo, mas,
-                  quando começa a afetar sua vida, é hora de buscar ajuda.
-                </p>
-                <p>
-                  A ansiedade pode surgir de muitas formas: preocupações
-                  excessivas no trabalho, dificuldades nos relacionamentos,
-                  tensões familiares ou até mesmo cobranças que você impõe a si
-                  mesmo. Talvez você se reconheça em momentos como:
-                </p>
-
-                <ul className="list-disc">
-                  <li>
-                    Procrastinar por medo de errar ou não ser bom o suficiente.
-                  </li>
-                  <li>
-                    Evitar discussões ou situações sociais por receio de
-                    julgamento.
-                  </li>
-                  <li>
-                    Ter dificuldade para dormir devido a pensamentos
-                    incessantes.
-                  </li>
-                  <li>
-                    Sentir que o coração acelera ou que o ar parece faltar,
-                    mesmo sem motivo aparente.
-                  </li>
-                </ul>
-
-                <p>
-                  Aqui, a psicoterapia é um espaço para você entender e
-                  transformar essas sensações. A abordagem que utilizo é a{" "}
-                  <strong>Análise do Comportamental</strong> (TCC), uma ciência
-                  que busca compreender o impacto das situações e das
-                  experiências na sua maneira de agir, pensar e sentir. Juntos,
-                  investigaremos como os padrões de comportamento relacionados à
-                  ansiedade se formaram e como você pode transformá-los de forma
-                  prática e eficaz.
-                </p>
-
-                <p>No tratamento, você irá:</p>
-
-                <ul className="list-decimal">
-                  <li>
-                    Compreender os contextos que desencadeiam sua ansiedade.
-                  </li>
-                  <li>
-                    Aprender formas de lidar com as situações que mais afetam
-                    seu bem-estar.
-                  </li>
-                  <li>
-                    Desenvolver habilidades para construir relações mais
-                    saudáveis e funcionais.
-                  </li>
-                  <li>Recuperar a autonomia e a segurança em suas escolhas.</li>
-                </ul>
-
-                <p>
-                  Você não precisa enfrentar tudo sozinho. Estou aqui para
-                  oferecer suporte e ajudá-lo a encontrar novos caminhos.
-                </p>
-
-                <p className="font-bold">
-                  Dê o primeiro passo e agende uma consulta.
-                </p>
-
-                <p className="mb-6">
-                  Cuidar da sua saúde emocional é um presente que transforma a
-                  maneira como você vive e se relaciona com o mundo.
-                </p>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    <div className="animate-pulse bg-gray-300 h-4 rounded w-full"></div>
+                    <div className="animate-pulse bg-gray-300 h-4 rounded w-3/4"></div>
+                    <div className="animate-pulse bg-gray-300 h-4 rounded w-full"></div>
+                  </div>
+                ) : (
+                  parseMarkdownToJSX(content)
+                )}
               </article>
             </div>
           </div>

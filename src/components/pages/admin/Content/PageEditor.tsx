@@ -2,7 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { DEFAULT_HERO_CONTENT } from "@/utils/default-content";
+import { DEFAULT_HERO_CONTENT, DEFAULT_WELCOME_CONTENT } from "@/utils/default-content";
 import { handleAuthError } from "@/lib/auth";
 import { ArrowLeft, Eye, Save, Upload, RotateCcw } from "lucide-react";
 import Image from "next/image";
@@ -79,6 +79,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         const heroCtaText = savedContent?.hero?.ctaText || DEFAULT_HERO_CONTENT.ctaText;
         const heroDisclaimer = savedContent?.hero?.disclaimer || DEFAULT_HERO_CONTENT.disclaimer;
         
+        const welcomeTitle = savedContent?.welcome?.title || DEFAULT_WELCOME_CONTENT.title;
+        const welcomeContent = savedContent?.welcome?.content || DEFAULT_WELCOME_CONTENT.content;
+        
         return [
           {
             name: "Seção Hero - Conteúdo Completo",
@@ -113,6 +116,32 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 value: heroDisclaimer,
                 label: "Texto do Disclaimer",
                 placeholder: "Digite o texto de aviso que aparece no final...",
+              },
+            ],
+          },
+          {
+            name: "Seção Welcome - Bem-vindo",
+            description: "Edite o título e conteúdo completo da seção de apresentação após o hero.",
+            items: [
+              {
+                id: 4,
+                page: "home",
+                section: "welcome",
+                key: "title",
+                type: "title",
+                value: welcomeTitle,
+                label: "Título da Seção Welcome",
+                placeholder: "Digite o título da seção de apresentação...",
+              },
+              {
+                id: 5,
+                page: "home",
+                section: "welcome",
+                key: "content",
+                type: "html",
+                value: welcomeContent,
+                label: "Conteúdo Completo da Seção Welcome",
+                placeholder: "Digite todo o conteúdo da seção de apresentação...",
               },
             ],
           },
@@ -182,11 +211,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       
       sections.forEach(section => {
         section.items.forEach(item => {
+          // Usar valor mudança SE existir, senão usar valor atual do item
+          const valueToSave = changes[item.id] !== undefined ? changes[item.id] : item.value;
+          
           if (item.section === "hero") {
             if (!contentToSave.hero) contentToSave.hero = {};
-            // Usar valor mudança SE existir, senão usar valor atual do item
-            const valueToSave = changes[item.id] !== undefined ? changes[item.id] : item.value;
             contentToSave.hero[item.key] = valueToSave;
+          } else if (item.section === "welcome") {
+            if (!contentToSave.welcome) contentToSave.welcome = {};
+            contentToSave.welcome[item.key] = valueToSave;
           }
         });
       });
@@ -291,6 +324,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       case "title":
       case "text":
         const isHeroField = item.section === "hero";
+        const isWelcomeField = item.section === "welcome";
         let maxLengthForField = 1000; // default
         let fieldName = "";
         
@@ -302,10 +336,13 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.disclaimer;
             fieldName = "Disclaimer";
           }
+        } else if (isWelcomeField && item.key === "title") {
+          maxLengthForField = DEFAULT_WELCOME_CONTENT.maxCharacters.title;
+          fieldName = "Welcome Title";
         }
         
         const currentLengthText = currentValue.length;
-        const isOverLimitText = isHeroField && currentLengthText > maxLengthForField;
+        const isOverLimitText = (isHeroField || isWelcomeField) && currentLengthText > maxLengthForField;
         
         return (
           <div className="space-y-2">
@@ -313,21 +350,21 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               type="text"
               value={currentValue}
               onChange={(e) => {
-                if (isHeroField && e.target.value.length <= maxLengthForField) {
+                if ((isHeroField || isWelcomeField) && e.target.value.length <= maxLengthForField) {
                   handleContentChange(item.id, e.target.value);
-                } else if (!isHeroField) {
+                } else if (!isHeroField && !isWelcomeField) {
                   handleContentChange(item.id, e.target.value);
                 }
               }}
               placeholder={item.placeholder}
-              maxLength={isHeroField ? maxLengthForField : undefined}
+              maxLength={(isHeroField || isWelcomeField) ? maxLengthForField : undefined}
               className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground ${
                 isOverLimitText 
                   ? "border-red-500 dark:border-red-400" 
                   : "border-gray-300 dark:border-gray-600"
               }`}
             />
-            {isHeroField && (
+            {(isHeroField || isWelcomeField) && (
               <div className="flex justify-between items-center text-sm">
                 <span className={`${isOverLimitText ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
                   {currentLengthText}/{maxLengthForField} caracteres
@@ -384,18 +421,48 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         );
 
       case "html":
+        const isWelcomeContent = item.key === "content" && item.section === "welcome";
+        const maxLengthHtml = isWelcomeContent ? DEFAULT_WELCOME_CONTENT.maxCharacters.content : 5000;
+        const currentLengthHtml = currentValue.length;
+        const isOverLimitHtml = isWelcomeContent && currentLengthHtml > maxLengthHtml;
+        
         return (
           <div className="space-y-2">
             <textarea
               value={currentValue}
-              onChange={(e) => handleContentChange(item.id, e.target.value)}
+              onChange={(e) => {
+                if (isWelcomeContent && e.target.value.length <= maxLengthHtml) {
+                  handleContentChange(item.id, e.target.value);
+                } else if (!isWelcomeContent) {
+                  handleContentChange(item.id, e.target.value);
+                }
+              }}
               placeholder={item.placeholder}
-              rows={8}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-foreground font-mono text-sm resize-vertical"
+              rows={isWelcomeContent ? 12 : 8}
+              maxLength={isWelcomeContent ? maxLengthHtml : undefined}
+              className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground font-mono text-sm resize-vertical ${
+                isOverLimitHtml 
+                  ? "border-red-500 dark:border-red-400" 
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
             />
+            {isWelcomeContent && (
+              <div className="flex justify-between items-center text-sm">
+                <span className={`${isOverLimitHtml ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                  {currentLengthHtml}/{maxLengthHtml} caracteres
+                </span>
+                {isOverLimitHtml && (
+                  <span className="text-red-600 dark:text-red-400 font-medium">
+                    Conteúdo muito longo! Reduza o texto.
+                  </span>
+                )}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">
-              Suporte a HTML básico: &lt;p&gt;, &lt;br&gt;, &lt;strong&gt;,
-              &lt;em&gt;
+              {isWelcomeContent 
+                ? "Use markdown básico: **negrito**, *itálico*, listas numeradas (1.) e com bullet (•)"
+                : "Suporte a HTML básico: <p>, <br>, <strong>, <em>"
+              }
             </p>
           </div>
         );

@@ -984,11 +984,11 @@
   }
 
   .appointment-calendar {
-    @apply max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-4 border-2 border-border;
+    @apply w-full max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-2 sm:p-4 border-2 border-border overflow-x-auto;
   }
 
   .time-slot-grid {
-    @apply grid grid-cols-3 sm:grid-cols-5 gap-2;
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2;
   }
 
   .time-slot {

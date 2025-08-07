@@ -31,7 +31,7 @@ export default function Therapies() {
 
   return (
     <section>
-      <div className="services-section min-h-screen">
+      <div className="w-full py-16 relative z-0 min-h-screen">
         <div className="content-container">
           <div className="relative z-10">
             <div className="section-header">

@@ -5,7 +5,7 @@ import { ContactCard } from "@/components/shared/cards/BaseCard";
 
 export const InfoCards = () => {
   return (
-    <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <ContactCard title="Preparando-se para sua consulta">
         <p className="text-foreground">
           Para a primeira consulta, recomendo chegar 10 minutos antes do horário

@@ -179,7 +179,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     if (mode === "schedule") return null;
 
     return (
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           onClick={() => {
             updateState({ step: AppointmentStep.DATE_TIME, cancelar: false });

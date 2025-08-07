@@ -164,7 +164,7 @@ export default function Assessment() {
 
   return (
     <section>
-      <div className="section-fullscreen w-full py-16 overflow-hidden relative z-0">
+      <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
         <div className="content-container">
           <div className="relative z-10">
             <div className="section-header">

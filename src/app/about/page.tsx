@@ -11,22 +11,12 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <div>
-      <section className="section-fullscreen py-16 relative z-0 overflow-hidden">
+      <section className="py-16 relative z-0 overflow-hidden min-h-screen xl:h-screen">
         <div className="content-container">
-          <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-            {/* Imagem */}
-            <div className="w-full md:w-1/2 flex justify-center items-center">
-              <Image
-                src="/assets/michel2.png"
-                alt="Michel - Psicólogo Clínico"
-                width={400}
-                height={400}
-                className="rounded-lg shadow-lg object-contain"
-              />
-            </div>
-
-            {/* Texto */}
-            <div className="w-full md:w-2/3 overflow-scroll h-[36rem] custom-scrollbar">
+          <div className="flex flex-col xl:flex-row items-start gap-8 relative z-10">
+            {/* Texto - aparece primeiro em telas ≤1200px */}
+            <div className="w-full xl:w-2/3 order-1">
+              <div className="xl:max-h-screen xl:overflow-y-auto custom-scrollbar xl:pr-4">
               <h2 className="text-2xl font-bold mb-4">Sobre mim</h2>
               <h3 className="text-xl font-bold mb-6">Psicólogo Clínico</h3>
 
@@ -66,6 +56,18 @@ export default function About() {
                   podemos trilhar um caminho de transformação e bem-estar.
                 </p>
               </div>
+              </div>
+            </div>
+
+            {/* Imagem - aparece após o texto em telas ≤1200px */}
+            <div className="w-full xl:w-1/3 order-2 flex justify-center items-start mb-8 xl:mb-0">
+              <Image
+                src="/assets/michel2.png"
+                alt="Michel - Psicólogo Clínico"
+                width={400}
+                height={400}
+                className="rounded-lg shadow-lg object-contain max-w-full h-auto"
+              />
             </div>
           </div>
         </div>

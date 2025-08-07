@@ -160,7 +160,7 @@ export default function DateTimeSelection({
         {/* Seleção de modalidade - ✅ USANDO CONSTANTS */}
         <div>
           <label className={formStyles.formLabel}>Modalidade da Consulta</label>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               className={`${
@@ -224,7 +224,7 @@ export default function DateTimeSelection({
         <label className={formStyles.formLabel}>
           Selecione uma data para a consulta
         </label>
-        <div className="max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-4 border-2 border-border" data-testid="calendar">
+        <div className="w-full max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-2 sm:p-4 border-2 border-border overflow-x-auto" data-testid="calendar">
           <Calendar
             mode="single"
             selected={date}
@@ -286,7 +286,7 @@ export default function DateTimeSelection({
         {formData.dataSelecionada && (
           <div className="mt-6">
             <label className={formStyles.formLabel}>Selecione um Horário</label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
               {carregando ? (
                 <div className="col-span-full flex justify-center py-8">
                   <svg

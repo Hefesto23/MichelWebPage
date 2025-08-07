@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 // ============================================
 const SECRET_KEY = process.env.JWT_SECRET || "minha-chave-secreta";
 const TOKEN_KEY = "token";
-const TOKEN_EXPIRY = "1h";
+const TOKEN_EXPIRY = "8h"; // Aumentado para 8 horas para melhor UX
 
 // ============================================
 // 🏗️ TIPOS
@@ -181,6 +181,18 @@ export const createAuthHeaders = (): HeadersInit => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+export const handleAuthError = (response: Response): boolean => {
+  if (response.status === 401) {
+    removeToken();
+    alert("Sua sessão expirou. Você será redirecionado para o login.");
+    if (typeof window !== "undefined") {
+      window.location.href = "/admin/login";
+    }
+    return true;
+  }
+  return false;
+};
+
 export const fetchWithAuth = async (
   url: string,
   options: RequestInit = {}
@@ -191,7 +203,14 @@ export const fetchWithAuth = async (
     ...options.headers,
   };
 
-  return fetch(url, { ...options, headers });
+  const response = await fetch(url, { ...options, headers });
+  
+  // Auto-handle 401 errors
+  if (handleAuthError(response)) {
+    throw new Error("Authentication expired");
+  }
+  
+  return response;
 };
 
 // ============================================

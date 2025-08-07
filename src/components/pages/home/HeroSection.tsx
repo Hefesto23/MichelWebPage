@@ -2,16 +2,61 @@
 
 import { Button } from "@/components/shared/ui/button";
 import useScrollToSection from "@/hooks/useScrollToSection";
+import { DEFAULT_HERO_CONTENT } from "@/utils/default-content";
 import { ArrowDown } from "lucide-react";
 import Link from "next/link";
-
-const heroSubtitles = {
-  text1:
-    "Já pensou em como seria ter uma vida mais tranquila e leve, com menos ansiedade? Lidar com isso pode ser difícil, mas você não precisa enfrentar tudo sozinho. Como psicólogo, estou aqui para te ouvir, acolher e ajudar a encontrar caminhos que tragam mais calma e equilíbrio ao seu dia a dia. Cada passo nessa jornada é importante, e eu estarei ao seu lado para apoiar você em cada um deles!",
-};
+import { useEffect, useState } from "react";
 
 export const HeroSection = () => {
   const scrollToSaibaMais = useScrollToSection("saiba-mais");
+  const [heroText, setHeroText] = useState(DEFAULT_HERO_CONTENT.mainText);
+  const [ctaText, setCtaText] = useState(DEFAULT_HERO_CONTENT.ctaText);
+  const [disclaimer, setDisclaimer] = useState(DEFAULT_HERO_CONTENT.disclaimer);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Buscar conteúdo personalizado do banco
+    const fetchHeroContent = async () => {
+      try {
+        console.log("🔄 HeroSection: Buscando conteúdo...");
+        const response = await fetch('/api/admin/content/home');
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📥 HeroSection: Dados recebidos:", data);
+          
+          if (data.content?.hero) {
+            console.log("✅ HeroSection: Usando conteúdo personalizado");
+            
+            // Atualizar mainText se existir
+            if (data.content.hero.mainText) {
+              setHeroText(data.content.hero.mainText);
+            }
+            
+            // Atualizar ctaText se existir
+            if (data.content.hero.ctaText) {
+              setCtaText(data.content.hero.ctaText);
+            }
+            
+            // Atualizar disclaimer se existir
+            if (data.content.hero.disclaimer) {
+              setDisclaimer(data.content.hero.disclaimer);
+            }
+          } else {
+            console.log("ℹ️ HeroSection: Usando conteúdo padrão (nenhum salvo)");
+          }
+        } else {
+          console.log("⚠️ HeroSection: Resposta não OK, usando padrão");
+        }
+      } catch (error) {
+        console.log("❌ HeroSection: Erro ao buscar, usando padrão:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHeroContent();
+  }, []);
 
   return (
     <section
@@ -22,10 +67,16 @@ export const HeroSection = () => {
         <div className="content-container">
           <div className="hero-content">
             <h1 className="hero-text">
-              {heroSubtitles.text1}
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Carregando...</span>
+                </div>
+              ) : (
+                heroText
+              )}
               <div className="mt-4">
-                Agende sua consulta e comece a reescrever sua história hoje
-                mesmo:
+                {ctaText}
               </div>
               <Link href="/agendamento">
                 <Button className="my-10 hover:opacity-80">
@@ -33,7 +84,7 @@ export const HeroSection = () => {
                 </Button>
               </Link>
               <div className="italic text-lg font-light">
-                *Atendimentos a partir de 20 anos de idade
+                {disclaimer}
               </div>
             </h1>
           </div>

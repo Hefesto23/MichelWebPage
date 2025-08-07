@@ -18,6 +18,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Forçar re-verificação quando localStorage mudar (logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
+      if (!token && isAuthenticated) {
+        // Token foi removido (logout), forçar re-verificação
+        setIsAuthenticated(false);
+        setLoading(true);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [isAuthenticated]);
 
   // Verificar se é a página de login (que tem seu próprio layout)
   const isLoginPage = pathname === "/admin/login";
@@ -29,13 +44,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       return;
     }
 
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
+      
       if (!token) {
-        router.push("/admin/login");
-      } else {
-        setIsAuthenticated(true);
+        setIsAuthenticated(false);
+        setLoading(false);
+        router.replace("/admin/login");
+        return;
       }
+
+      try {
+        // Verificar token com o servidor
+        const response = await fetch("/api/auth/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            setIsAuthenticated(true);
+          } else {
+            localStorage.removeItem("token");
+            setIsAuthenticated(false);
+            router.replace("/admin/login");
+          }
+        } else {
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+          router.replace("/admin/login");
+        }
+      } catch (error) {
+        console.error("Erro na verificação de autenticação:", error);
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+        router.replace("/admin/login");
+      }
+      
       setLoading(false);
     };
 
@@ -56,18 +105,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Loading state para outras páginas admin
-  if (loading) {
+  // SEMPRE mostrar loading ou bloquear acesso até verificação completa
+  if (loading || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-foreground"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-foreground mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            {loading ? "Verificando autenticação..." : "Redirecionando..."}
+          </p>
+        </div>
       </div>
     );
-  }
-
-  // Se não autenticado, não renderizar nada (já redirecionado)
-  if (!isAuthenticated) {
-    return null;
   }
 
   // Layout padrão admin com sidebar para todas as outras páginas

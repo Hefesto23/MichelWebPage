@@ -1,5 +1,6 @@
 // src/components/admin/Sidebar.tsx
 "use client";
+import { logoutUser } from "@/lib/auth";
 import { cn } from "@/utils/utils";
 import {
   BarChart3,
@@ -12,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const sidebarItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Home },
@@ -24,12 +25,11 @@ const sidebarItems = [
 ];
 
 export const AdminSidebar = () => {
-  const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/admin/login");
+  const handleLogout = async () => {
+    // Usar a função centralizada de logout que faz limpeza completa
+    await logoutUser();
   };
 
   return (
@@ -78,7 +78,7 @@ export const AdminSidebar = () => {
       <div className="absolute bottom-0 left-0 right-0 p-6">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium"
+          className="flex items-center w-full px-4 py-3 text-primary-foreground  hover:bg-black/10 rounded-lg transition-colors font-bold"
         >
           <LogOut className="w-5 h-5 mr-3" />
           Logout

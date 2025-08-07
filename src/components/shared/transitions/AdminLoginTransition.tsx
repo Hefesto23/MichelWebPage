@@ -1,36 +1,28 @@
 // src/components/shared/transitions/AdminLoginTransition.tsx
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AdminLoginTransitionProps {
   children: React.ReactNode;
 }
 
 export const AdminLoginTransition = ({ children }: AdminLoginTransitionProps) => {
-  const pathname = usePathname();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const isFirstRender = useRef(true);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    setIsTransitioning(true);
+    // Fade in simples ao montar o componente
     const timer = setTimeout(() => {
-      setIsTransitioning(false);
-    }, 300);
+      setIsLoaded(true);
+    }, 50);
 
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, []);
 
   return (
     <div
-      className={`transition-all duration-300 ease-in-out ${
-        isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+      className={`transition-opacity duration-500 ease-in-out ${
+        isLoaded ? "opacity-100" : "opacity-0"
       }`}
     >
       {children}

@@ -12,7 +12,7 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  
+
   const { login, error, isLoading, isAuthenticated } = useAuthLogin();
 
   // Redireciona se já estiver logado
@@ -24,7 +24,7 @@ export const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const success = await login(email, password);
     if (success) {
       // Usar window.location em vez de router.push para forçar reload completo
@@ -118,10 +118,8 @@ export const Login = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-red-600 dark:text-red-400 text-sm">
-                  {error}
-                </p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-500  rounded-lg">
+                <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
 
@@ -129,7 +127,7 @@ export const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary-foreground text-white rounded-lg hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="w-full py-3 bg-primary-foreground text-gray-900 rounded-lg hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-bold"
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </button>

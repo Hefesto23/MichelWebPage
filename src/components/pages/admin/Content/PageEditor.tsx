@@ -2,7 +2,9 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { ArrowLeft, Eye, Save, Upload } from "lucide-react";
+import { DEFAULT_HERO_CONTENT } from "@/utils/default-content";
+import { handleAuthError } from "@/lib/auth";
+import { ArrowLeft, Eye, Save, Upload, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -33,6 +35,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const [sections, setSections] = useState<PageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [changes, setChanges] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -40,14 +43,25 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     try {
       setError(null);
 
-      // Simulação de dados
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Buscar conteúdo salvo no banco
+      const response = await fetch(`/api/admin/content/${page}`);
+      let savedContent = null;
+      
+      if (response.ok) {
+        const data = await response.json();
+        savedContent = data.content;
+      }
 
-      const mockSections = getPageSections(page);
-      setSections(mockSections);
+      const sections = getPageSections(page, savedContent);
+      setSections(sections);
     } catch (error) {
       console.error("Erro ao carregar conteúdo:", error);
-      setError("Erro ao carregar conteúdo. Tente novamente mais tarde.");
+      
+      // Em caso de erro, usar conteúdo padrão
+      const sections = getPageSections(page, null);
+      setSections(sections);
+      
+      setError("Erro ao carregar conteúdo salvo. Usando conteúdo padrão.");
     } finally {
       setLoading(false);
     }
@@ -57,70 +71,48 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     loadPageContent();
   }, [loadPageContent]);
 
-  const getPageSections = (pageKey: string): PageSection[] => {
+  const getPageSections = (pageKey: string, savedContent: Record<string, Record<string, string>> | null = null): PageSection[] => {
     switch (pageKey) {
       case "home":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const heroMainText = savedContent?.hero?.mainText || DEFAULT_HERO_CONTENT.mainText;
+        const heroCtaText = savedContent?.hero?.ctaText || DEFAULT_HERO_CONTENT.ctaText;
+        const heroDisclaimer = savedContent?.hero?.disclaimer || DEFAULT_HERO_CONTENT.disclaimer;
+        
         return [
           {
-            name: "Seção Hero",
-            description: "Banner principal da página inicial",
+            name: "Seção Hero - Conteúdo Completo",
+            description: "Edite todos os textos que aparecem na seção principal da página inicial.",
             items: [
               {
                 id: 1,
                 page: "home",
                 section: "hero",
-                key: "title",
-                type: "title",
-                value: "Transforme sua vida com apoio profissional",
-                label: "Título Principal",
-                placeholder: "Digite o título principal...",
+                key: "mainText",
+                type: "description",
+                value: heroMainText,
+                label: "Texto Principal do Hero",
+                placeholder: "Digite o texto principal que será exibido no banner inicial...",
               },
               {
                 id: 2,
                 page: "home",
                 section: "hero",
-                key: "subtitle",
+                key: "ctaText",
                 type: "text",
-                value:
-                  "Psicologia clínica especializada em transtornos emocionais",
-                label: "Subtítulo",
-                placeholder: "Digite o subtítulo...",
+                value: heroCtaText,
+                label: "Texto do Call-to-Action",
+                placeholder: "Digite o texto que aparece antes do botão de agendamento...",
               },
               {
                 id: 3,
                 page: "home",
                 section: "hero",
-                key: "cta_text",
+                key: "disclaimer",
                 type: "text",
-                value: "Agende sua Consulta",
-                label: "Texto do Botão",
-                placeholder: "Texto do botão de ação...",
-              },
-            ],
-          },
-          {
-            name: "Seção Welcome",
-            description: "Apresentação e boas-vindas",
-            items: [
-              {
-                id: 4,
-                page: "home",
-                section: "welcome",
-                key: "title",
-                type: "title",
-                value: "Bem-vindo ao meu consultório",
-                label: "Título da Seção",
-                placeholder: "Digite o título...",
-              },
-              {
-                id: 5,
-                page: "home",
-                section: "welcome",
-                key: "description",
-                type: "description",
-                value: "Sou especializado em análise do comportamento...",
-                label: "Descrição",
-                placeholder: "Digite a descrição...",
+                value: heroDisclaimer,
+                label: "Texto do Disclaimer",
+                placeholder: "Digite o texto de aviso que aparece no final...",
               },
             ],
           },
@@ -179,14 +171,43 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   };
 
   const saveChanges = async () => {
-    if (Object.keys(changes).length === 0) return;
+    // Permitir salvar mesmo sem mudanças pendentes (para preservar valores atuais)
 
     setSaving(true);
     setError(null);
 
     try {
-      // Simular salvamento
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Preparar dados para salvar - MESCLAR valores atuais + mudanças
+      const contentToSave: Record<string, Record<string, string>> = {};
+      
+      sections.forEach(section => {
+        section.items.forEach(item => {
+          if (item.section === "hero") {
+            if (!contentToSave.hero) contentToSave.hero = {};
+            // Usar valor mudança SE existir, senão usar valor atual do item
+            const valueToSave = changes[item.id] !== undefined ? changes[item.id] : item.value;
+            contentToSave.hero[item.key] = valueToSave;
+          }
+        });
+      });
+
+      // Salvar no banco
+      const response = await fetch(`/api/admin/content/${page}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ content: contentToSave }),
+      });
+
+      if (!response.ok) {
+        // Se for erro 401 (token expirado), usar helper para redirecionar
+        if (handleAuthError(response)) {
+          return;
+        }
+        throw new Error("Erro ao salvar conteúdo");
+      }
 
       // Atualizar dados locais
       setSections((prev) =>
@@ -211,6 +232,46 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     }
   };
 
+  const resetToDefaults = async () => {
+    if (!confirm("Tem certeza que deseja restaurar o conteúdo para os valores padrão? Esta ação não pode ser desfeita.")) {
+      return;
+    }
+
+    setResetting(true);
+    setError(null);
+
+    try {
+      // Chamar endpoint DELETE para resetar
+      const response = await fetch(`/api/admin/content/${page}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        // Se for erro 401 (token expirado), usar helper para redirecionar
+        if (handleAuthError(response)) {
+          return;
+        }
+        throw new Error("Erro ao resetar conteúdo");
+      }
+
+      // Recarregar conteúdo padrão
+      await loadPageContent();
+      
+      // Limpar mudanças pendentes
+      setChanges({});
+      
+      alert("Conteúdo restaurado para os valores padrão com sucesso!");
+    } catch (error) {
+      console.error("Erro ao resetar:", error);
+      setError("Erro ao restaurar conteúdo. Tente novamente.");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const getPageTitle = (pageKey: string) => {
     const titles: Record<string, string> = {
       home: "Página Inicial",
@@ -229,25 +290,97 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     switch (item.type) {
       case "title":
       case "text":
+        const isHeroField = item.section === "hero";
+        let maxLengthForField = 1000; // default
+        let fieldName = "";
+        
+        if (isHeroField) {
+          if (item.key === "ctaText") {
+            maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.ctaText;
+            fieldName = "CTA Text";
+          } else if (item.key === "disclaimer") {
+            maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.disclaimer;
+            fieldName = "Disclaimer";
+          }
+        }
+        
+        const currentLengthText = currentValue.length;
+        const isOverLimitText = isHeroField && currentLengthText > maxLengthForField;
+        
         return (
-          <input
-            type="text"
-            value={currentValue}
-            onChange={(e) => handleContentChange(item.id, e.target.value)}
-            placeholder={item.placeholder}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-foreground"
-          />
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={currentValue}
+              onChange={(e) => {
+                if (isHeroField && e.target.value.length <= maxLengthForField) {
+                  handleContentChange(item.id, e.target.value);
+                } else if (!isHeroField) {
+                  handleContentChange(item.id, e.target.value);
+                }
+              }}
+              placeholder={item.placeholder}
+              maxLength={isHeroField ? maxLengthForField : undefined}
+              className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground ${
+                isOverLimitText 
+                  ? "border-red-500 dark:border-red-400" 
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            />
+            {isHeroField && (
+              <div className="flex justify-between items-center text-sm">
+                <span className={`${isOverLimitText ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                  {currentLengthText}/{maxLengthForField} caracteres
+                </span>
+                {isOverLimitText && (
+                  <span className="text-red-600 dark:text-red-400 font-medium">
+                    {fieldName} muito longo! Reduza o texto.
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         );
 
       case "description":
+        const isHeroMainText = item.key === "mainText" && item.section === "hero";
+        const maxLength = isHeroMainText ? DEFAULT_HERO_CONTENT.maxCharacters.mainText : 1000;
+        const currentLengthDesc = currentValue.length;
+        const isOverLimitDesc = currentLengthDesc > maxLength;
+        
         return (
-          <textarea
-            value={currentValue}
-            onChange={(e) => handleContentChange(item.id, e.target.value)}
-            placeholder={item.placeholder}
-            rows={4}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-foreground resize-vertical"
-          />
+          <div className="space-y-2">
+            <textarea
+              value={currentValue}
+              onChange={(e) => {
+                if (isHeroMainText && e.target.value.length <= maxLength) {
+                  handleContentChange(item.id, e.target.value);
+                } else if (!isHeroMainText) {
+                  handleContentChange(item.id, e.target.value);
+                }
+              }}
+              placeholder={item.placeholder}
+              rows={isHeroMainText ? 8 : 4}
+              maxLength={isHeroMainText ? maxLength : undefined}
+              className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground resize-vertical ${
+                isOverLimitDesc 
+                  ? "border-red-500 dark:border-red-400" 
+                  : "border-gray-300 dark:border-gray-600"
+              }`}
+            />
+            {isHeroMainText && (
+              <div className="flex justify-between items-center text-sm">
+                <span className={`${isOverLimitDesc ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                  {currentLengthDesc}/{maxLength} caracteres
+                </span>
+                {isOverLimitDesc && (
+                  <span className="text-red-600 dark:text-red-400 font-medium">
+                    Limite excedido! Reduza o texto para manter o design.
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         );
 
       case "html":
@@ -350,12 +483,21 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           </Link>
 
           <button
+            onClick={resetToDefaults}
+            disabled={resetting || saving}
+            className="inline-flex items-center space-x-2 px-4 py-2 border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>{resetting ? "Restaurando..." : "Restaurar Padrão"}</span>
+          </button>
+
+          <button
             onClick={saveChanges}
-            disabled={saving || Object.keys(changes).length === 0}
+            disabled={saving}
             className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-foreground text-white rounded-md hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? "Salvando..." : "Salvar Alterações"}</span>
+            <span>{saving ? "Salvando..." : Object.keys(changes).length > 0 ? "Salvar Alterações" : "Salvar"}</span>
           </button>
         </div>
       </div>

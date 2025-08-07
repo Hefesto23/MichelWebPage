@@ -12,6 +12,7 @@ export const HeroSection = () => {
   const [heroText, setHeroText] = useState(DEFAULT_HERO_CONTENT.mainText);
   const [ctaText, setCtaText] = useState(DEFAULT_HERO_CONTENT.ctaText);
   const [disclaimer, setDisclaimer] = useState(DEFAULT_HERO_CONTENT.disclaimer);
+  const [backgroundImage, setBackgroundImage] = useState(DEFAULT_HERO_CONTENT.backgroundImage);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +43,11 @@ export const HeroSection = () => {
             if (data.content.hero.disclaimer) {
               setDisclaimer(data.content.hero.disclaimer);
             }
+            
+            // Atualizar backgroundImage se existir
+            if (data.content.hero.backgroundImage) {
+              setBackgroundImage(data.content.hero.backgroundImage);
+            }
           } else {
             console.log("ℹ️ HeroSection: Usando conteúdo padrão (nenhum salvo)");
           }
@@ -61,32 +67,43 @@ export const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="hero-section bg-[url('/assets/horizonte.jpg')]"
+      className="hero-section"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
       <div className="hero-overlay section-padding">
         <div className="content-container">
           <div className="hero-content">
             <h1 className="hero-text">
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Carregando...</span>
-                </div>
+                <>
+                  <span className="inline-flex items-center space-x-2">
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block"></span>
+                    <span>Carregando...</span>
+                  </span>
+                </>
               ) : (
                 heroText
               )}
-              <div className="mt-4">
-                {ctaText}
-              </div>
-              <Link href="/agendamento">
-                <Button className="my-10 hover:opacity-80">
-                  Agende sua Consulta!
-                </Button>
-              </Link>
-              <div className="italic text-lg font-light">
-                {disclaimer}
-              </div>
             </h1>
+            
+            <div className="mt-4 text-white text-lg font-light">
+              {ctaText}
+            </div>
+            
+            <Link href="/agendamento">
+              <Button className="my-10 hover:opacity-80">
+                Agende sua Consulta!
+              </Button>
+            </Link>
+            
+            <div className="italic text-lg font-light text-white">
+              {disclaimer}
+            </div>
           </div>
         </div>
         <div className="hero-cta">

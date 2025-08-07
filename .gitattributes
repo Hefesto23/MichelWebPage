@@ -1,0 +1,121 @@
+# ============================================
+# Git Attributes Configuration
+# Defines how Git handles different file types
+# ============================================
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files - enforce LF line endings
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+
+# Configuration files
+*.env text eol=lf
+*.config.js text eol=lf
+*.config.mjs text eol=lf
+*.config.ts text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+
+# Documentation
+*.txt text eol=lf
+README* text eol=lf
+LICENSE* text eol=lf
+CHANGELOG* text eol=lf
+
+# Binary files - prevent Git from trying to diff/merge
+# Images
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.svg binary
+*.bmp binary
+*.tiff binary
+
+# Fonts  
+*.woff binary
+*.woff2 binary
+*.eot binary
+*.ttf binary
+*.otf binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+
+# Documents
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+
+# Audio/Video
+*.mp3 binary
+*.mp4 binary
+*.avi binary
+*.mov binary
+*.wmv binary
+*.wav binary
+*.flac binary
+
+# Executables
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Generated files should not be stored in git
+*.map binary
+*.min.js binary
+*.min.css binary
+
+# Lock files - treat as binary to avoid conflicts
+package-lock.json binary
+yarn.lock binary
+pnpm-lock.yaml binary
+
+# IDE/Editor files
+*.code-workspace text eol=lf
+
+# Next.js specific
+next-env.d.ts text eol=lf
+*.d.ts text eol=lf
+
+# Prisma
+*.prisma text eol=lf
+schema.prisma text eol=lf
+
+# Docker
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# GitHub
+.github/* text eol=lf
+
+# Linguist overrides for better GitHub language detection
+*.prisma linguist-language=Prisma
+*.css linguist-language=CSS
+*.scss linguist-language=SCSS
+public/uploads/* linguist-generated=true

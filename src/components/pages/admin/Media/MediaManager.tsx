@@ -4,34 +4,23 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { ImageUpload } from "@/components/shared/media";
+import { ImageUploader } from "@/components/shared/media";
 import { Edit, Eye, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface MediaFile {
-  id: number;
+  id: string;
   filename: string;
-  originalName: string;
   url: string;
+  thumbnailUrl: string;
   size: number;
-  category?: string;
-  alt?: string;
-  createdAt: string;
+  uploadedAt: string;
 }
 
 export const MediaManager = () => {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [fetchingFiles, setFetchingFiles] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-
-  const categories = [
-    { value: "all", label: "Todas" },
-    { value: "profile", label: "Perfil" },
-    { value: "gallery", label: "Galeria" },
-    { value: "services", label: "Serviços" },
-    { value: "hero", label: "Hero" },
-  ];
 
   useEffect(() => {
     fetchFiles();
@@ -41,7 +30,7 @@ export const MediaManager = () => {
     setFetchingFiles(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/admin/media", {
+      const response = await fetch("/api/admin/media/list", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -49,7 +38,7 @@ export const MediaManager = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setFiles(data.files);
+        setFiles(data.images || []);
       }
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error);
@@ -58,12 +47,12 @@ export const MediaManager = () => {
     }
   };
 
-  const deleteFile = async (fileId: number) => {
+  const deleteFile = async (filename: string) => {
     if (!confirm("Tem certeza que deseja excluir este arquivo?")) return;
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/admin/media/${fileId}`, {
+      const response = await fetch(`/api/admin/media/delete?filename=${encodeURIComponent(filename)}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,17 +60,12 @@ export const MediaManager = () => {
       });
 
       if (response.ok) {
-        setFiles(files.filter((file) => file.id !== fileId));
+        setFiles(files.filter((file) => file.filename !== filename));
       }
     } catch (error) {
       console.error("Erro ao deletar arquivo:", error);
     }
   };
-
-  const filteredFiles =
-    selectedCategory === "all"
-      ? files
-      : files.filter((file) => file.category === selectedCategory);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -103,39 +87,16 @@ export const MediaManager = () => {
       </div>
 
       {/* Upload Section */}
-      <ImageUpload
-        onUploadSuccess={(newFile) => {
-          setFiles((prev) => [
-            ...prev,
-            {
-              ...newFile,
-              createdAt: new Date().toISOString(), // Ensure 'createdAt' is provided
-            } as MediaFile,
-          ]);
-        }}
-      />
-
-      {/* Filter Section */}
-      <AdminCard title="Filtros">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category.value}
-              onClick={() => setSelectedCategory(category.value)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                selectedCategory === category.value
-                  ? "bg-primary-foreground text-white"
-                  : "bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
+      <AdminCard title="Upload de Imagens">
+        <ImageUploader
+          onUploadSuccess={fetchFiles}
+          onUploadError={(error) => alert(`Erro no upload: ${error}`)}
+          maxFiles={10}
+        />
       </AdminCard>
 
       {/* Files Grid */}
-      <AdminCard title={`Arquivos (${filteredFiles.length})`}>
+      <AdminCard title={`Arquivos (${files.length})`}>
         {fetchingFiles ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -143,15 +104,15 @@ export const MediaManager = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredFiles.map((file) => (
+            {files.map((file) => (
               <div
                 key={file.id}
                 className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border group hover:shadow-md transition-shadow"
               >
                 <div className="relative aspect-video bg-gray-200 dark:bg-gray-700 rounded overflow-hidden mb-3">
                   <Image
-                    src={file.url}
-                    alt={file.alt || file.originalName}
+                    src={file.thumbnailUrl}
+                    alt={file.filename}
                     fill
                     className="object-cover"
                   />
@@ -161,15 +122,24 @@ export const MediaManager = () => {
                     <button
                       onClick={() => window.open(file.url, "_blank")}
                       className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+                      title="Visualizar"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(file.url);
+                        alert('URL copiada para a área de transferência!');
+                      }}
+                      className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700"
+                      title="Copiar URL"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => deleteFile(file.id)}
+                      onClick={() => deleteFile(file.filename)}
                       className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+                      title="Deletar"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -178,25 +148,24 @@ export const MediaManager = () => {
 
                 <div>
                   <p className="text-sm font-medium truncate mb-1">
-                    {file.originalName}
+                    {file.filename}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground mb-1">
                     {formatFileSize(file.size)}
                   </p>
-                  {file.category && (
-                    <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                      {file.category}
-                    </span>
-                  )}
+                  <p className="text-xs text-gray-500">
+                    {new Date(file.uploadedAt).toLocaleDateString('pt-BR')}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {!fetchingFiles && filteredFiles.length === 0 && (
+        {!fetchingFiles && files.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground">Nenhum arquivo encontrado</p>
+            <p className="text-sm text-gray-500 mt-2">Faça upload de algumas imagens para começar</p>
           </div>
         )}
       </AdminCard>

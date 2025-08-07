@@ -113,10 +113,10 @@ export const WelcomeSection = () => {
             <div className="section-header">
               <h1 className="section-title">
                 {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                  <span className="inline-flex items-center space-x-2">
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground inline-block"></span>
                     <span>Carregando...</span>
-                  </div>
+                  </span>
                 ) : (
                   title
                 )}

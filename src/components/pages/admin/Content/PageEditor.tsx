@@ -2,9 +2,22 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { DEFAULT_HERO_CONTENT, DEFAULT_WELCOME_CONTENT } from "@/utils/default-content";
+import { ImageSelector } from "@/components/shared/media";
 import { handleAuthError } from "@/lib/auth";
-import { ArrowLeft, Eye, Save, Upload, RotateCcw } from "lucide-react";
+import {
+  DEFAULT_CLINIC_CONTENT,
+  DEFAULT_HERO_CONTENT,
+  DEFAULT_SERVICES_CONTENT,
+  DEFAULT_WELCOME_CONTENT,
+} from "@/utils/default-content";
+import {
+  ArrowLeft,
+  Eye,
+  ImageIcon,
+  RotateCcw,
+  Save,
+  Upload,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -38,6 +51,10 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const [resetting, setResetting] = useState(false);
   const [changes, setChanges] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [imageSelectorOpen, setImageSelectorOpen] = useState(false);
+  const [currentImageField, setCurrentImageField] = useState<number | null>(
+    null
+  );
 
   const loadPageContent = useCallback(async () => {
     try {
@@ -46,7 +63,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       // Buscar conteúdo salvo no banco
       const response = await fetch(`/api/admin/content/${page}`);
       let savedContent = null;
-      
+
       if (response.ok) {
         const data = await response.json();
         savedContent = data.content;
@@ -56,11 +73,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       setSections(sections);
     } catch (error) {
       console.error("Erro ao carregar conteúdo:", error);
-      
+
       // Em caso de erro, usar conteúdo padrão
       const sections = getPageSections(page, null);
       setSections(sections);
-      
+
       setError("Erro ao carregar conteúdo salvo. Usando conteúdo padrão.");
     } finally {
       setLoading(false);
@@ -71,21 +88,71 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     loadPageContent();
   }, [loadPageContent]);
 
-  const getPageSections = (pageKey: string, savedContent: Record<string, Record<string, string>> | null = null): PageSection[] => {
+  const getPageSections = (
+    pageKey: string,
+    savedContent: Record<string, Record<string, string>> | null = null
+  ): PageSection[] => {
     switch (pageKey) {
       case "home":
         // Usar conteúdo salvo se existir, senão usar padrão
-        const heroMainText = savedContent?.hero?.mainText || DEFAULT_HERO_CONTENT.mainText;
-        const heroCtaText = savedContent?.hero?.ctaText || DEFAULT_HERO_CONTENT.ctaText;
-        const heroDisclaimer = savedContent?.hero?.disclaimer || DEFAULT_HERO_CONTENT.disclaimer;
-        
-        const welcomeTitle = savedContent?.welcome?.title || DEFAULT_WELCOME_CONTENT.title;
-        const welcomeContent = savedContent?.welcome?.content || DEFAULT_WELCOME_CONTENT.content;
-        
+        const heroMainText =
+          savedContent?.hero?.mainText || DEFAULT_HERO_CONTENT.mainText;
+        const heroCtaText =
+          savedContent?.hero?.ctaText || DEFAULT_HERO_CONTENT.ctaText;
+        const heroDisclaimer =
+          savedContent?.hero?.disclaimer || DEFAULT_HERO_CONTENT.disclaimer;
+        const heroBackgroundImage =
+          savedContent?.hero?.backgroundImage ||
+          DEFAULT_HERO_CONTENT.backgroundImage;
+
+        const welcomeTitle =
+          savedContent?.welcome?.title || DEFAULT_WELCOME_CONTENT.title;
+        const welcomeContent =
+          savedContent?.welcome?.content || DEFAULT_WELCOME_CONTENT.content;
+
+        const servicesTitle =
+          savedContent?.services?.title || DEFAULT_SERVICES_CONTENT.title;
+        const servicesDescription =
+          savedContent?.services?.description ||
+          DEFAULT_SERVICES_CONTENT.description;
+
+        // Parse dos cards se vier como string JSON
+        let servicesCards = DEFAULT_SERVICES_CONTENT.cards;
+        if (savedContent?.services?.cards) {
+          try {
+            servicesCards =
+              typeof savedContent.services.cards === "string"
+                ? JSON.parse(savedContent.services.cards)
+                : savedContent.services.cards;
+          } catch {
+            servicesCards = DEFAULT_SERVICES_CONTENT.cards;
+          }
+        }
+
+        const clinicTitle =
+          savedContent?.clinic?.title || DEFAULT_CLINIC_CONTENT.title;
+        const clinicDescription =
+          savedContent?.clinic?.description ||
+          DEFAULT_CLINIC_CONTENT.description;
+
+        // Parse das imagens se vier como string JSON
+        let clinicImages = DEFAULT_CLINIC_CONTENT.images;
+        if (savedContent?.clinic?.images) {
+          try {
+            clinicImages =
+              typeof savedContent.clinic.images === "string"
+                ? JSON.parse(savedContent.clinic.images)
+                : savedContent.clinic.images;
+          } catch {
+            clinicImages = DEFAULT_CLINIC_CONTENT.images;
+          }
+        }
+
         return [
           {
             name: "Seção Hero - Conteúdo Completo",
-            description: "Edite todos os textos que aparecem na seção principal da página inicial.",
+            description:
+              "Edite todos os textos que aparecem na seção principal da página inicial.",
             items: [
               {
                 id: 1,
@@ -95,7 +162,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 type: "description",
                 value: heroMainText,
                 label: "Texto Principal do Hero",
-                placeholder: "Digite o texto principal que será exibido no banner inicial...",
+                placeholder:
+                  "Digite o texto principal que será exibido no banner inicial...",
               },
               {
                 id: 2,
@@ -105,7 +173,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 type: "text",
                 value: heroCtaText,
                 label: "Texto do Call-to-Action",
-                placeholder: "Digite o texto que aparece antes do botão de agendamento...",
+                placeholder:
+                  "Digite o texto que aparece antes do botão de agendamento...",
               },
               {
                 id: 3,
@@ -117,14 +186,25 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 label: "Texto do Disclaimer",
                 placeholder: "Digite o texto de aviso que aparece no final...",
               },
+              {
+                id: 4,
+                page: "home",
+                section: "hero",
+                key: "backgroundImage",
+                type: "image",
+                value: heroBackgroundImage,
+                label: "Imagem de Fundo do Hero",
+                placeholder: "URL da imagem de fundo...",
+              },
             ],
           },
           {
             name: "Seção Welcome - Bem-vindo",
-            description: "Edite o título e conteúdo completo da seção de apresentação após o hero.",
+            description:
+              "Edite o título e conteúdo completo da seção de apresentação após o hero.",
             items: [
               {
-                id: 4,
+                id: 5,
                 page: "home",
                 section: "welcome",
                 key: "title",
@@ -134,15 +214,170 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 placeholder: "Digite o título da seção de apresentação...",
               },
               {
-                id: 5,
+                id: 6,
                 page: "home",
                 section: "welcome",
                 key: "content",
                 type: "html",
                 value: welcomeContent,
                 label: "Conteúdo Completo da Seção Welcome",
-                placeholder: "Digite todo o conteúdo da seção de apresentação...",
+                placeholder:
+                  "Digite todo o conteúdo da seção de apresentação...",
               },
+            ],
+          },
+          {
+            name: "Seção Services - Primeiros Passos",
+            description:
+              "Edite o título, descrição e todos os 6 cards da seção de serviços.",
+            items: [
+              {
+                id: 7,
+                page: "home",
+                section: "services",
+                key: "title",
+                type: "title",
+                value: servicesTitle,
+                label: "Título da Seção Services",
+                placeholder: "Digite o título da seção de serviços...",
+              },
+              {
+                id: 8,
+                page: "home",
+                section: "services",
+                key: "description",
+                type: "text",
+                value: servicesDescription,
+                label: "Descrição da Seção Services",
+                placeholder: "Digite a descrição da seção de serviços...",
+              },
+              // Cards individuais
+              ...servicesCards
+                .map((card: any, index: number) => [
+                  {
+                    id: 9 + index * 4, // 9, 13, 17, 21, 25, 29
+                    page: "home",
+                    section: "services",
+                    key: `card${card.id}_title`,
+                    type: "text" as const,
+                    value: card.title,
+                    label: `Card ${card.id} - Título`,
+                    placeholder: `Título do card ${card.id}...`,
+                  },
+                  {
+                    id: 10 + index * 4, // 10, 14, 18, 22, 26, 30
+                    page: "home",
+                    section: "services",
+                    key: `card${card.id}_description`,
+                    type: "text" as const,
+                    value: card.description,
+                    label: `Card ${card.id} - Descrição`,
+                    placeholder: `Descrição do card ${card.id}...`,
+                  },
+                  {
+                    id: 11 + index * 4, // 11, 15, 19, 23, 27, 31
+                    page: "home",
+                    section: "services",
+                    key: `card${card.id}_imageUrl`,
+                    type: "image" as const,
+                    value: card.imageUrl,
+                    label: `Card ${card.id} - Imagem`,
+                    placeholder: `URL da imagem do card ${card.id}...`,
+                  },
+                  {
+                    id: 12 + index * 4, // 12, 16, 20, 24, 28, 32
+                    page: "home",
+                    section: "services",
+                    key: `card${card.id}_href`,
+                    type: "text" as const,
+                    value: card.href,
+                    label: `Card ${card.id} - Link`,
+                    placeholder: `Link do card ${card.id} (ex: /terapias)...`,
+                  },
+                ])
+                .flat(),
+            ],
+          },
+          {
+            name: "Seção Clinic - Nosso Espaço",
+            description:
+              "Edite o título, descrição e galeria de imagens da clínica.",
+            items: [
+              {
+                id: 33,
+                page: "home",
+                section: "clinic",
+                key: "title",
+                type: "title" as const,
+                value: clinicTitle,
+                label: "Título da Seção Clinic",
+                placeholder: "Digite o título da seção da clínica...",
+              },
+              {
+                id: 34,
+                page: "home",
+                section: "clinic",
+                key: "description",
+                type: "text" as const,
+                value: clinicDescription,
+                label: "Descrição da Seção Clinic",
+                placeholder: "Digite a descrição da seção da clínica...",
+              },
+              // Imagens individuais
+              ...clinicImages
+                .map((image: any, index: number) => [
+                  {
+                    id: 35 + index * 5, // 35, 40, 45, etc.
+                    page: "home",
+                    section: "clinic",
+                    key: `image${image.id}_originalTitle`,
+                    type: "text" as const,
+                    value: image.originalTitle,
+                    label: `Imagem ${image.id} - Título`,
+                    placeholder: `Título da imagem ${image.id}...`,
+                  },
+                  {
+                    id: 36 + index * 5, // 36, 41, 46, etc.
+                    page: "home",
+                    section: "clinic",
+                    key: `image${image.id}_description`,
+                    type: "text" as const,
+                    value: image.description,
+                    label: `Imagem ${image.id} - Descrição`,
+                    placeholder: `Descrição da imagem ${image.id}...`,
+                  },
+                  {
+                    id: 37 + index * 5, // 37, 42, 47, etc.
+                    page: "home",
+                    section: "clinic",
+                    key: `image${image.id}_originalAlt`,
+                    type: "text" as const,
+                    value: image.originalAlt,
+                    label: `Imagem ${image.id} - Alt Text`,
+                    placeholder: `Texto alternativo da imagem ${image.id}...`,
+                  },
+                  {
+                    id: 38 + index * 5, // 38, 43, 48, etc.
+                    page: "home",
+                    section: "clinic",
+                    key: `image${image.id}_original`,
+                    type: "image" as const,
+                    value: image.original,
+                    label: `Imagem ${image.id} - URL`,
+                    placeholder: `URL da imagem ${image.id}...`,
+                  },
+                  {
+                    id: 39 + index * 5, // 39, 44, 49, etc.
+                    page: "home",
+                    section: "clinic",
+                    key: `image${image.id}_thumbnail`,
+                    type: "image" as const,
+                    value: image.thumbnail,
+                    label: `Imagem ${image.id} - Thumbnail`,
+                    placeholder: `URL da thumbnail da imagem ${image.id}...`,
+                  },
+                ])
+                .flat(),
             ],
           },
         ];
@@ -199,6 +434,19 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     }));
   };
 
+  const handleImageSelect = (imageUrl: string) => {
+    if (currentImageField !== null) {
+      handleContentChange(currentImageField, imageUrl);
+    }
+    setImageSelectorOpen(false);
+    setCurrentImageField(null);
+  };
+
+  const openImageSelector = (itemId: number) => {
+    setCurrentImageField(itemId);
+    setImageSelectorOpen(true);
+  };
+
   const saveChanges = async () => {
     // Permitir salvar mesmo sem mudanças pendentes (para preservar valores atuais)
 
@@ -208,18 +456,79 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     try {
       // Preparar dados para salvar - MESCLAR valores atuais + mudanças
       const contentToSave: Record<string, Record<string, string>> = {};
-      
-      sections.forEach(section => {
-        section.items.forEach(item => {
+
+      sections.forEach((section) => {
+        section.items.forEach((item) => {
           // Usar valor mudança SE existir, senão usar valor atual do item
-          const valueToSave = changes[item.id] !== undefined ? changes[item.id] : item.value;
-          
+          const valueToSave =
+            changes[item.id] !== undefined ? changes[item.id] : item.value;
+
           if (item.section === "hero") {
             if (!contentToSave.hero) contentToSave.hero = {};
             contentToSave.hero[item.key] = valueToSave;
           } else if (item.section === "welcome") {
             if (!contentToSave.welcome) contentToSave.welcome = {};
             contentToSave.welcome[item.key] = valueToSave;
+          } else if (item.section === "services") {
+            if (!contentToSave.services) contentToSave.services = {};
+
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.services[item.key] = valueToSave;
+            }
+
+            // Para campos dos cards
+            if (item.key.startsWith("card")) {
+              if (!(contentToSave.services as any).cards) {
+                (contentToSave.services as any).cards = [
+                  ...DEFAULT_SERVICES_CONTENT.cards,
+                ];
+              }
+
+              // Extrair card ID e field do key (ex: card1_title -> cardId=1, field=title)
+              const match = item.key.match(/card(\d+)_(.+)/);
+              if (match) {
+                const cardId = parseInt(match[1]);
+                const field = match[2];
+                const cardIndex = cardId - 1; // Array é 0-indexed
+
+                if ((contentToSave.services as any).cards[cardIndex]) {
+                  ((contentToSave.services as any).cards[cardIndex] as any)[
+                    field
+                  ] = valueToSave;
+                }
+              }
+            }
+          } else if (item.section === "clinic") {
+            if (!contentToSave.clinic) contentToSave.clinic = {};
+
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.clinic[item.key] = valueToSave;
+            }
+
+            // Para campos das imagens
+            if (item.key.startsWith("image")) {
+              if (!(contentToSave.clinic as any).images) {
+                (contentToSave.clinic as any).images = [
+                  ...DEFAULT_CLINIC_CONTENT.images,
+                ];
+              }
+
+              // Extrair image ID e field do key (ex: image1_originalTitle -> imageId=1, field=originalTitle)
+              const match = item.key.match(/image(\d+)_(.+)/);
+              if (match) {
+                const imageId = parseInt(match[1]);
+                const field = match[2];
+                const imageIndex = imageId - 1; // Array é 0-indexed
+
+                if ((contentToSave.clinic as any).images[imageIndex]) {
+                  ((contentToSave.clinic as any).images[imageIndex] as any)[
+                    field
+                  ] = valueToSave;
+                }
+              }
+            }
           }
         });
       });
@@ -229,7 +538,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ content: contentToSave }),
       });
@@ -266,7 +575,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   };
 
   const resetToDefaults = async () => {
-    if (!confirm("Tem certeza que deseja restaurar o conteúdo para os valores padrão? Esta ação não pode ser desfeita.")) {
+    if (
+      !confirm(
+        "Tem certeza que deseja restaurar o conteúdo para os valores padrão? Esta ação não pode ser desfeita."
+      )
+    ) {
       return;
     }
 
@@ -278,7 +591,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       const response = await fetch(`/api/admin/content/${page}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
@@ -292,10 +605,10 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
       // Recarregar conteúdo padrão
       await loadPageContent();
-      
+
       // Limpar mudanças pendentes
       setChanges({});
-      
+
       alert("Conteúdo restaurado para os valores padrão com sucesso!");
     } catch (error) {
       console.error("Erro ao resetar:", error);
@@ -325,9 +638,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       case "text":
         const isHeroField = item.section === "hero";
         const isWelcomeField = item.section === "welcome";
+        const isServicesField = item.section === "services";
+        const isClinicField = item.section === "clinic";
         let maxLengthForField = 1000; // default
         let fieldName = "";
-        
+
         if (isHeroField) {
           if (item.key === "ctaText") {
             maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.ctaText;
@@ -339,34 +654,95 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         } else if (isWelcomeField && item.key === "title") {
           maxLengthForField = DEFAULT_WELCOME_CONTENT.maxCharacters.title;
           fieldName = "Welcome Title";
+        } else if (isServicesField) {
+          if (item.key === "title") {
+            maxLengthForField = DEFAULT_SERVICES_CONTENT.maxCharacters.title;
+            fieldName = "Services Title";
+          } else if (item.key === "description") {
+            maxLengthForField =
+              DEFAULT_SERVICES_CONTENT.maxCharacters.description;
+            fieldName = "Services Description";
+          } else if (item.key.includes("_title")) {
+            maxLengthForField =
+              DEFAULT_SERVICES_CONTENT.maxCharacters.cardTitle;
+            fieldName = "Card Title";
+          } else if (item.key.includes("_description")) {
+            maxLengthForField =
+              DEFAULT_SERVICES_CONTENT.maxCharacters.cardDescription;
+            fieldName = "Card Description";
+          }
+        } else if (isClinicField) {
+          if (item.key === "title") {
+            maxLengthForField = DEFAULT_CLINIC_CONTENT.maxCharacters.title;
+            fieldName = "Clinic Title";
+          } else if (item.key === "description") {
+            maxLengthForField =
+              DEFAULT_CLINIC_CONTENT.maxCharacters.description;
+            fieldName = "Clinic Description";
+          } else if (item.key.includes("_originalTitle")) {
+            maxLengthForField = DEFAULT_CLINIC_CONTENT.maxCharacters.imageTitle;
+            fieldName = "Image Title";
+          } else if (item.key.includes("_description")) {
+            maxLengthForField =
+              DEFAULT_CLINIC_CONTENT.maxCharacters.imageDescription;
+            fieldName = "Image Description";
+          } else if (item.key.includes("_originalAlt")) {
+            maxLengthForField = DEFAULT_CLINIC_CONTENT.maxCharacters.imageAlt;
+            fieldName = "Image Alt Text";
+          }
         }
-        
+
         const currentLengthText = currentValue.length;
-        const isOverLimitText = (isHeroField || isWelcomeField) && currentLengthText > maxLengthForField;
-        
+        const isOverLimitText =
+          (isHeroField || isWelcomeField || isServicesField || isClinicField) &&
+          currentLengthText > maxLengthForField;
+
         return (
           <div className="space-y-2">
             <input
               type="text"
               value={currentValue}
               onChange={(e) => {
-                if ((isHeroField || isWelcomeField) && e.target.value.length <= maxLengthForField) {
+                if (
+                  (isHeroField ||
+                    isWelcomeField ||
+                    isServicesField ||
+                    isClinicField) &&
+                  e.target.value.length <= maxLengthForField
+                ) {
                   handleContentChange(item.id, e.target.value);
-                } else if (!isHeroField && !isWelcomeField) {
+                } else if (
+                  !isHeroField &&
+                  !isWelcomeField &&
+                  !isServicesField &&
+                  !isClinicField
+                ) {
                   handleContentChange(item.id, e.target.value);
                 }
               }}
               placeholder={item.placeholder}
-              maxLength={(isHeroField || isWelcomeField) ? maxLengthForField : undefined}
+              maxLength={
+                isHeroField ||
+                isWelcomeField ||
+                isServicesField ||
+                isClinicField
+                  ? maxLengthForField
+                  : undefined
+              }
               className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground ${
-                isOverLimitText 
-                  ? "border-red-500 dark:border-red-400" 
+                isOverLimitText
+                  ? "border-red-500 dark:border-red-400"
                   : "border-gray-300 dark:border-gray-600"
               }`}
             />
-            {(isHeroField || isWelcomeField) && (
+            {(isHeroField ||
+              isWelcomeField ||
+              isServicesField ||
+              isClinicField) && (
               <div className="flex justify-between items-center text-sm">
-                <span className={`${isOverLimitText ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                <span
+                  className={`${isOverLimitText ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}
+                >
                   {currentLengthText}/{maxLengthForField} caracteres
                 </span>
                 {isOverLimitText && (
@@ -380,11 +756,14 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         );
 
       case "description":
-        const isHeroMainText = item.key === "mainText" && item.section === "hero";
-        const maxLength = isHeroMainText ? DEFAULT_HERO_CONTENT.maxCharacters.mainText : 1000;
+        const isHeroMainText =
+          item.key === "mainText" && item.section === "hero";
+        const maxLength = isHeroMainText
+          ? DEFAULT_HERO_CONTENT.maxCharacters.mainText
+          : 1000;
         const currentLengthDesc = currentValue.length;
         const isOverLimitDesc = currentLengthDesc > maxLength;
-        
+
         return (
           <div className="space-y-2">
             <textarea
@@ -400,14 +779,16 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               rows={isHeroMainText ? 8 : 4}
               maxLength={isHeroMainText ? maxLength : undefined}
               className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground resize-vertical ${
-                isOverLimitDesc 
-                  ? "border-red-500 dark:border-red-400" 
+                isOverLimitDesc
+                  ? "border-red-500 dark:border-red-400"
                   : "border-gray-300 dark:border-gray-600"
               }`}
             />
             {isHeroMainText && (
               <div className="flex justify-between items-center text-sm">
-                <span className={`${isOverLimitDesc ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                <span
+                  className={`${isOverLimitDesc ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}
+                >
                   {currentLengthDesc}/{maxLength} caracteres
                 </span>
                 {isOverLimitDesc && (
@@ -421,17 +802,24 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         );
 
       case "html":
-        const isWelcomeContent = item.key === "content" && item.section === "welcome";
-        const maxLengthHtml = isWelcomeContent ? DEFAULT_WELCOME_CONTENT.maxCharacters.content : 5000;
+        const isWelcomeContent =
+          item.key === "content" && item.section === "welcome";
+        const maxLengthHtml = isWelcomeContent
+          ? DEFAULT_WELCOME_CONTENT.maxCharacters.content
+          : 5000;
         const currentLengthHtml = currentValue.length;
-        const isOverLimitHtml = isWelcomeContent && currentLengthHtml > maxLengthHtml;
-        
+        const isOverLimitHtml =
+          isWelcomeContent && currentLengthHtml > maxLengthHtml;
+
         return (
           <div className="space-y-2">
             <textarea
               value={currentValue}
               onChange={(e) => {
-                if (isWelcomeContent && e.target.value.length <= maxLengthHtml) {
+                if (
+                  isWelcomeContent &&
+                  e.target.value.length <= maxLengthHtml
+                ) {
                   handleContentChange(item.id, e.target.value);
                 } else if (!isWelcomeContent) {
                   handleContentChange(item.id, e.target.value);
@@ -441,14 +829,16 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               rows={isWelcomeContent ? 12 : 8}
               maxLength={isWelcomeContent ? maxLengthHtml : undefined}
               className={`w-full p-3 border rounded-md bg-white dark:bg-gray-800 text-foreground font-mono text-sm resize-vertical ${
-                isOverLimitHtml 
-                  ? "border-red-500 dark:border-red-400" 
+                isOverLimitHtml
+                  ? "border-red-500 dark:border-red-400"
                   : "border-gray-300 dark:border-gray-600"
               }`}
             />
             {isWelcomeContent && (
               <div className="flex justify-between items-center text-sm">
-                <span className={`${isOverLimitHtml ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}>
+                <span
+                  className={`${isOverLimitHtml ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"}`}
+                >
                   {currentLengthHtml}/{maxLengthHtml} caracteres
                 </span>
                 {isOverLimitHtml && (
@@ -459,10 +849,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              {isWelcomeContent 
+              {isWelcomeContent
                 ? "Use markdown básico: **negrito**, *itálico*, listas numeradas (1.) e com bullet (•)"
-                : "Suporte a HTML básico: <p>, <br>, <strong>, <em>"
-              }
+                : "Suporte a HTML básico: <p>, <br>, <strong>, <em>"}
             </p>
           </div>
         );
@@ -470,29 +859,48 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       case "image":
         return (
           <div className="space-y-4">
-            <input
-              type="text"
-              value={currentValue}
-              onChange={(e) => handleContentChange(item.id, e.target.value)}
-              placeholder="URL da imagem"
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-foreground"
-            />
-            <Link
-              href="/admin/media"
-              className="inline-flex items-center space-x-2 text-sm text-primary-foreground hover:underline"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Fazer upload de nova imagem</span>
-            </Link>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={currentValue}
+                onChange={(e) => handleContentChange(item.id, e.target.value)}
+                placeholder="URL da imagem"
+                className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-foreground"
+              />
+              <button
+                type="button"
+                onClick={() => openImageSelector(item.id)}
+                className="px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span>Selecionar</span>
+              </button>
+            </div>
+            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+              <Link
+                href="/admin/media"
+                className="inline-flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Gerenciar imagens</span>
+              </Link>
+              <span>ou digite uma URL personalizada</span>
+            </div>
             {currentValue && (
               <div className="mt-2">
-                <Image
-                  src={currentValue}
-                  alt="Preview"
-                  width={300}
-                  height={200}
-                  className="max-w-xs h-auto rounded border"
-                />
+                <div className="relative inline-block">
+                  <Image
+                    src={currentValue}
+                    alt="Preview"
+                    width={300}
+                    height={200}
+                    className="max-w-xs h-auto rounded border shadow-sm"
+                    onError={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = "none";
+                    }}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -543,7 +951,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           <Link
             href={`/${page === "home" ? "" : page}`}
             target="_blank"
-            className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >
             <Eye className="w-4 h-4" />
             <span>Visualizar</span>
@@ -552,7 +960,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           <button
             onClick={resetToDefaults}
             disabled={resetting || saving}
-            className="inline-flex items-center space-x-2 px-4 py-2 border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center space-x-2 px-4 py-2 border border-[var(--destructive)] text-[var(--destructive)] rounded-md hover:bg-white/10 hover:font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
             <span>{resetting ? "Restaurando..." : "Restaurar Padrão"}</span>
@@ -564,7 +972,13 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-foreground text-white rounded-md hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? "Salvando..." : Object.keys(changes).length > 0 ? "Salvar Alterações" : "Salvar"}</span>
+            <span>
+              {saving
+                ? "Salvando..."
+                : Object.keys(changes).length > 0
+                  ? "Salvar Alterações"
+                  : "Salvar"}
+            </span>
           </button>
         </div>
       </div>
@@ -620,6 +1034,17 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           </p>
         </div>
       )}
+
+      {/* Image Selector Modal */}
+      <ImageSelector
+        isOpen={imageSelectorOpen}
+        onClose={() => {
+          setImageSelectorOpen(false);
+          setCurrentImageField(null);
+        }}
+        onSelect={handleImageSelect}
+        title="Selecionar Imagem"
+      />
     </div>
   );
 };

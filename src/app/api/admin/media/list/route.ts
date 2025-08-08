@@ -23,7 +23,7 @@ async function getImageFiles(): Promise<ImageInfo[]> {
     let files: string[] = [];
     try {
       files = await readdir(originalsDir);
-    } catch (error) {
+    } catch {
       // Se o diretório não existir, retornar array vazio
       return [];
     }
@@ -70,7 +70,7 @@ async function getImageFiles(): Promise<ImageInfo[]> {
     images.sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
     
     return images;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Erro ao listar imagens:', error);
     return [];
   }
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       count: images.length
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Erro ao listar imagens:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },

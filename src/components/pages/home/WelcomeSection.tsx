@@ -21,7 +21,7 @@ const parseMarkdownToJSX = (content: string) => {
         const listItems = trimmedParagraph
           .split('\n')
           .filter(item => item.match(/^\d\./))
-          .map((item, i) => {
+          .map((item) => {
             const text = item.replace(/^\d\.\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
             return `<li>${text}</li>`;
           });
@@ -38,7 +38,7 @@ const parseMarkdownToJSX = (content: string) => {
         const listItems = trimmedParagraph
           .split('\n')
           .filter(item => item.match(/^•/))
-          .map((item, i) => {
+          .map((item) => {
             const text = item.replace(/^•\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
             return `<li>${text}</li>`;
           });

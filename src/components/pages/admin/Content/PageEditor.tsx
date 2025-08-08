@@ -5,6 +5,7 @@ import { AdminCard } from "@/components/shared/cards/BaseCard";
 import { ImageSelector } from "@/components/shared/media";
 import { handleAuthError } from "@/lib/auth";
 import {
+  DEFAULT_ABOUT_CONTENT,
   DEFAULT_CLINIC_CONTENT,
   DEFAULT_HERO_CONTENT,
   DEFAULT_SERVICES_CONTENT,
@@ -27,11 +28,62 @@ interface ContentItem {
   page: string;
   section: string;
   key: string;
-  type: "text" | "title" | "description" | "image" | "html";
+  type: string;
   value: string;
-  metadata?: unknown;
-  label: string;
+  label?: string;
   placeholder?: string;
+  metadata?: unknown;
+}
+
+interface ServiceCard {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  href: string;
+  order: number;
+  active: boolean;
+}
+
+interface ClinicImage {
+  id: number;
+  original: string;
+  thumbnail: string;
+  originalAlt: string;
+  originalTitle: string;
+  description: string;
+  order: number;
+  active: boolean;
+}
+
+interface NetworkItem {
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  enabled: boolean;
+  order: number;
+}
+
+interface SavedContent {
+  hero?: Record<string, string>;
+  welcome?: Record<string, string>;
+  services?: {
+    title?: string;
+    description?: string;
+    cards?: ServiceCard[];
+  };
+  clinic?: {
+    title?: string;
+    description?: string;
+    images?: ClinicImage[];
+  };
+  about?: Record<string, string>;
+  social?: {
+    title?: string;
+    description?: string;
+    networks?: NetworkItem[];
+  };
 }
 
 interface PageSection {
@@ -253,7 +305,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               },
               // Cards individuais
               ...servicesCards
-                .map((card: any, index: number) => [
+                .map((card: ServiceCard, index: number) => [
                   {
                     id: 9 + index * 4, // 9, 13, 17, 21, 25, 29
                     page: "home",
@@ -325,7 +377,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               },
               // Imagens individuais
               ...clinicImages
-                .map((image: any, index: number) => [
+                .map((image: ClinicImage, index: number) => [
                   {
                     id: 35 + index * 5, // 35, 40, 45, etc.
                     page: "home",
@@ -383,41 +435,121 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         ];
 
       case "about":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const aboutTitle = savedContent?.about?.title || DEFAULT_ABOUT_CONTENT.title;
+        const aboutSubtitle = savedContent?.about?.subtitle || DEFAULT_ABOUT_CONTENT.subtitle;
+        const aboutProfileImage = savedContent?.about?.profileImage || DEFAULT_ABOUT_CONTENT.profileImage;
+        const aboutContent = savedContent?.about?.content || DEFAULT_ABOUT_CONTENT.content;
+        
+        const socialTitle = savedContent?.social?.title || DEFAULT_ABOUT_CONTENT.socialMedia.title;
+        const socialDescription = savedContent?.social?.description || DEFAULT_ABOUT_CONTENT.socialMedia.description;
+        
+        // Parse das redes sociais se vier como string JSON
+        let socialNetworks = DEFAULT_ABOUT_CONTENT.socialMedia.networks;
+        if (savedContent?.social?.networks) {
+          try {
+            socialNetworks = typeof savedContent.social.networks === 'string' 
+              ? JSON.parse(savedContent.social.networks)
+              : savedContent.social.networks;
+          } catch {
+            socialNetworks = DEFAULT_ABOUT_CONTENT.socialMedia.networks;
+          }
+        }
+
         return [
           {
             name: "Informações Pessoais",
-            description: "Biografia e apresentação",
+            description: "Biografia e apresentação do psicólogo",
             items: [
               {
-                id: 6,
+                id: 400,
                 page: "about",
-                section: "bio",
+                section: "about",
                 key: "title",
                 type: "title",
-                value: "Sobre mim",
+                value: aboutTitle,
                 label: "Título da Página",
-                placeholder: "Digite o título...",
+                placeholder: "Digite o título principal...",
               },
               {
-                id: 7,
+                id: 401,
                 page: "about",
-                section: "bio",
+                section: "about",
                 key: "subtitle",
                 type: "text",
-                value: "Psicólogo Clínico",
+                value: aboutSubtitle,
                 label: "Subtítulo",
-                placeholder: "Digite o subtítulo...",
+                placeholder: "Digite o subtítulo profissional...",
               },
               {
-                id: 8,
+                id: 402,
                 page: "about",
-                section: "bio",
-                key: "description",
-                type: "html",
-                value: "Olá! Sou o Michel, psicólogo especializado...",
-                label: "Biografia Completa",
-                placeholder: "Digite a biografia...",
+                section: "about",
+                key: "profileImage",
+                type: "image",
+                value: aboutProfileImage,
+                label: "Foto de Perfil",
+                placeholder: "URL da foto de perfil...",
               },
+              {
+                id: 403,
+                page: "about",
+                section: "about",
+                key: "content",
+                type: "html",
+                value: aboutContent,
+                label: "Biografia Completa",
+                placeholder: "Digite a biografia detalhada...",
+              },
+            ],
+          },
+          {
+            name: "Minhas Redes Sociais",
+            description: "Configure suas redes sociais e links de contato",
+            items: [
+              {
+                id: 404,
+                page: "about",
+                section: "social",
+                key: "title",
+                type: "title",
+                value: socialTitle,
+                label: "Título da Seção Redes",
+                placeholder: "Digite o título da seção...",
+              },
+              {
+                id: 405,
+                page: "about",
+                section: "social",
+                key: "description",
+                type: "text",
+                value: socialDescription,
+                label: "Descrição da Seção",
+                placeholder: "Digite a descrição...",
+              },
+              // Redes sociais individuais - sem campo de ordem manual
+              ...socialNetworks.map((network: NetworkItem, index: number) => [
+                {
+                  id: 406 + (index * 2), // 406, 408, 410, 412, 414
+                  page: "about",
+                  section: "social",
+                  key: `network${network.id}_url`,
+                  type: "text" as const,
+                  value: network.url,
+                  label: `${network.name} - URL`,
+                  placeholder: `URL do ${network.name}...`,
+                },
+                {
+                  id: 407 + (index * 2), // 407, 409, 411, 413, 415
+                  page: "about",
+                  section: "social",
+                  key: `network${network.id}_enabled`,
+                  type: "text" as const, // Will be handled as switch in render
+                  value: network.enabled ? "true" : "false",
+                  label: `${network.name} - Habilitado`,
+                  placeholder: "true/false",
+                },
+              ]).flat(),
             ],
           },
         ];
@@ -447,6 +579,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     setImageSelectorOpen(true);
   };
 
+
   const saveChanges = async () => {
     // Permitir salvar mesmo sem mudanças pendentes (para preservar valores atuais)
 
@@ -455,7 +588,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
     try {
       // Preparar dados para salvar - MESCLAR valores atuais + mudanças
-      const contentToSave: Record<string, Record<string, string>> = {};
+      const contentToSave: SavedContent = {};
 
       sections.forEach((section) => {
         section.items.forEach((item) => {
@@ -479,8 +612,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
             // Para campos dos cards
             if (item.key.startsWith("card")) {
-              if (!(contentToSave.services as any).cards) {
-                (contentToSave.services as any).cards = [
+              if (!contentToSave.services?.cards) {
+                if (!contentToSave.services) contentToSave.services = {};
+                contentToSave.services.cards = [
                   ...DEFAULT_SERVICES_CONTENT.cards,
                 ];
               }
@@ -492,10 +626,16 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 const field = match[2];
                 const cardIndex = cardId - 1; // Array é 0-indexed
 
-                if ((contentToSave.services as any).cards[cardIndex]) {
-                  ((contentToSave.services as any).cards[cardIndex] as any)[
-                    field
-                  ] = valueToSave;
+                const cardsList = contentToSave.services!.cards!;
+                if (cardsList[cardIndex]) {
+                  const card = cardsList[cardIndex];
+                  if (field === "title") {
+                    card.title = valueToSave;
+                  } else if (field === "description") {
+                    card.description = valueToSave;
+                  } else if (field === "imageUrl") {
+                    card.imageUrl = valueToSave;
+                  }
                 }
               }
             }
@@ -509,8 +649,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
             // Para campos das imagens
             if (item.key.startsWith("image")) {
-              if (!(contentToSave.clinic as any).images) {
-                (contentToSave.clinic as any).images = [
+              if (!contentToSave.clinic?.images) {
+                if (!contentToSave.clinic) contentToSave.clinic = {};
+                contentToSave.clinic.images = [
                   ...DEFAULT_CLINIC_CONTENT.images,
                 ];
               }
@@ -522,10 +663,57 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 const field = match[2];
                 const imageIndex = imageId - 1; // Array é 0-indexed
 
-                if ((contentToSave.clinic as any).images[imageIndex]) {
-                  ((contentToSave.clinic as any).images[imageIndex] as any)[
-                    field
-                  ] = valueToSave;
+                const imagesList = contentToSave.clinic.images;
+                if (imagesList[imageIndex]) {
+                  const image = imagesList[imageIndex];
+                  if (field === "originalTitle") {
+                    image.originalTitle = valueToSave;
+                  } else if (field === "originalAlt") {
+                    image.originalAlt = valueToSave;
+                  } else if (field === "description") {
+                    image.description = valueToSave;
+                  } else if (field === "original") {
+                    image.original = valueToSave;
+                  }
+                }
+              }
+            }
+          } else if (item.section === "about") {
+            if (!contentToSave.about) contentToSave.about = {};
+            contentToSave.about[item.key] = valueToSave;
+          } else if (item.section === "social") {
+            if (!contentToSave.social) contentToSave.social = {};
+            
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.social[item.key] = valueToSave;
+            }
+            
+            // Para campos das redes sociais
+            if (item.key.startsWith("network")) {
+              if (!contentToSave.social?.networks) {
+                if (!contentToSave.social) contentToSave.social = {};
+                contentToSave.social.networks = [...DEFAULT_ABOUT_CONTENT.socialMedia.networks];
+              }
+              
+              // Extrair network ID e field do key (ex: networkfacebook_url -> networkId=facebook, field=url)
+              const match = item.key.match(/network([^_]+)_(.+)/);
+              if (match) {
+                const networkId = match[1];
+                const field = match[2];
+                
+                const socialNetworksList = contentToSave.social.networks;
+                const networkIndex = socialNetworksList.findIndex((n: NetworkItem) => n.id === networkId);
+                
+                if (networkIndex !== -1) {
+                  const network = socialNetworksList[networkIndex];
+                  if (field === "enabled") {
+                    network.enabled = valueToSave === "true";
+                  } else if (field === "url") {
+                    network.url = valueToSave;
+                  } else if (field === "name") {
+                    network.name = valueToSave;
+                  }
                 }
               }
             }
@@ -633,6 +821,42 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     const currentValue =
       changes[item.id] !== undefined ? changes[item.id] : item.value;
 
+    // Special handling for enabled fields - render as switch
+    if (item.key.includes('_enabled')) {
+      const isEnabled = currentValue === "true";
+      return (
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={() => handleContentChange(item.id, isEnabled ? "false" : "true")}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ${
+              isEnabled 
+                ? 'bg-rose-600 dark:bg-rose-500' 
+                : 'bg-gray-200 dark:bg-gray-700'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <span className={`text-sm font-medium ${
+            isEnabled 
+              ? 'text-rose-600 dark:text-rose-400' 
+              : 'text-gray-500 dark:text-gray-400'
+          }`}>
+            {isEnabled ? 'Sim' : 'Não'}
+          </span>
+          {changes[item.id] !== undefined && (
+            <span className="text-xs text-orange-600 dark:text-orange-400">
+              (alterado)
+            </span>
+          )}
+        </div>
+      );
+    }
+
     switch (item.type) {
       case "title":
       case "text":
@@ -640,6 +864,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         const isWelcomeField = item.section === "welcome";
         const isServicesField = item.section === "services";
         const isClinicField = item.section === "clinic";
+        const isAboutField = item.section === "about";
+        const isSocialField = item.section === "social";
         let maxLengthForField = 1000; // default
         let fieldName = "";
 
@@ -690,11 +916,30 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             maxLengthForField = DEFAULT_CLINIC_CONTENT.maxCharacters.imageAlt;
             fieldName = "Image Alt Text";
           }
+        } else if (isAboutField) {
+          if (item.key === "title") {
+            maxLengthForField = DEFAULT_ABOUT_CONTENT.maxCharacters.title;
+            fieldName = "About Title";
+          } else if (item.key === "subtitle") {
+            maxLengthForField = DEFAULT_ABOUT_CONTENT.maxCharacters.subtitle;
+            fieldName = "About Subtitle";
+          }
+        } else if (isSocialField) {
+          if (item.key === "title") {
+            maxLengthForField = DEFAULT_ABOUT_CONTENT.maxCharacters.socialTitle;
+            fieldName = "Social Title";
+          } else if (item.key === "description") {
+            maxLengthForField = DEFAULT_ABOUT_CONTENT.maxCharacters.socialDescription;
+            fieldName = "Social Description";
+          } else if (item.key.includes("_url")) {
+            maxLengthForField = DEFAULT_ABOUT_CONTENT.maxCharacters.socialUrl;
+            fieldName = "Social URL";
+          }
         }
 
         const currentLengthText = currentValue.length;
         const isOverLimitText =
-          (isHeroField || isWelcomeField || isServicesField || isClinicField) &&
+          (isHeroField || isWelcomeField || isServicesField || isClinicField || isAboutField || isSocialField) &&
           currentLengthText > maxLengthForField;
 
         return (

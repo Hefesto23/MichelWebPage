@@ -2,14 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import {
-  Briefcase,
-  FileText,
-  Home,
-  MessageCircle,
-  Star,
-  User,
-} from "lucide-react";
+import { Briefcase, FileText, Home, MessageCircle, Star, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -25,7 +18,7 @@ interface ContentPage {
 const contentPages: ContentPage[] = [
   {
     key: "home",
-    name: "Página Inicial",
+    name: "Página Inicial/Home",
     description: "Hero, welcome, serviços e seções principais",
     icon: Home,
     sections: 4,
@@ -33,7 +26,7 @@ const contentPages: ContentPage[] = [
   },
   {
     key: "about",
-    name: "Sobre Mim",
+    name: "About/Sobre Mim",
     description: "Biografia, formação e abordagem terapêutica",
     icon: User,
     sections: 3,
@@ -58,7 +51,7 @@ const contentPages: ContentPage[] = [
   {
     key: "testimonials",
     name: "Avaliações",
-    description: "Depoimentos e testemunhos",
+    description: "Tipos de avaliações feitas na clinica",
     icon: Star,
     sections: 1,
     lastUpdated: "2024-05-12T11:00:00Z",
@@ -113,23 +106,15 @@ export const ContentPage = () => {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
-          Gerenciamento de Conteúdo
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Edite o conteúdo das páginas do seu site
-        </p>
+        <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Conteúdo</h1>
+        <p className="text-muted-foreground mt-2">Edite o conteúdo das páginas do seu site</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {pages.map((page) => {
           const Icon = page.icon;
           return (
-            <Link
-              key={page.key}
-              href={`/admin/content/${page.key}`}
-              className="block group"
-            >
+            <Link key={page.key} href={`/admin/content/${page.key}`} className="block group">
               <AdminCard
                 title=""
                 className="h-full group-hover:shadow-xl transition-all duration-300"
@@ -142,9 +127,7 @@ export const ContentPage = () => {
                     <h3 className="text-xl font-semibold text-foreground group-hover:text-primary-foreground transition-colors">
                       {page.name}
                     </h3>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      {page.description}
-                    </p>
+                    <p className="text-muted-foreground mt-2 text-sm">{page.description}</p>
                     <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                       <span>{page.sections} seções</span>
                       <span>Editado: {formatDate(page.lastUpdated)}</span>
@@ -169,9 +152,7 @@ export const ContentPage = () => {
                 <FileText className="w-5 h-5 text-primary-foreground" />
                 <div>
                   <h4 className="font-medium">Configurações Globais</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Logo, favicon, meta tags, etc.
-                  </p>
+                  <p className="text-sm text-muted-foreground">Logo, favicon, meta tags, etc.</p>
                 </div>
               </div>
             </Link>
@@ -184,9 +165,7 @@ export const ContentPage = () => {
                 <FileText className="w-5 h-5 text-primary-foreground" />
                 <div>
                   <h4 className="font-medium">Backup de Conteúdo</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Exportar e importar conteúdo
-                  </p>
+                  <p className="text-sm text-muted-foreground">Exportar e importar conteúdo</p>
                 </div>
               </div>
             </Link>

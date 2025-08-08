@@ -149,11 +149,80 @@ export const DEFAULT_CLINIC_CONTENT = {
   }
 };
 
+export const DEFAULT_ABOUT_CONTENT = {
+  title: "Sobre mim",
+  subtitle: "Psicólogo Clínico",
+  profileImage: "/assets/michel2.png",
+  content: `Olá! Sou o Michel, psicólogo especializado em transtornos emocionais, como ansiedade e depressão, e como especialista em análise do comportamento, realizo avaliação cognitiva através do teste de inteligência WAIS III.
+
+Meu objetivo é auxiliar pessoas que estão enfrentando dificuldades psicológicas, proporcionando alívio dos sintomas e uma melhora significativa na qualidade de vida.
+
+Minha abordagem se baseia na Análise do Comportamento, uma visão teórica da Psicologia Comportamental. Através dela, busco compreender individualmente cada pessoa, considerando tanto o ambiente quanto os comportamentos envolvidos. Acredito que essa compreensão é fundamental para alcançarmos resultados efetivos.
+
+Estou aqui para te ajudar nessa jornada. Se você está enfrentando desafios emocionais e comportamentais devido à ansiedade e/ou depressão, será um prazer oferecer meu apoio e orientação.
+
+Entre em contato comigo para agendar uma consulta ou para obter mais informações sobre avaliação cognitiva. Juntos, podemos trilhar um caminho de transformação e bem-estar.`,
+  socialMedia: {
+    title: "Minhas Redes",
+    description: "Conecte-se comigo nas redes sociais para conteúdos e dicas sobre saúde mental",
+    networks: [
+      {
+        id: "facebook",
+        name: "Facebook",
+        url: "https://facebook.com/michelcamargo",
+        icon: "Facebook",
+        enabled: true,
+        order: 1
+      },
+      {
+        id: "instagram",
+        name: "Instagram", 
+        url: "https://instagram.com/michelcamargo",
+        icon: "Instagram",
+        enabled: true,
+        order: 2
+      },
+      {
+        id: "tiktok",
+        name: "TikTok",
+        url: "https://tiktok.com/@michelcamargo",
+        icon: "Music", // TikTok icon not in lucide, using Music as alternative
+        enabled: false,
+        order: 3
+      },
+      {
+        id: "youtube",
+        name: "YouTube",
+        url: "https://youtube.com/@michelcamargo",
+        icon: "Youtube",
+        enabled: false,
+        order: 4
+      },
+      {
+        id: "linkedin",
+        name: "LinkedIn",
+        url: "https://linkedin.com/in/michelcamargo",
+        icon: "Linkedin",
+        enabled: true,
+        order: 5
+      }
+    ]
+  },
+  // Limites de caracteres
+  maxCharacters: {
+    title: 50,
+    subtitle: 100,
+    content: 2000,
+    socialTitle: 50,
+    socialDescription: 200,
+    socialUrl: 200
+  }
+};
+
 export const DEFAULT_CONTENT = {
   hero: DEFAULT_HERO_CONTENT,
   welcome: DEFAULT_WELCOME_CONTENT,
   services: DEFAULT_SERVICES_CONTENT,
   clinic: DEFAULT_CLINIC_CONTENT,
-  // Aqui podem ser adicionados outros conteúdos padrão futuramente
-  // about: DEFAULT_ABOUT_CONTENT,
+  about: DEFAULT_ABOUT_CONTENT,
 } as const;

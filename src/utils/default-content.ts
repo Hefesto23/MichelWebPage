@@ -377,27 +377,27 @@ export const DEFAULT_AGENDAMENTO_CONTENT = {
     {
       id: 1,
       title: "Preparando-se para sua consulta",
-      description: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
-      active: true
+      content: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
+      order: 1
     },
     {
       id: 2,
       title: "Política de Cancelamento",
-      description: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
-      active: true
+      content: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
+      order: 2
     },
     {
       id: 3,
       title: "Consulta Online",
-      description: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
-      active: true
+      content: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
+      order: 3
     }
   ],
   maxCharacters: {
     title: 80,
-    description: 250,
+    description: 200,
     cardTitle: 60,
-    cardDescription: 300
+    cardContent: 300
   }
 };
 

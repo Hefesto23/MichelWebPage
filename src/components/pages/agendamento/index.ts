@@ -3,6 +3,7 @@
 // ============================================
 export { AppointmentFlow } from "./AppointmentFlow";
 export { InfoCards } from "./InfoCards";
+export { default as AgendamentoContent } from "./AgendamentoContent";
 
 // Reexport dos componentes originais para compatibilidade
 export { default as AppointmentConfirmation } from "./AppointmentConfirmation";

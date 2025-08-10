@@ -2,7 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { Briefcase, Home, Star, User } from "lucide-react";
+import { Briefcase, Calendar, Home, Phone, Star, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -47,6 +47,22 @@ const contentPages: ContentPage[] = [
     icon: Star,
     sections: 2,
     lastUpdated: "2024-05-12T11:00:00Z",
+  },
+  {
+    key: "agendamento",
+    name: "Agendamento",
+    description: "Título, descrição e cards informativos da página de agendamento",
+    icon: Calendar,
+    sections: 2,
+    lastUpdated: "2024-05-25T09:15:00Z",
+  },
+  {
+    key: "contact",
+    name: "Contato",
+    description: "Informações de contato, horários e localização do consultório",
+    icon: Phone,
+    sections: 3,
+    lastUpdated: "2024-05-22T13:30:00Z",
   },
 ];
 

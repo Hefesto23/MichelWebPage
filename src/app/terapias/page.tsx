@@ -1,62 +1,46 @@
-// src/app/terapias/page.tsx - REFATORADO
-"use client";
+// src/app/terapias/page.tsx - REFATORADO COM CMS
+import { Metadata } from "next";
+import dynamic from "next/dynamic";
 
-import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
-import Divisor from "@/components/shared/ui/divisor";
-
-export default function Therapies() {
-  const therapyModalities = [
-    {
-      imageUrl: "/assets/terapias1.jpg",
-      title: "Psicoterapia individual - Presencial",
-      description:
-        "Modalidade de atendimento de um paciente através de técnicas personalizadas em encontros presenciais no consultório.",
-      href: "/presencial",
-    },
-    {
-      imageUrl: "/assets/terapias1.jpg",
-      title: "Psicoterapia individual - On-line",
-      description:
-        "Modalidade de terapia que permite o atendimento feito à distância, com todo o conforto e privacidade que você precisa.",
-      href: "/online",
-    },
-    {
-      imageUrl: "/assets/terapias1.jpg",
-      title: "Plantão Psicológico",
-      description:
-        "Serviço de atendimento rápido e pontual, oferecido para pessoas que precisam de suporte emocional imediato e urgente.",
-      href: "/plantao",
-    },
-  ];
-
-  return (
-    <section>
+const TerapiasContent = dynamic(
+  () => import("@/components/pages/terapias").then((mod) => ({ default: mod.TerapiasContent })),
+  { 
+    ssr: false,
+    loading: () => (
       <div className="w-full py-16 relative z-0 min-h-screen">
         <div className="content-container">
           <div className="relative z-10">
-            <div className="section-header">
-              <h2 className="section-title">Modalidades de Atendimentos</h2>
-              <p className="section-description">
-                Os atendimentos são realizados dentro da visão teórica da
-                Análise do Comportamento, buscando compreender e transformar
-                comportamentos para uma melhor qualidade de vida.
-              </p>
+            <div className="section-header animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
             </div>
-
             <div className="grid-pages relative z-[3]">
-              {therapyModalities.map((modality, index) => (
-                <ImageLargeCard
-                  key={index}
-                  imageUrl={modality.imageUrl}
-                  title={modality.title}
-                  description={modality.description}
-                  href={modality.href}
-                />
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
               ))}
             </div>
           </div>
         </div>
       </div>
+    )
+  }
+);
+
+const Divisor = dynamic(
+  () => import("@/components/shared/ui/divisor"),
+  { ssr: false }
+);
+
+export const metadata: Metadata = {
+  title: "Terapias | Modalidades de Atendimento - Michel de Camargo",
+  description:
+    "Conheça as modalidades de atendimento psicológico oferecidas: presencial, online e plantão psicológico com base na Análise do Comportamento.",
+};
+
+export default function Therapies() {
+  return (
+    <section>
+      <TerapiasContent />
       <Divisor index={4} />
     </section>
   );

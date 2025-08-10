@@ -130,8 +130,8 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -145,7 +145,7 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
           </button>
         </div>
         
-        <div className="p-6">
+        <div className="p-6 flex-1 flex flex-col min-h-0">
           {/* Tabs */}
           <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
@@ -174,7 +174,7 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
           </div>
           
           {/* Content */}
-          <div className="h-96 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {showUploader ? (
               <ImageUploader
                 onUploadSuccess={handleUploadSuccess}
@@ -289,7 +289,7 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
         
         {/* Footer */}
         {!showUploader && (
-          <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+          <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex-shrink-0">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {selectedImage ? 'Imagem selecionada' : 'Selecione uma imagem'}
             </p>

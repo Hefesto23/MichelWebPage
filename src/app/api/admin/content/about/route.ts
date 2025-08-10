@@ -192,7 +192,7 @@ export async function POST(request: Request) {
 
       // Processar networks se existir
       if (networks && Array.isArray(networks)) {
-        networks.forEach((network: any) => {
+        networks.forEach((network: { id: string; enabled: boolean; url?: string; order?: number }) => {
           // Salvar enabled
           itemsToSave.push({
             page: "about",

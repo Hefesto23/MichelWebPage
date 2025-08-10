@@ -219,10 +219,196 @@ Entre em contato comigo para agendar uma consulta ou para obter mais informaçõ
   }
 };
 
+export const DEFAULT_TERAPIAS_CONTENT = {
+  title: "Modalidades de Atendimentos",
+  description: "Os atendimentos são realizados dentro da visão teórica da Análise do Comportamento, buscando compreender e transformar comportamentos para uma melhor qualidade de vida.",
+  therapyModalities: [
+    {
+      id: 1,
+      imageUrl: "/assets/terapias1.jpg",
+      title: "Psicoterapia individual - Presencial",
+      description: "Modalidade de atendimento de um paciente através de técnicas personalizadas em encontros presenciais no consultório.",
+      href: "/presencial",
+      order: 1,
+      active: true
+    },
+    {
+      id: 2,
+      imageUrl: "/assets/terapias1.jpg",
+      title: "Psicoterapia individual - On-line",
+      description: "Modalidade de terapia que permite o atendimento feito à distância, com todo o conforto e privacidade que você precisa.",
+      href: "/online",
+      order: 2,
+      active: true
+    },
+    {
+      id: 3,
+      imageUrl: "/assets/terapias1.jpg",
+      title: "Plantão Psicológico",
+      description: "Serviço de atendimento rápido e pontual, oferecido para pessoas que precisam de suporte emocional imediato e urgente.",
+      href: "/plantao",
+      order: 3,
+      active: true
+    }
+  ],
+  maxCharacters: {
+    title: 80,
+    description: 300,
+    modalityTitle: 60,
+    modalityDescription: 200
+  }
+};
+
+export const DEFAULT_AVALIACOES_CONTENT = {
+  title: "Testes Psicológicos",
+  description: "Instrumentos técnicos e científicos que auxiliam na compreensão de aspectos específicos da saúde mental e cognitiva. Cada teste oferece insights importantes sobre diferentes dimensões psicológicas.",
+  testModalities: [
+    {
+      id: 1,
+      imageUrl: "/assets/terapias1.jpg",
+      title: "Teste de Ansiedade - Escala BAI",
+      description: "A Escala de Ansiedade de Beck (BAI) é um instrumento de avaliação que ajuda a identificar e medir a severidade dos sintomas de ansiedade. Composta por 21 questões, permite uma análise rápida e objetiva do estado atual de ansiedade do indivíduo.",
+      href: "https://kiai.med.br/test/teste-online-de-ansiedade-escala-de-beck-bai/",
+      order: 1,
+      active: true
+    },
+    {
+      id: 2,
+      imageUrl: "/assets/terapias1.jpg",
+      title: "Teste de Inteligência WAIS III",
+      description: "A Escala Wechsler de Inteligência (WAIS III) é um instrumento completo para avaliação cognitiva, composto por subtestes que analisam diferentes aspectos da inteligência, como compreensão verbal, raciocínio perceptual, memória de trabalho e velocidade de processamento.",
+      href: "/wais-iii",
+      order: 2,
+      active: true
+    }
+  ],
+  maxCharacters: {
+    title: 80,
+    description: 300,
+    testTitle: 60,
+    testDescription: 250
+  }
+};
+
+export const DEFAULT_CONTACT_CONTENT = {
+  // Informações do profissional
+  psychologist: {
+    name: "Michel de Camargo",
+    fullName: "Michel de Camargo",
+    title: "Psicólogo Clínico",
+    crp: "CRP 06/174807",
+    specialties: ["Ansiedade", "Depressão", "Análise do Comportamento"],
+    approach: "Análise do Comportamento"
+  },
+  
+  // Informações de contato
+  contact: {
+    whatsapp: "5515997646421",
+    phoneDisplay: "+55 (15) 99764-6421",
+    email: "michelcamargo.psi@gmail.com",
+    social: {
+      instagram: "@michelcamargo.psi",
+      linkedin: "michel-camargo-psi"
+    }
+  },
+  
+  // Informações do consultório
+  clinic: {
+    name: "Consultório de Psicologia Michel de Camargo",
+    address: {
+      street: "Rua Antônio Ferreira, 171",
+      neighborhood: "Parque Campolim",
+      city: "Sorocaba",
+      state: "SP",
+      zip: "18047-636",
+      country: "Brasil",
+      coordinates: {
+        lat: -23.493335284719095,
+        lng: -47.47244788549275
+      }
+    },
+    hours: {
+      weekdays: "Segunda à Sexta",
+      start: "8:00",
+      end: "21:00",
+      timezone: "America/Sao_Paulo",
+      closedDays: ["Sexta", "Sábado", "Domingo"],
+      note: "As consultas necessitam ser previamente agendadas.",
+      ageRestriction: "* Atendimentos a partir de 20 anos de idade"
+    }
+  },
+  
+  // Página específica de contato
+  page: {
+    title: "Contato",
+    description: "Entre em contato para esclarecer suas dúvidas e agendar sua consulta. Estou aqui para ajudar você em sua jornada de bem-estar emocional.",
+    sections: {
+      contactInfo: {
+        title: "Informações de Contato",
+        description: "Entre em contato através dos canais abaixo"
+      },
+      hours: {
+        title: "Atendimento", 
+        description: "Horários de funcionamento do consultório"
+      },
+      location: {
+        title: "Localização no Mapa",
+        description: "Encontre facilmente o consultório"
+      }
+    }
+  },
+  
+  maxCharacters: {
+    psychologistName: 50,
+    phoneDisplay: 20,
+    email: 50,
+    address: 100,
+    pageTitle: 50,
+    pageDescription: 300,
+    sectionTitle: 50,
+    sectionDescription: 150
+  }
+};
+
+export const DEFAULT_AGENDAMENTO_CONTENT = {
+  title: "Agendamento de Consultas",
+  description: "Agende sua consulta de forma rápida e segura. Escolha entre atendimento presencial ou online.",
+  infoCards: [
+    {
+      id: 1,
+      title: "Preparando-se para sua consulta",
+      description: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
+      active: true
+    },
+    {
+      id: 2,
+      title: "Política de Cancelamento",
+      description: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
+      active: true
+    },
+    {
+      id: 3,
+      title: "Consulta Online",
+      description: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
+      active: true
+    }
+  ],
+  maxCharacters: {
+    title: 80,
+    description: 250,
+    cardTitle: 60,
+    cardDescription: 300
+  }
+};
+
 export const DEFAULT_CONTENT = {
   hero: DEFAULT_HERO_CONTENT,
   welcome: DEFAULT_WELCOME_CONTENT,
   services: DEFAULT_SERVICES_CONTENT,
   clinic: DEFAULT_CLINIC_CONTENT,
   about: DEFAULT_ABOUT_CONTENT,
+  terapias: DEFAULT_TERAPIAS_CONTENT,
+  avaliacoes: DEFAULT_AVALIACOES_CONTENT,
+  contact: DEFAULT_CONTACT_CONTENT,
+  agendamento: DEFAULT_AGENDAMENTO_CONTENT,
 } as const;

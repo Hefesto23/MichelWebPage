@@ -6,9 +6,13 @@ import { ImageSelector } from "@/components/shared/media";
 import { handleAuthError } from "@/lib/auth";
 import {
   DEFAULT_ABOUT_CONTENT,
+  DEFAULT_AGENDAMENTO_CONTENT,
+  DEFAULT_AVALIACOES_CONTENT,
   DEFAULT_CLINIC_CONTENT,
+  DEFAULT_CONTACT_CONTENT,
   DEFAULT_HERO_CONTENT,
   DEFAULT_SERVICES_CONTENT,
+  DEFAULT_TERAPIAS_CONTENT,
   DEFAULT_WELCOME_CONTENT,
 } from "@/utils/default-content";
 import {
@@ -18,6 +22,7 @@ import {
   RotateCcw,
   Save,
   Upload,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -65,6 +70,23 @@ interface NetworkItem {
   order: number;
 }
 
+interface ModalityItem {
+  id: number;
+  imageUrl: string;
+  title: string;
+  description: string;
+  href: string;
+  order: number;
+  active: boolean;
+}
+
+interface InfoCardItem {
+  id: number;
+  title: string;
+  description: string;
+  active: boolean;
+}
+
 interface SavedContent {
   hero?: Record<string, string>;
   welcome?: Record<string, string>;
@@ -83,6 +105,27 @@ interface SavedContent {
     title?: string;
     description?: string;
     networks?: NetworkItem[];
+  };
+  terapias?: {
+    title?: string;
+    description?: string;
+    therapyModalities?: ModalityItem[];
+  };
+  avaliacoes?: {
+    title?: string;
+    description?: string;
+    testModalities?: ModalityItem[];
+  };
+  contact?: {
+    psychologist?: typeof DEFAULT_CONTACT_CONTENT.psychologist;
+    contact?: typeof DEFAULT_CONTACT_CONTENT.contact;
+    clinic?: typeof DEFAULT_CONTACT_CONTENT.clinic;
+    page?: typeof DEFAULT_CONTACT_CONTENT.page;
+  };
+  agendamento?: {
+    title?: string;
+    description?: string;
+    infoCards?: InfoCardItem[];
   };
 }
 
@@ -119,9 +162,28 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       if (response.ok) {
         const data = await response.json();
         savedContent = data.content;
+        console.log(`🔍 PageEditor carregou conteúdo para ${page}:`, savedContent);
       }
 
       const sections = getPageSections(page, savedContent);
+      console.log(`📋 PageEditor gerou seções para ${page}:`, sections);
+      
+      // Debug específico para campos de imagem
+      if (page === "terapias" || page === "avaliacoes") {
+        sections.forEach((section, sIndex) => {
+          section.items.forEach((item, iIndex) => {
+            if (item.type === "image") {
+              console.log(`🖼️ Campo de imagem encontrado em ${page} - Seção ${sIndex}, Item ${iIndex}:`, {
+                id: item.id,
+                key: item.key,
+                label: item.label,
+                value: item.value
+              });
+            }
+          });
+        });
+      }
+      
       setSections(sections);
     } catch (error) {
       console.error("Erro ao carregar conteúdo:", error);
@@ -554,6 +616,526 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           },
         ];
 
+      case "terapias":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const terapiasTitle = savedContent?.terapias?.title || DEFAULT_TERAPIAS_CONTENT.title;
+        const terapiasDescription = savedContent?.terapias?.description || DEFAULT_TERAPIAS_CONTENT.description;
+        
+        // Parse das modalidades se vier como string JSON
+        let terapiasModalities = DEFAULT_TERAPIAS_CONTENT.therapyModalities;
+        if (savedContent?.terapias?.therapyModalities) {
+          try {
+            terapiasModalities = typeof savedContent.terapias.therapyModalities === 'string' 
+              ? JSON.parse(savedContent.terapias.therapyModalities)
+              : savedContent.terapias.therapyModalities;
+          } catch {
+            terapiasModalities = DEFAULT_TERAPIAS_CONTENT.therapyModalities;
+          }
+        }
+
+        return [
+          {
+            name: "Informações Gerais",
+            description: "Título e descrição principal da página de terapias",
+            items: [
+              {
+                id: 500,
+                page: "terapias",
+                section: "terapias",
+                key: "title",
+                type: "title",
+                value: terapiasTitle,
+                label: "Título da Página",
+                placeholder: "Digite o título principal...",
+              },
+              {
+                id: 501,
+                page: "terapias",
+                section: "terapias",
+                key: "description",
+                type: "text",
+                value: terapiasDescription,
+                label: "Descrição da Página",
+                placeholder: "Digite a descrição principal...",
+              },
+            ],
+          },
+          {
+            name: "Modalidades de Terapia",
+            description: "Configure as modalidades de atendimento oferecidas",
+            items: [
+              // Modalidades individuais
+              ...terapiasModalities.map((modality: ModalityItem, index: number) => [
+                {
+                  id: 502 + (index * 5), // 502, 507, 512
+                  page: "terapias",
+                  section: "modalities",
+                  key: `modality${modality.id}_title`,
+                  type: "text" as const,
+                  value: modality.title,
+                  label: `Modalidade ${modality.id} - Título`,
+                  placeholder: `Título da modalidade ${modality.id}...`,
+                },
+                {
+                  id: 503 + (index * 5), // 503, 508, 513
+                  page: "terapias",
+                  section: "modalities",
+                  key: `modality${modality.id}_description`,
+                  type: "text" as const,
+                  value: modality.description,
+                  label: `Modalidade ${modality.id} - Descrição`,
+                  placeholder: `Descrição da modalidade ${modality.id}...`,
+                },
+                {
+                  id: 504 + (index * 5), // 504, 509, 514
+                  page: "terapias",
+                  section: "modalities",
+                  key: `modality${modality.id}_imageUrl`,
+                  type: "image" as const,
+                  value: modality.imageUrl,
+                  label: `Modalidade ${modality.id} - Imagem`,
+                  placeholder: `URL da imagem da modalidade ${modality.id}...`,
+                },
+                {
+                  id: 505 + (index * 5), // 505, 510, 515
+                  page: "terapias",
+                  section: "modalities",
+                  key: `modality${modality.id}_href`,
+                  type: "text" as const,
+                  value: modality.href,
+                  label: `Modalidade ${modality.id} - Link`,
+                  placeholder: `Link da modalidade ${modality.id} (ex: /presencial)...`,
+                },
+                {
+                  id: 506 + (index * 5), // 506, 511, 516
+                  page: "terapias",
+                  section: "modalities",
+                  key: `modality${modality.id}_active`,
+                  type: "text" as const, // Will be handled as switch in render
+                  value: modality.active ? "true" : "false",
+                  label: `Modalidade ${modality.id} - Ativo`,
+                  placeholder: "true/false",
+                },
+              ]).flat(),
+            ],
+          },
+        ];
+
+      case "avaliacoes":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const avaliacoesTitle = savedContent?.avaliacoes?.title || DEFAULT_AVALIACOES_CONTENT.title;
+        const avaliacoesDescription = savedContent?.avaliacoes?.description || DEFAULT_AVALIACOES_CONTENT.description;
+        
+        // Parse das modalidades se vier como string JSON
+        let avaliacoesTests = DEFAULT_AVALIACOES_CONTENT.testModalities;
+        if (savedContent?.avaliacoes?.testModalities) {
+          try {
+            avaliacoesTests = typeof savedContent.avaliacoes.testModalities === 'string' 
+              ? JSON.parse(savedContent.avaliacoes.testModalities)
+              : savedContent.avaliacoes.testModalities;
+          } catch (error) {
+            console.error('Erro ao fazer parse das modalidades de avaliação:', error);
+          }
+        }
+        
+        return [
+          {
+            name: "Informações da Página",
+            description: "Configure o cabeçalho da página de avaliações",
+            items: [
+              {
+                id: 600,
+                page: "avaliacoes",
+                section: "avaliacoes",
+                key: "title",
+                type: "title",
+                value: avaliacoesTitle,
+                label: "Título da Página",
+                placeholder: "Digite o título principal...",
+              },
+              {
+                id: 601,
+                page: "avaliacoes",
+                section: "avaliacoes",
+                key: "description",
+                type: "text",
+                value: avaliacoesDescription,
+                label: "Descrição da Página",
+                placeholder: "Digite a descrição principal...",
+              },
+            ],
+          },
+          {
+            name: "Testes Psicológicos",
+            description: "Configure os testes psicológicos oferecidos",
+            items: [
+              // Testes individuais
+              ...avaliacoesTests.map((test: ModalityItem, index: number) => [
+                {
+                  id: 602 + (index * 5), // 602, 607, 612
+                  page: "avaliacoes",
+                  section: "tests",
+                  key: `test${test.id}_title`,
+                  type: "text" as const,
+                  value: test.title,
+                  label: `Teste ${test.id} - Título`,
+                  placeholder: `Título do teste ${test.id}...`,
+                },
+                {
+                  id: 603 + (index * 5), // 603, 608, 613
+                  page: "avaliacoes",
+                  section: "tests",
+                  key: `test${test.id}_description`,
+                  type: "text" as const,
+                  value: test.description,
+                  label: `Teste ${test.id} - Descrição`,
+                  placeholder: `Descrição do teste ${test.id}...`,
+                },
+                {
+                  id: 604 + (index * 5), // 604, 609, 614
+                  page: "avaliacoes",
+                  section: "tests",
+                  key: `test${test.id}_imageUrl`,
+                  type: "image" as const,
+                  value: test.imageUrl,
+                  label: `Teste ${test.id} - Imagem`,
+                  placeholder: `URL da imagem do teste ${test.id}...`,
+                },
+                {
+                  id: 605 + (index * 5), // 605, 610, 615
+                  page: "avaliacoes",
+                  section: "tests",
+                  key: `test${test.id}_href`,
+                  type: "text" as const,
+                  value: test.href,
+                  label: `Teste ${test.id} - Link`,
+                  placeholder: `Link do teste ${test.id} (ex: /wais-iii)...`,
+                },
+                {
+                  id: 606 + (index * 5), // 606, 611, 616
+                  page: "avaliacoes",
+                  section: "tests",
+                  key: `test${test.id}_active`,
+                  type: "text" as const, // Will be handled as switch in render
+                  value: test.active ? "true" : "false",
+                  label: `Teste ${test.id} - Ativo`,
+                  placeholder: "true/false",
+                },
+              ]).flat(),
+            ],
+          },
+        ];
+
+      case "contact":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const contactData = savedContent?.contact || {};
+        const contactPsychologist = (typeof contactData.psychologist === 'object' ? contactData.psychologist : DEFAULT_CONTACT_CONTENT.psychologist) as typeof DEFAULT_CONTACT_CONTENT.psychologist;
+        const contactContact = (typeof contactData.contact === 'object' ? contactData.contact : DEFAULT_CONTACT_CONTENT.contact) as typeof DEFAULT_CONTACT_CONTENT.contact;
+        const contactClinic = (typeof contactData.clinic === 'object' ? contactData.clinic : DEFAULT_CONTACT_CONTENT.clinic) as typeof DEFAULT_CONTACT_CONTENT.clinic;
+        const contactPage = (typeof contactData.page === 'object' ? contactData.page : DEFAULT_CONTACT_CONTENT.page) as typeof DEFAULT_CONTACT_CONTENT.page;
+        
+        return [
+          {
+            name: "Informações do Psicólogo",
+            description: "Configure informações profissionais que serão usadas em todo o site",
+            items: [
+              {
+                id: 700,
+                page: "contact",
+                section: "psychologist",
+                key: "name",
+                type: "text",
+                value: contactPsychologist.name,
+                label: "Nome do Psicólogo",
+                placeholder: "Nome completo do profissional",
+              },
+              {
+                id: 701,
+                page: "contact", 
+                section: "psychologist",
+                key: "crp",
+                type: "text",
+                value: contactPsychologist.crp,
+                label: "CRP",
+                placeholder: "Ex: CRP 06/174807",
+              },
+              {
+                id: 702,
+                page: "contact",
+                section: "psychologist", 
+                key: "title",
+                type: "text",
+                value: contactPsychologist.title,
+                label: "Título Profissional",
+                placeholder: "Ex: Psicólogo Clínico",
+              },
+              {
+                id: 703,
+                page: "contact",
+                section: "psychologist",
+                key: "approach",
+                type: "text", 
+                value: contactPsychologist.approach,
+                label: "Abordagem Terapêutica",
+                placeholder: "Ex: Análise do Comportamento",
+              },
+            ],
+          },
+          {
+            name: "Informações de Contato",
+            description: "Configure contatos que serão usados em todo o site (Footer, WhatsApp, etc.)",
+            items: [
+              {
+                id: 704,
+                page: "contact",
+                section: "contact",
+                key: "whatsapp",
+                type: "text",
+                value: contactContact.whatsapp,
+                label: "WhatsApp (apenas números)",
+                placeholder: "Ex: 5515997646421",
+              },
+              {
+                id: 705,
+                page: "contact",
+                section: "contact", 
+                key: "phoneDisplay",
+                type: "text",
+                value: contactContact.phoneDisplay,
+                label: "Telefone para Exibição",
+                placeholder: "Ex: +55 (15) 99764-6421",
+              },
+              {
+                id: 706,
+                page: "contact",
+                section: "contact",
+                key: "email",
+                type: "text",
+                value: contactContact.email,
+                label: "E-mail",
+                placeholder: "email@exemplo.com",
+              },
+              {
+                id: 707,
+                page: "contact",
+                section: "contact",
+                key: "instagram",
+                type: "text",
+                value: contactContact.social.instagram,
+                label: "Instagram",
+                placeholder: "@usuario",
+              },
+            ],
+          },
+          {
+            name: "Informações do Consultório", 
+            description: "Configure endereço e horários do consultório",
+            items: [
+              {
+                id: 708,
+                page: "contact",
+                section: "clinic",
+                key: "name",
+                type: "text",
+                value: contactClinic.name,
+                label: "Nome do Consultório",
+                placeholder: "Nome da clínica/consultório",
+              },
+              {
+                id: 709,
+                page: "contact",
+                section: "clinic",
+                key: "street",
+                type: "text", 
+                value: contactClinic.address.street,
+                label: "Rua e Número",
+                placeholder: "Ex: Rua das Flores, 123",
+              },
+              {
+                id: 710,
+                page: "contact",
+                section: "clinic",
+                key: "neighborhood",
+                type: "text",
+                value: contactClinic.address.neighborhood,
+                label: "Bairro",
+                placeholder: "Nome do bairro",
+              },
+              {
+                id: 711,
+                page: "contact",
+                section: "clinic",
+                key: "city",
+                type: "text",
+                value: contactClinic.address.city,
+                label: "Cidade",
+                placeholder: "Nome da cidade",
+              },
+              {
+                id: 712,
+                page: "contact",
+                section: "clinic",
+                key: "state",
+                type: "text",
+                value: contactClinic.address.state,
+                label: "Estado",
+                placeholder: "Ex: SP",
+              },
+              {
+                id: 713,
+                page: "contact",
+                section: "clinic",
+                key: "zip",
+                type: "text",
+                value: contactClinic.address.zip,
+                label: "CEP",
+                placeholder: "00000-000",
+              },
+              {
+                id: 714,
+                page: "contact", 
+                section: "clinic",
+                key: "weekdays",
+                type: "text",
+                value: contactClinic.hours.weekdays,
+                label: "Dias de Atendimento",
+                placeholder: "Ex: Segunda à Sexta",
+              },
+              {
+                id: 715,
+                page: "contact",
+                section: "clinic",
+                key: "start",
+                type: "text",
+                value: contactClinic.hours.start,
+                label: "Hora de Início",
+                placeholder: "Ex: 8:00",
+              },
+              {
+                id: 716,
+                page: "contact",
+                section: "clinic", 
+                key: "end",
+                type: "text",
+                value: contactClinic.hours.end,
+                label: "Hora de Término",
+                placeholder: "Ex: 21:00",
+              },
+            ],
+          },
+          {
+            name: "Página de Contato",
+            description: "Configure o conteúdo específico da página de contato", 
+            items: [
+              {
+                id: 717,
+                page: "contact",
+                section: "page",
+                key: "title",
+                type: "title",
+                value: contactPage.title,
+                label: "Título da Página",
+                placeholder: "Título principal da página",
+              },
+              {
+                id: 718,
+                page: "contact",
+                section: "page",
+                key: "description",
+                type: "text",
+                value: contactPage.description,
+                label: "Descrição da Página",
+                placeholder: "Descrição que aparece no topo da página",
+              },
+            ],
+          },
+        ];
+
+      case "agendamento":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        const agendamentoTitle = savedContent?.agendamento?.title || DEFAULT_AGENDAMENTO_CONTENT.title;
+        const agendamentoDescription = savedContent?.agendamento?.description || DEFAULT_AGENDAMENTO_CONTENT.description;
+        
+        // Parse dos cards se vier como string JSON
+        let agendamentoCards = DEFAULT_AGENDAMENTO_CONTENT.infoCards;
+        if (savedContent?.agendamento?.infoCards) {
+          try {
+            agendamentoCards = typeof savedContent.agendamento.infoCards === 'string' 
+              ? JSON.parse(savedContent.agendamento.infoCards)
+              : savedContent.agendamento.infoCards;
+          } catch (error) {
+            console.error('Erro ao fazer parse dos cards de agendamento:', error);
+          }
+        }
+        
+        return [
+          {
+            name: "Informações da Página",
+            description: "Configure o cabeçalho da página de agendamento",
+            items: [
+              {
+                id: 800,
+                page: "agendamento",
+                section: "header",
+                key: "title",
+                type: "title",
+                value: agendamentoTitle,
+                label: "Título da Página",
+                placeholder: "Digite o título principal...",
+              },
+              {
+                id: 801,
+                page: "agendamento",
+                section: "header",
+                key: "description",
+                type: "text",
+                value: agendamentoDescription,
+                label: "Descrição da Página",
+                placeholder: "Digite a descrição principal...",
+              },
+            ],
+          },
+          {
+            name: "Cards Informativos",
+            description: "Configure os cards informativos do agendamento",
+            items: [
+              // Cards individuais
+              ...agendamentoCards.map((card: InfoCardItem, index: number) => [
+                {
+                  id: 802 + (index * 3), // 802, 805, 808
+                  page: "agendamento",
+                  section: `card_${card.id}`,
+                  key: "title",
+                  type: "text" as const,
+                  value: card.title,
+                  label: `Card ${card.id} - Título`,
+                  placeholder: `Título do card ${card.id}...`,
+                },
+                {
+                  id: 803 + (index * 3), // 803, 806, 809
+                  page: "agendamento",
+                  section: `card_${card.id}`,
+                  key: "description",
+                  type: "text" as const,
+                  value: card.description,
+                  label: `Card ${card.id} - Descrição`,
+                  placeholder: `Descrição do card ${card.id}...`,
+                },
+                {
+                  id: 804 + (index * 3), // 804, 807, 810
+                  page: "agendamento",
+                  section: `card_${card.id}`,
+                  key: "active",
+                  type: "text" as const, // Will be handled as switch in render
+                  value: card.active ? "true" : "false",
+                  label: `Card ${card.id} - Ativo`,
+                  placeholder: "true/false",
+                },
+              ]).flat(),
+            ],
+          },
+        ];
+
       default:
         return [];
     }
@@ -583,6 +1165,10 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const saveChanges = async () => {
     // Permitir salvar mesmo sem mudanças pendentes (para preservar valores atuais)
 
+    console.log(`💾 PageEditor: Iniciando save para página ${page}`);
+    console.log(`📝 PageEditor: Mudanças pendentes:`, changes);
+    console.log(`📋 PageEditor: Seções atuais:`, sections);
+
     setSaving(true);
     setError(null);
 
@@ -595,6 +1181,18 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           // Usar valor mudança SE existir, senão usar valor atual do item
           const valueToSave =
             changes[item.id] !== undefined ? changes[item.id] : item.value;
+
+          // Debug específico para campos de imagem em terapias
+          if (page === "terapias" && item.type === "image") {
+            console.log(`🖼️ PageEditor: Processando campo de imagem:`, {
+              id: item.id,
+              key: item.key,
+              section: item.section,
+              originalValue: item.value,
+              changeValue: changes[item.id],
+              finalValue: valueToSave
+            });
+          }
 
           if (item.section === "hero") {
             if (!contentToSave.hero) contentToSave.hero = {};
@@ -717,9 +1315,190 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 }
               }
             }
+          } else if (item.section === "terapias") {
+            if (!contentToSave.terapias) contentToSave.terapias = {};
+            
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.terapias[item.key] = valueToSave;
+              console.log(`📝 PageEditor: Salvando campo geral terapias.${item.key} = ${valueToSave}`);
+            }
+          } else if (item.section === "modalities") {
+            console.log(`🔧 PageEditor: Processando seção modalities, item:`, {
+              id: item.id,
+              key: item.key,
+              type: item.type,
+              value: item.value,
+              changeValue: changes[item.id],
+              finalValue: valueToSave
+            });
+            if (!contentToSave.terapias?.therapyModalities) {
+              if (!contentToSave.terapias) contentToSave.terapias = {};
+              contentToSave.terapias.therapyModalities = [...DEFAULT_TERAPIAS_CONTENT.therapyModalities];
+            }
+            
+            // Para campos das modalidades
+            if (item.key.startsWith("modality")) {
+              // Extrair modality ID e field do key (ex: modality1_title -> modalityId=1, field=title)
+              const match = item.key.match(/modality(\d+)_(.+)/);
+              console.log(`🔍 PageEditor: Match do regex:`, { key: item.key, match });
+              
+              if (match) {
+                const modalityId = parseInt(match[1]);
+                const field = match[2];
+                
+                console.log(`🎯 PageEditor: Processando modalidade ${modalityId}, campo ${field}`);
+                
+                const modalitiesList = contentToSave.terapias.therapyModalities;
+                const modalityIndex = modalitiesList.findIndex((m: ModalityItem) => m.id === modalityId);
+                
+                console.log(`🔍 PageEditor: Modalidade encontrada no índice:`, modalityIndex);
+                
+                if (modalityIndex !== -1) {
+                  const modality = modalitiesList[modalityIndex];
+                  
+                  console.log(`📝 PageEditor: Atualizando modalidade ${modalityId}.${field}:`, {
+                    antes: modality[field as keyof ModalityItem],
+                    depois: valueToSave,
+                    tipo: field
+                  });
+                  
+                  if (field === "active") {
+                    modality.active = valueToSave === "true";
+                  } else if (field === "title") {
+                    modality.title = valueToSave;
+                  } else if (field === "description") {
+                    modality.description = valueToSave;
+                  } else if (field === "imageUrl") {
+                    modality.imageUrl = valueToSave;
+                    console.log(`🖼️ PageEditor: IMAGEM ATUALIZADA para modalidade ${modalityId}: ${valueToSave}`);
+                  } else if (field === "href") {
+                    modality.href = valueToSave;
+                  }
+                  
+                  console.log(`✅ PageEditor: Modalidade ${modalityId} atualizada:`, modality);
+                } else {
+                  console.log(`❌ PageEditor: Modalidade ${modalityId} NÃO encontrada na lista!`);
+                }
+              }
+            }
+          } else if (item.section === "avaliacoes") {
+            if (!contentToSave.avaliacoes) contentToSave.avaliacoes = {};
+            
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.avaliacoes[item.key] = valueToSave;
+            }
+          } else if (item.section === "tests") {
+            if (!contentToSave.avaliacoes?.testModalities) {
+              if (!contentToSave.avaliacoes) contentToSave.avaliacoes = {};
+              contentToSave.avaliacoes.testModalities = [...DEFAULT_AVALIACOES_CONTENT.testModalities];
+            }
+            
+            // Para campos dos testes
+            if (item.key.startsWith("test")) {
+              // Extrair test ID e field do key (ex: test1_title -> testId=1, field=title)
+              const match = item.key.match(/test(\d+)_(.+)/);
+              if (match) {
+                const testId = parseInt(match[1]);
+                const field = match[2];
+                
+                const testsList = contentToSave.avaliacoes.testModalities;
+                const testIndex = testsList.findIndex((t: ModalityItem) => t.id === testId);
+                
+                if (testIndex !== -1) {
+                  const test = testsList[testIndex];
+                  if (field === "active") {
+                    test.active = valueToSave === "true";
+                  } else if (field === "title") {
+                    test.title = valueToSave;
+                  } else if (field === "description") {
+                    test.description = valueToSave;
+                  } else if (field === "imageUrl") {
+                    test.imageUrl = valueToSave;
+                  } else if (field === "href") {
+                    test.href = valueToSave;
+                  }
+                }
+              }
+            }
+          } else if (item.section === "psychologist") {
+            if (!contentToSave.contact) contentToSave.contact = {};
+            if (!contentToSave.contact.psychologist) contentToSave.contact.psychologist = { ...DEFAULT_CONTACT_CONTENT.psychologist };
+            contentToSave.contact.psychologist[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.psychologist] = valueToSave as unknown;
+          } else if (item.section === "contact" && item.page === "contact") {
+            if (!contentToSave.contact) contentToSave.contact = {};
+            if (!contentToSave.contact.contact) contentToSave.contact.contact = { ...DEFAULT_CONTACT_CONTENT.contact };
+            
+            if (item.key === "instagram") {
+              if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
+              contentToSave.contact.contact.social.instagram = valueToSave;
+            } else if (item.key === "linkedin") {
+              if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
+              contentToSave.contact.contact.social.linkedin = valueToSave;
+            } else {
+              contentToSave.contact.contact[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.contact] = valueToSave as unknown;
+            }
+          } else if (item.section === "clinic" && item.page === "contact") {
+            if (!contentToSave.contact) contentToSave.contact = {};
+            if (!contentToSave.contact.clinic) contentToSave.contact.clinic = { ...DEFAULT_CONTACT_CONTENT.clinic };
+            
+            // Endereço
+            if (['street', 'neighborhood', 'city', 'state', 'zip'].includes(item.key)) {
+              if (!contentToSave.contact.clinic.address) contentToSave.contact.clinic.address = { ...DEFAULT_CONTACT_CONTENT.clinic.address };
+              contentToSave.contact.clinic.address[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.address] = valueToSave as unknown;
+            }
+            // Horários
+            else if (['weekdays', 'start', 'end', 'note', 'ageRestriction'].includes(item.key)) {
+              if (!contentToSave.contact.clinic.hours) contentToSave.contact.clinic.hours = { ...DEFAULT_CONTACT_CONTENT.clinic.hours };
+              contentToSave.contact.clinic.hours[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.hours] = valueToSave as unknown;
+            }
+            // Outros campos da clínica
+            else {
+              contentToSave.contact.clinic[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic] = valueToSave as unknown;
+            }
+          } else if (item.section === "page" && item.page === "contact") {
+            if (!contentToSave.contact) contentToSave.contact = {};
+            if (!contentToSave.contact.page) contentToSave.contact.page = { ...DEFAULT_CONTACT_CONTENT.page };
+            contentToSave.contact.page[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.page] = valueToSave as unknown;
+          } else if (item.section === "header" && item.page === "agendamento") {
+            if (!contentToSave.agendamento) contentToSave.agendamento = {};
+            
+            // Para fields gerais da seção
+            if (item.key === "title" || item.key === "description") {
+              contentToSave.agendamento[item.key] = valueToSave;
+            }
+          } else if (item.section.startsWith("card_") && item.page === "agendamento") {
+            if (!contentToSave.agendamento?.infoCards) {
+              if (!contentToSave.agendamento) contentToSave.agendamento = {};
+              contentToSave.agendamento.infoCards = [...DEFAULT_AGENDAMENTO_CONTENT.infoCards];
+            }
+            
+            // Extrair card ID da seção (ex: card_1 -> cardId=1)
+            const match = item.section.match(/card_(\d+)/);
+            if (match) {
+              const cardId = parseInt(match[1]);
+              
+              const cardsList = contentToSave.agendamento.infoCards;
+              const cardIndex = cardsList?.findIndex((c: InfoCardItem) => c.id === cardId) ?? -1;
+              
+              if (cardIndex !== -1) {
+                const card = cardsList[cardIndex];
+                if (item.key === "active") {
+                  card.active = valueToSave === "true";
+                } else if (item.key === "title") {
+                  card.title = valueToSave;
+                } else if (item.key === "description") {
+                  card.description = valueToSave;
+                }
+              }
+            }
           }
         });
       });
+
+      console.log(`📤 PageEditor: Dados finais para salvar em ${page}:`, contentToSave);
+      console.log(`📤 PageEditor: JSON que será enviado:`, JSON.stringify(contentToSave, null, 2));
 
       // Salvar no banco
       const response = await fetch(`/api/admin/content/${page}`, {
@@ -728,7 +1507,13 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ content: contentToSave }),
+        body: JSON.stringify({ content: contentToSave }), // Envolvendo em { content: ... } conforme API espera
+      });
+      
+      console.log(`📡 PageEditor: Response do save:`, {
+        status: response.status,
+        ok: response.ok,
+        statusText: response.statusText
       });
 
       if (!response.ok) {
@@ -760,6 +1545,24 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const cancelChanges = () => {
+    if (Object.keys(changes).length === 0) {
+      return; // Não há alterações para cancelar
+    }
+
+    if (
+      !confirm(
+        "Tem certeza que deseja cancelar todas as alterações não salvas? Esta ação não pode ser desfeita."
+      )
+    ) {
+      return;
+    }
+
+    // Limpar todas as mudanças pendentes
+    setChanges({});
+    setError(null);
   };
 
   const resetToDefaults = async () => {
@@ -811,8 +1614,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       home: "Página Inicial",
       about: "Sobre Mim",
       services: "Terapias",
+      terapias: "Terapias",
       contact: "Contato",
       testimonials: "Avaliações",
+      avaliacoes: "Avaliações",
+      agendamento: "Agendamento",
     };
     return titles[pageKey] || "Página";
   };
@@ -821,8 +1627,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     const currentValue =
       changes[item.id] !== undefined ? changes[item.id] : item.value;
 
-    // Special handling for enabled fields - render as switch
-    if (item.key.includes('_enabled')) {
+    // Special handling for enabled/active fields - render as switch
+    if (item.key.includes('_enabled') || item.key.includes('_active')) {
       const isEnabled = currentValue === "true";
       return (
         <div className="flex items-center space-x-3">
@@ -1201,6 +2007,17 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             <Eye className="w-4 h-4" />
             <span>Visualizar</span>
           </Link>
+
+          {Object.keys(changes).length > 0 && (
+            <button
+              onClick={cancelChanges}
+              disabled={saving}
+              className="inline-flex items-center space-x-2 px-4 py-2 border border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <X className="w-4 h-4" />
+              <span>Cancelar Alterações</span>
+            </button>
+          )}
 
           <button
             onClick={resetToDefaults}

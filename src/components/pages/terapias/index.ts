@@ -1,0 +1,1 @@
+export { TerapiasContent } from './TerapiasContent';

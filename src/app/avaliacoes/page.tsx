@@ -1,8 +1,35 @@
-// src/app/avaliacoes/page.tsx - REFATORADO
-
-import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
-import Divisor from "@/components/shared/ui/divisor";
+// src/app/avaliacoes/page.tsx - REFATORADO COM CMS
 import { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+const AvaliacoesContent = dynamic(
+  () => import("@/components/pages/avaliacoes").then((mod) => ({ default: mod.AvaliacoesContent })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
+        <div className="content-container">
+          <div className="relative z-10">
+            <div className="section-header animate-pulse">
+              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+            </div>
+            <div className="grid-pages-2col z-content">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+);
+
+const Divisor = dynamic(
+  () => import("@/components/shared/ui/divisor"),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title:
@@ -145,52 +172,9 @@ export const metadata: Metadata = {
 };
 
 export default function Assessment() {
-  const testModalities = [
-    {
-      imageUrl: "/assets/terapias1.jpg",
-      title: "Teste de Ansiedade - Escala BAI",
-      description:
-        "A Escala de Ansiedade de Beck (BAI) é um instrumento de avaliação que ajuda a identificar e medir a severidade dos sintomas de ansiedade. Composta por 21 questões, permite uma análise rápida e objetiva do estado atual de ansiedade do indivíduo.",
-      href: "https://kiai.med.br/test/teste-online-de-ansiedade-escala-de-beck-bai/",
-    },
-    {
-      imageUrl: "/assets/terapias1.jpg",
-      title: "Teste de Inteligência WAIS III",
-      description:
-        "A Escala Wechsler de Inteligência (WAIS III) é um instrumento completo para avaliação cognitiva, composto por subtestes que analisam diferentes aspectos da inteligência, como compreensão verbal, raciocínio perceptual, memória de trabalho e velocidade de processamento.",
-      href: "/wais-iii",
-    },
-  ];
-
   return (
     <section>
-      <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
-        <div className="content-container">
-          <div className="relative z-10">
-            <div className="section-header">
-              <h2 className="section-title">Testes Psicológicos</h2>
-              <p className="section-description">
-                Instrumentos técnicos e científicos que auxiliam na compreensão
-                de aspectos específicos da saúde mental e cognitiva. Cada teste
-                oferece insights importantes sobre diferentes dimensões
-                psicológicas.
-              </p>
-            </div>
-
-            <div className="grid-pages-2col z-content">
-              {testModalities.map((test, index) => (
-                <ImageLargeCard
-                  key={index}
-                  imageUrl={test.imageUrl}
-                  title={test.title}
-                  description={test.description}
-                  href={test.href}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <AvaliacoesContent />
       <Divisor index={5} />
     </section>
   );

@@ -2,7 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { Briefcase, FileText, Home, MessageCircle, Star, User } from "lucide-react";
+import { Briefcase, Home, Star, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -33,27 +33,19 @@ const contentPages: ContentPage[] = [
     lastUpdated: "2024-05-18T14:20:00Z",
   },
   {
-    key: "services",
+    key: "terapias",
     name: "Terapias",
-    description: "Serviços oferecidos e metodologias",
+    description: "Modalidades de atendimento e metodologias oferecidas",
     icon: Briefcase,
     sections: 2,
     lastUpdated: "2024-05-15T16:45:00Z",
   },
   {
-    key: "contact",
-    name: "Contato",
-    description: "Informações de contato e localização",
-    icon: MessageCircle,
-    sections: 2,
-    lastUpdated: "2024-05-10T09:15:00Z",
-  },
-  {
-    key: "testimonials",
+    key: "avaliacoes",
     name: "Avaliações",
-    description: "Tipos de avaliações feitas na clinica",
+    description: "Tipos de avaliações feitas na clínica",
     icon: Star,
-    sections: 1,
+    sections: 2,
     lastUpdated: "2024-05-12T11:00:00Z",
   },
 ];
@@ -138,39 +130,6 @@ export const ContentPage = () => {
             </Link>
           );
         })}
-      </div>
-
-      {/* Ações Rápidas */}
-      <div className="mt-8">
-        <AdminCard title="Ações Rápidas">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link
-              href="/admin/content/global"
-              className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5 text-primary-foreground" />
-                <div>
-                  <h4 className="font-medium">Configurações Globais</h4>
-                  <p className="text-sm text-muted-foreground">Logo, favicon, meta tags, etc.</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/admin/content/backup"
-              className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5 text-primary-foreground" />
-                <div>
-                  <h4 className="font-medium">Backup de Conteúdo</h4>
-                  <p className="text-sm text-muted-foreground">Exportar e importar conteúdo</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </AdminCard>
       </div>
     </div>
   );

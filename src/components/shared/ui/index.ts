@@ -11,3 +11,4 @@ export { Pagination } from "./Pagination";
 export { StatusBadge } from "./StatusBadge";
 export { Switch } from "./switch";
 export { Textarea } from "./textarea";
+export { WeekDaySelector } from "./WeekDaySelector";

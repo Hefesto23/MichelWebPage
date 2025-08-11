@@ -86,3 +86,13 @@ model Appointment {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
+
+// Modelo para configurações do sistema
+model Settings {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique // identificador único da configuração
+  value     String   @db.Text // valor da configuração (JSON)
+  section   String // seção da configuração (geral, agendamento, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -2,14 +2,13 @@
 import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
 import { Calendar } from "@/components/shared/ui/calendar";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { AppointmentFormData, AppointmentModality } from "@/types/appointment";
 import {
   addMonths,
   format,
   isAfter,
   isBefore,
-  isFriday,
-  isWeekend,
   startOfDay,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -34,6 +33,9 @@ export default function DateTimeSelection({
   setCarregando,
   handleError,
 }: DateTimeSelectionProps) {
+  // Hook para configurações públicas
+  const { settings, loading: settingsLoading, formatWorkingDays, getActiveDaysAsNumbers } = usePublicSettings();
+  
   // Estado para os horários disponíveis
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
   const [date, setDate] = useState<Date | undefined>(
@@ -50,20 +52,23 @@ export default function DateTimeSelection({
 
   // Definir o intervalo de datas permitidas
   const hoje = startOfDay(new Date());
-  const fimProximoMes = addMonths(hoje, 2);
+  const advanceDays = settings?.advance_days || 60;
+  const fimPeriodo = addMonths(hoje, Math.ceil(advanceDays / 30));
 
-  // Função para verificar se um dia é desabilitado (sexta, sábado, domingo)
+  // Função para verificar se um dia é desabilitado baseado nas configurações
   const isDiaDesabilitado = (data: Date) => {
+    const dayOfWeek = data.getDay(); // 0 = domingo, 1 = segunda, etc.
+    const activeDays = getActiveDaysAsNumbers();
+    
     return (
-      isFriday(data) ||
-      isWeekend(data) ||
       isBefore(data, hoje) ||
-      isAfter(data, fimProximoMes)
+      isAfter(data, fimPeriodo) ||
+      !activeDays.includes(dayOfWeek) // Só permite dias configurados no admin
     );
   };
 
   // Função para lidar com a mudança de data
-  const handleDateChange = (selectedDate: Date | undefined) => {
+  const handleDateChange = async (selectedDate: Date | undefined) => {
     if (
       !selectedDate ||
       (formData.dataSelecionada &&
@@ -76,39 +81,30 @@ export default function DateTimeSelection({
     setCarregando(true);
 
     try {
-      const horariosPadrao = [
-        "08:00",
-        "09:00",
-        "10:00",
-        "11:00",
-        "13:00",
-        "14:00",
-        "15:00",
-        "16:00",
-        "17:00",
-        "18:00",
-        "19:00",
-        "20:00",
-        "21:00",
-      ];
+      // Garantir que a data seja formatada corretamente
+      const dataFormatada = format(selectedDate, "yyyy-MM-dd");
+      console.log("📅 Frontend - Data selecionada:", selectedDate);
+      console.log("📄 Frontend - Data formatada:", dataFormatada);
 
-      setTimeout(() => {
-        setHorariosDisponiveis(horariosPadrao);
-        setCarregando(false);
+      // Buscar horários disponíveis da API
+      const response = await fetch(`/api/calendario/horarios?data=${dataFormatada}`);
+      const data = await response.json();
 
-        // Garantir que a data seja formatada corretamente
-        const dataFormatada = format(selectedDate, "yyyy-MM-dd");
-        console.log("📅 Frontend - Data selecionada:", selectedDate);
-        console.log("📄 Frontend - Data formatada:", dataFormatada);
-        
-        updateFormData({
-          dataSelecionada: dataFormatada,
-          horarioSelecionado: "",
-        });
-      }, 500);
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao buscar horários");
+      }
+
+      setHorariosDisponiveis(data.horariosDisponiveis || []);
+      
+      updateFormData({
+        dataSelecionada: dataFormatada,
+        horarioSelecionado: "",
+      });
     } catch (error: unknown) {
       console.error("Erro ao carregar horários:", error);
       handleError("Erro ao carregar horários disponíveis. Tente novamente.");
+      setHorariosDisponiveis([]);
+    } finally {
       setCarregando(false);
     }
   };
@@ -231,7 +227,7 @@ export default function DateTimeSelection({
             onSelect={handleDateChange}
             disabled={isDiaDesabilitado}
             startMonth={hoje}
-            endMonth={fimProximoMes}
+            endMonth={fimPeriodo}
             timeZone="America/Sao_Paulo"
             locale={ptBR}
             classNames={{
@@ -258,11 +254,28 @@ export default function DateTimeSelection({
             footer={
               <div className="mt-3 pt-3 border-t border-border">
                 <p className="text-md text-muted-foreground text-center font-bold">
-                  Atendimento disponível de{" "}
-                  <span className="font-extrabold capitalize">segunda</span> a{" "}
-                  <span className="font-extrabold capitalize">
-                    quinta-feira
-                  </span>
+                  {settingsLoading ? (
+                    "Carregando horários..."
+                  ) : (
+                    <>
+                      Atendimento disponível{" "}
+                      <span className="font-extrabold capitalize">
+                        {formatWorkingDays().toLowerCase()}
+                      </span>
+                      {settings && (
+                        <>
+                          {" "}das{" "}
+                          <span className="font-extrabold">
+                            {settings.start_time}
+                          </span>
+                          {" às "}
+                          <span className="font-extrabold">
+                            {settings.end_time}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  )}
                 </p>
               </div>
             }

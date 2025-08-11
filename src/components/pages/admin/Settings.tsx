@@ -12,6 +12,8 @@ import {
   RefreshCw,
   Save,
   X,
+  MapPin,
+  User,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -39,6 +41,7 @@ interface Setting {
   type: SettingType;
   value: any;
   options?: { value: string; label: string }[];
+  disabled?: boolean;
 }
 
 export const Settings = () => {
@@ -84,6 +87,112 @@ export const Settings = () => {
             description: "Email para receber mensagens do formulário",
             type: "email",
             value: settings.geral?.contact_email || "michelcamargo.psi@gmail.com",
+          },
+        ],
+      },
+      {
+        id: "clinica",
+        name: "Informações da Clínica",
+        icon: User,
+        settings: [
+          {
+            id: "psychologist_name",
+            label: "Nome do Psicólogo",
+            description: "Nome completo que aparece no site",
+            type: "text",
+            value: settings.clinica?.psychologist_name || "Michel de Camargo",
+          },
+          {
+            id: "crp_number",
+            label: "Número do CRP",
+            description: "Registro profissional (ex: CRP 06/174807)",
+            type: "text",
+            value: settings.clinica?.crp_number || "CRP 06/174807",
+          },
+          {
+            id: "minimum_age",
+            label: "Idade Mínima para Atendimento",
+            description: "Idade mínima em anos para atendimento",
+            type: "select",
+            value: settings.clinica?.minimum_age?.toString() || "20",
+            options: [
+              { value: "16", label: "16 anos" },
+              { value: "17", label: "17 anos" },
+              { value: "18", label: "18 anos" },
+              { value: "19", label: "19 anos" },
+              { value: "20", label: "20 anos" },
+              { value: "21", label: "21 anos" },
+            ],
+          },
+          {
+            id: "appointment_note",
+            label: "Observação sobre Agendamentos",
+            description: "Nota importante sobre consultas (ex: 'As consultas necessitam ser previamente agendadas.')",
+            type: "text",
+            value: settings.clinica?.appointment_note || "As consultas necessitam ser previamente agendadas.",
+          },
+          {
+            id: "additional_notes",
+            label: "Observações Adicionais",
+            description: "Outras informações importantes para exibir no footer",
+            type: "textarea",
+            value: settings.clinica?.additional_notes || "",
+          },
+        ],
+      },
+      {
+        id: "endereco",
+        name: "Endereço da Clínica",
+        icon: MapPin,
+        settings: [
+          {
+            id: "street",
+            label: "Rua e Número",
+            description: "Endereço completo com número",
+            type: "text",
+            value: settings.endereco?.street || "Rua Antônio Ferreira, 171",
+          },
+          {
+            id: "neighborhood",
+            label: "Bairro",
+            description: "Nome do bairro",
+            type: "text",
+            value: settings.endereco?.neighborhood || "Parque Campolim",
+          },
+          {
+            id: "city",
+            label: "Cidade",
+            description: "Nome da cidade",
+            type: "text",
+            value: settings.endereco?.city || "Sorocaba",
+          },
+          {
+            id: "state",
+            label: "Estado",
+            description: "Sigla do estado (ex: SP)",
+            type: "text",
+            value: settings.endereco?.state || "SP",
+          },
+          {
+            id: "zip_code",
+            label: "CEP",
+            description: "Código postal",
+            type: "text",
+            value: settings.endereco?.zip_code || "18047-636",
+          },
+          {
+            id: "latitude",
+            label: "Latitude",
+            description: "Coordenada de latitude para o Google Maps",
+            type: "text",
+            value: settings.endereco?.latitude || "-23.493335284719095",
+          },
+          {
+            id: "longitude",
+            label: "Longitude",
+            description: "Coordenada de longitude para o Google Maps",
+            type: "text",
+            value: settings.endereco?.longitude || "-47.47244788549275",
           },
         ],
       },
@@ -170,9 +279,10 @@ export const Settings = () => {
           {
             id: "whatsapp_notifications",
             label: "Notificações via WhatsApp",
-            description: "Enviar confirmações via WhatsApp",
+            description: "🚧 Em desenvolvimento - Funcionalidade será implementada em breve",
             type: "switch",
-            value: clinicSettings.whatsapp_notifications,
+            value: false,
+            disabled: true,
           },
         ],
       },
@@ -276,6 +386,22 @@ export const Settings = () => {
         phone_number: "(15) 99764-6421",
         contact_email: "michelcamargo.psi@gmail.com",
       });
+      await saveMultipleSettings("clinica", {
+        psychologist_name: "Michel de Camargo",
+        crp_number: "CRP 06/174807",
+        minimum_age: 20,
+        appointment_note: "As consultas necessitam ser previamente agendadas.",
+        additional_notes: "",
+      });
+      await saveMultipleSettings("endereco", {
+        street: "Rua Antônio Ferreira, 171",
+        neighborhood: "Parque Campolim",
+        city: "Sorocaba",
+        state: "SP",
+        zip_code: "18047-636",
+        latitude: "-23.493335284719095",
+        longitude: "-47.47244788549275",
+      });
 
       setLocalChanges({});
       setSuccess("Configurações restauradas para o padrão!");
@@ -346,22 +472,28 @@ export const Settings = () => {
         );
 
       case "switch":
+        const isDisabled = setting.disabled || false;
         return (
           <div className="flex items-center">
             <button
-              onClick={() => handleSettingChange(sectionId, setting.id, !value)}
+              onClick={() => !isDisabled && handleSettingChange(sectionId, setting.id, !value)}
+              disabled={isDisabled}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                value ? "bg-primary-foreground" : "bg-gray-300 dark:bg-gray-600"
+                isDisabled 
+                  ? "bg-gray-200 dark:bg-gray-700 cursor-not-allowed opacity-50" 
+                  : value ? "bg-primary-foreground" : "bg-gray-300 dark:bg-gray-600"
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  value ? "translate-x-6" : "translate-x-1"
+                className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                  isDisabled 
+                    ? "bg-gray-400 translate-x-1" 
+                    : value ? "bg-white translate-x-6" : "bg-white translate-x-1"
                 }`}
               />
             </button>
-            <span className="ml-2 text-sm">
-              {value ? "Ativado" : "Desativado"}
+            <span className={`ml-2 text-sm ${isDisabled ? "text-gray-400" : ""}`}>
+              {isDisabled ? "Em desenvolvimento" : (value ? "Ativado" : "Desativado")}
             </span>
           </div>
         );

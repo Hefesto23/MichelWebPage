@@ -12,6 +12,14 @@ export const ContactHours = () => {
   const workingDaysText = !loading && settings ? formatWorkingDays() : CLINIC_INFO.HOURS.WEEKDAYS;
   const startTime = settings?.start_time || CLINIC_INFO.HOURS.START;
   const endTime = settings?.end_time || CLINIC_INFO.HOURS.END;
+  
+  // Configurações dinâmicas de endereço
+  const street = settings?.street || CLINIC_INFO.ADDRESS.STREET;
+  const neighborhood = settings?.neighborhood || CLINIC_INFO.ADDRESS.NEIGHBORHOOD;
+  const city = settings?.city || CLINIC_INFO.ADDRESS.CITY;
+  const state = settings?.state || CLINIC_INFO.ADDRESS.STATE;
+  const zipCode = settings?.zip_code || CLINIC_INFO.ADDRESS.ZIP;
+  const appointmentNote = settings?.appointment_note || CLINIC_INFO.HOURS.NOTE;
 
   return (
     <div className="space-y-6">
@@ -22,13 +30,12 @@ export const ContactHours = () => {
           strokeWidth={3}
         />
         <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
-          <p className="text-lg">{CLINIC_INFO.ADDRESS.STREET}</p>
+          <p className="text-lg">{street}</p>
           <p className="text-lg">
-            {CLINIC_INFO.ADDRESS.NEIGHBORHOOD}, {CLINIC_INFO.ADDRESS.CITY}{" "}
-            {CLINIC_INFO.ADDRESS.STATE}
+            {neighborhood}, {city} {state}
           </p>
           <p className="text-lg">
-            {CLINIC_INFO.ADDRESS.ZIP}, {CLINIC_INFO.ADDRESS.COUNTRY}
+            {zipCode}, Brasil
           </p>
         </div>
       </div>
@@ -42,7 +49,7 @@ export const ContactHours = () => {
             Das {startTime} as {endTime}
           </p>
           <p className="text-sm text-muted-foreground mt-2 italic">
-            Obs: {CLINIC_INFO.HOURS.NOTE}
+            Obs: {appointmentNote}
           </p>
         </div>
       </div>

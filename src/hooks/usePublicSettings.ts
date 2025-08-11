@@ -21,6 +21,20 @@ export interface PublicClinicSettings {
   session_duration: number;
   first_session_duration: number;
   advance_days: number;
+  // Informações da Clínica
+  psychologist_name: string;
+  crp_number: string;
+  minimum_age: number;
+  appointment_note: string;
+  additional_notes: string;
+  // Endereço
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  latitude: string;
+  longitude: string;
 }
 
 export const usePublicSettings = () => {
@@ -62,6 +76,20 @@ export const usePublicSettings = () => {
         session_duration: 50,
         first_session_duration: 60,
         advance_days: 60,
+        // Informações da Clínica
+        psychologist_name: "Michel de Camargo",
+        crp_number: "CRP 06/174807",
+        minimum_age: 20,
+        appointment_note: "As consultas necessitam ser previamente agendadas.",
+        additional_notes: "",
+        // Endereço
+        street: "Rua Antônio Ferreira, 171",
+        neighborhood: "Parque Campolim",
+        city: "Sorocaba",
+        state: "SP",
+        zip_code: "18047-636",
+        latitude: "-23.493335284719095",
+        longitude: "-47.47244788549275",
       });
     } finally {
       setLoading(false);
@@ -80,8 +108,8 @@ export const usePublicSettings = () => {
     };
 
     const activeDays = Object.entries(workingDays)
-      .filter(([_, isActive]) => isActive)
-      .map(([day, _]) => dayNames[day as keyof typeof dayNames]);
+      .filter(([, isActive]) => isActive)
+      .map(([day]) => dayNames[day as keyof typeof dayNames]);
 
     if (activeDays.length === 0) return "Fechado";
     if (activeDays.length === 1) return activeDays[0];
@@ -128,8 +156,8 @@ export const usePublicSettings = () => {
     };
 
     return Object.entries(settings.working_days)
-      .filter(([_, isActive]) => isActive)
-      .map(([day, _]) => dayMapping[day as keyof typeof dayMapping]);
+      .filter(([, isActive]) => isActive)
+      .map(([day]) => dayMapping[day as keyof typeof dayMapping]);
   };
 
   useEffect(() => {

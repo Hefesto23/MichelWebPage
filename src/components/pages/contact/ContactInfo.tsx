@@ -1,15 +1,24 @@
 // components/pages/contact/ContactInfo.tsx
-import { CLINIC_INFO, EXTERNAL_LINKS } from "@/utils/constants";
+"use client";
+
+import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { CLINIC_INFO } from "@/utils/constants";
 import { Mail } from "lucide-react";
 import Link from "next/link";
 import { IoLogoWhatsapp } from "react-icons/io";
 
 export const ContactInfo = () => {
+  const { settings } = usePublicSettings();
+
+  // Usar configurações dinâmicas ou fallback
+  const phoneDisplay = settings?.phone_number || CLINIC_INFO.CONTACT.PHONE_DISPLAY;
+  const whatsappNumber = settings?.phone_number?.replace(/\D/g, "") || CLINIC_INFO.CONTACT.WHATSAPP;
+  const contactEmail = settings?.contact_email || CLINIC_INFO.CONTACT.EMAIL;
   return (
     <div className="space-y-6">
       {/* Phone */}
       <Link
-        href={EXTERNAL_LINKS.WHATSAPP}
+        href={`https://wa.me/55${whatsappNumber}`}
         target="_blank"
         rel="noopener noreferrer"
         className="contact-item group"
@@ -20,16 +29,16 @@ export const ContactInfo = () => {
             size={24}
           />
           <span className="contact-text group-hover:text-foreground/80 transition-colors">
-            {CLINIC_INFO.CONTACT.PHONE_DISPLAY}
+            {phoneDisplay}
           </span>
         </div>
       </Link>
 
       {/* Email */}
-      <Link href={EXTERNAL_LINKS.EMAIL} className="contact-item">
+      <Link href={`mailto:${contactEmail}`} className="contact-item">
         <div className="flex items-center w-full">
           <Mail className="contact-icon" size={24} strokeWidth={3} />
-          <span className="contact-text">{CLINIC_INFO.CONTACT.EMAIL}</span>
+          <span className="contact-text">{contactEmail}</span>
         </div>
       </Link>
     </div>

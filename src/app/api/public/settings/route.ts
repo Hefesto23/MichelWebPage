@@ -36,6 +36,20 @@ export async function GET() {
       session_duration: settingsMap["agendamento.session_duration"] || 50,
       first_session_duration: settingsMap["agendamento.first_session_duration"] || 60,
       advance_days: settingsMap["agendamento.advance_days"] || 60,
+      // Informações da Clínica
+      psychologist_name: settingsMap["clinica.psychologist_name"] || CLINIC_INFO.PSYCHOLOGIST.NAME,
+      crp_number: settingsMap["clinica.crp_number"] || CLINIC_INFO.PSYCHOLOGIST.CRP,
+      minimum_age: settingsMap["clinica.minimum_age"] || 20,
+      appointment_note: settingsMap["clinica.appointment_note"] || CLINIC_INFO.HOURS.NOTE,
+      additional_notes: settingsMap["clinica.additional_notes"] || "",
+      // Endereço
+      street: settingsMap["endereco.street"] || CLINIC_INFO.ADDRESS.STREET,
+      neighborhood: settingsMap["endereco.neighborhood"] || CLINIC_INFO.ADDRESS.NEIGHBORHOOD,
+      city: settingsMap["endereco.city"] || CLINIC_INFO.ADDRESS.CITY,
+      state: settingsMap["endereco.state"] || CLINIC_INFO.ADDRESS.STATE,
+      zip_code: settingsMap["endereco.zip_code"] || CLINIC_INFO.ADDRESS.ZIP,
+      latitude: settingsMap["endereco.latitude"] || CLINIC_INFO.ADDRESS.COORDINATES.LAT.toString(),
+      longitude: settingsMap["endereco.longitude"] || CLINIC_INFO.ADDRESS.COORDINATES.LNG.toString(),
     };
 
     return NextResponse.json({
@@ -62,6 +76,20 @@ export async function GET() {
       session_duration: 50,
       first_session_duration: 60,
       advance_days: 60,
+      // Informações da Clínica
+      psychologist_name: CLINIC_INFO.PSYCHOLOGIST.NAME,
+      crp_number: CLINIC_INFO.PSYCHOLOGIST.CRP,
+      minimum_age: 20,
+      appointment_note: CLINIC_INFO.HOURS.NOTE,
+      additional_notes: "",
+      // Endereço
+      street: CLINIC_INFO.ADDRESS.STREET,
+      neighborhood: CLINIC_INFO.ADDRESS.NEIGHBORHOOD,
+      city: CLINIC_INFO.ADDRESS.CITY,
+      state: CLINIC_INFO.ADDRESS.STATE,
+      zip_code: CLINIC_INFO.ADDRESS.ZIP,
+      latitude: CLINIC_INFO.ADDRESS.COORDINATES.LAT.toString(),
+      longitude: CLINIC_INFO.ADDRESS.COORDINATES.LNG.toString(),
     };
 
     return NextResponse.json({

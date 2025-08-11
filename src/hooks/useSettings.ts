@@ -166,8 +166,8 @@ export const useSettings = () => {
     };
 
     const activeDays = Object.entries(workingDays)
-      .filter(([_, isActive]) => isActive)
-      .map(([day, _]) => dayNames[day as keyof typeof dayNames]);
+      .filter(([, isActive]) => isActive)
+      .map(([day]) => dayNames[day as keyof typeof dayNames]);
 
     if (activeDays.length === 0) return "Nenhum dia selecionado";
     if (activeDays.length === 1) return activeDays[0];

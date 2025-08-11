@@ -2,6 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
+import { fetchWithAuth } from "@/lib/auth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -40,7 +41,13 @@ export const Appointments = () => {
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
+    // Inicializar com mês atual (YYYY-MM)
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+  });
   const [currentPage, setCurrentPage] = useState(1);
+  const [updating, setUpdating] = useState<number | null>(null);
   const itemsPerPage = 10;
 
   const applyFilters = useCallback(() => {
@@ -62,9 +69,18 @@ export const Appointments = () => {
       );
     }
 
-    // Filtrar por data
+    // Filtrar por data específica
     if (selectedDate) {
       filtered = filtered.filter((apt) => apt.dataSelecionada === selectedDate);
+    }
+    // Filtrar por mês quando não há data específica selecionada
+    else if (selectedMonth) {
+      filtered = filtered.filter((apt) => {
+        // Extrair ano-mês diretamente da string da data (formato YYYY-MM-DD)
+        const appointmentMonth = apt.dataSelecionada.substring(0, 7); // "2024-08"
+        console.log(`🔍 Filtro mês - Appointment: ${apt.nome}, Data: ${apt.dataSelecionada}, Mês extraído: ${appointmentMonth}, Filtro: ${selectedMonth}`);
+        return appointmentMonth === selectedMonth;
+      });
     }
 
     // Ordenar por data (mais recentes primeiro)
@@ -76,7 +92,7 @@ export const Appointments = () => {
 
     setFilteredAppointments(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [appointments, filterStatus, searchTerm, selectedDate]);
+  }, [appointments, filterStatus, searchTerm, selectedDate, selectedMonth]);
 
   useEffect(() => {
     fetchAppointments();
@@ -84,50 +100,88 @@ export const Appointments = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [appointments, filterStatus, searchTerm, selectedDate, applyFilters]);
+  }, [appointments, filterStatus, searchTerm, selectedDate, selectedMonth, applyFilters]);
 
   const fetchAppointments = async () => {
     try {
-      // Dados simulados para desenvolvimento
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockData: Appointment[] = Array.from({ length: 25 }, (_, i) => ({
-        id: i + 1,
-        nome: `Paciente ${i + 1}`,
-        email: `paciente${i + 1}@example.com`,
-        telefone: `(15) 9${Math.floor(Math.random() * 10000)}-${Math.floor(
-          Math.random() * 10000
-        )}`,
-        dataSelecionada: new Date(Date.now() + (i % 14) * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        horarioSelecionado: `${Math.floor(Math.random() * 12) + 8}:00`,
-        modalidade: Math.random() > 0.5 ? "presencial" : "online",
-        primeiraConsulta: Math.random() > 0.7,
-        mensagem:
-          Math.random() > 0.6
-            ? "Preciso discutir sobre ansiedade e estresse no trabalho."
-            : undefined,
-        codigo: `AGD${Math.floor(Math.random() * 10000)}`,
-        status: ["agendado", "confirmado", "cancelado", "realizado"][
-          Math.floor(Math.random() * 4)
-        ] as "agendado" | "confirmado" | "cancelado" | "realizado",
-        createdAt: new Date(
-          Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
-        ).toISOString(),
-      }));
-
-      setAppointments(mockData);
-      setFilteredAppointments(mockData);
+      setLoading(true);
+      console.log("🔄 Iniciando busca de appointments...");
+      
+      const response = await fetchWithAuth("/api/admin/appointments");
+      console.log("📡 Response status:", response.status);
+      
+      if (!response.ok) {
+        console.error("❌ Response não OK:", response.status, response.statusText);
+        throw new Error("Erro ao buscar agendamentos");
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log("📥 Dados recebidos da API:", data.data.length, "appointments");
+        console.log("📥 Primeiros 3 appointments:", data.data.slice(0, 3));
+        
+        // Os dados já vêm formatados da API
+        const formattedAppointments: Appointment[] = data.data;
+        
+        console.log("🔄 Appointments formatados:", formattedAppointments.slice(0, 3));
+        
+        setAppointments(formattedAppointments);
+      } else {
+        throw new Error(data.message || "Erro ao carregar agendamentos");
+      }
     } catch (error) {
       console.error("Erro ao carregar agendamentos:", error);
+      // Em caso de erro, manter lista vazia
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const updateAppointmentStatus = async (id: number, status: string) => {
+    try {
+      setUpdating(id);
+      
+      const response = await fetchWithAuth("/api/admin/appointments", {
+        method: "PUT",
+        body: JSON.stringify({ id, status }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar agendamento");
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Atualizar o appointment na lista local
+        setAppointments(prev => 
+          prev.map(apt => 
+            apt.id === id 
+              ? { 
+                  ...apt, 
+                  status: status as "agendado" | "confirmado" | "cancelado" | "realizado"
+                }
+              : apt
+          )
+        );
+      } else {
+        throw new Error(data.message || "Erro ao atualizar agendamento");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar agendamento:", error);
+      alert("Erro ao atualizar agendamento. Tente novamente.");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "dd 'de' MMMM 'de' yyyy", {
+    // Usar a data diretamente sem conversões de timezone para evitar problemas
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // Month é 0-indexed em JS
+    return format(date, "dd 'de' MMMM 'de' yyyy", {
       locale: ptBR,
     });
   };
@@ -194,7 +248,7 @@ export const Appointments = () => {
 
       {/* Filters */}
       <AdminCard title="Filtros">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Status Filter */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
@@ -213,16 +267,33 @@ export const Appointments = () => {
             </select>
           </div>
 
+          {/* Month Filter */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Mês/Ano
+            </label>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => {
+                setSelectedMonth(e.target.value);
+                setSelectedDate(""); // Limpar data específica quando mudar mês
+              }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+            />
+          </div>
+
           {/* Date Filter */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Data da Consulta
+              Data Específica
             </label>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
+              placeholder="Opcional - sobrepõe o filtro de mês"
             />
           </div>
 
@@ -248,6 +319,9 @@ export const Appointments = () => {
               setFilterStatus("todos");
               setSearchTerm("");
               setSelectedDate("");
+              // Resetar para mês atual ao limpar filtros
+              const now = new Date();
+              setSelectedMonth(`${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`);
             }}
             className="text-sm text-primary-foreground hover:underline"
           >
@@ -258,7 +332,25 @@ export const Appointments = () => {
 
       {/* Appointments List */}
       <div className="mt-8">
-        <AdminCard title={`Consultas (${filteredAppointments.length})`}>
+        <AdminCard title={
+          <div className="flex items-center justify-between">
+            <span>Consultas ({filteredAppointments.length})</span>
+            {selectedMonth && !selectedDate && (
+              <span className="text-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-md">
+                Filtro: {(() => {
+                  const [year, month] = selectedMonth.split('-').map(Number);
+                  const date = new Date(year, month - 1, 15); // 15º dia do mês para evitar problemas de timezone
+                  return format(date, "MMMM 'de' yyyy", { locale: ptBR });
+                })()}
+              </span>
+            )}
+            {selectedDate && (
+              <span className="text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 px-2 py-1 rounded-md">
+                Filtro: {formatDate(selectedDate)}
+              </span>
+            )}
+          </div>
+        }>
           {filteredAppointments.length > 0 ? (
             <div className="space-y-4">
               {currentAppointments.map((appointment) => (
@@ -337,26 +429,44 @@ export const Appointments = () => {
 
                   {/* Action Buttons */}
                   <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
-                    <button className="px-3 py-1 text-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800">
-                      Ver Detalhes
-                    </button>
-
                     {appointment.status === "agendado" && (
-                      <button className="px-3 py-1 text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-800">
-                        Confirmar
+                      <button
+                        onClick={() => updateAppointmentStatus(appointment.id, "confirmado")}
+                        disabled={updating === appointment.id}
+                        className="px-3 py-1 text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-md hover:bg-green-200 dark:hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {updating === appointment.id ? "Atualizando..." : "Confirmar"}
                       </button>
                     )}
 
                     {(appointment.status === "agendado" ||
                       appointment.status === "confirmado") && (
-                      <button className="px-3 py-1 text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-800">
-                        Cancelar
+                      <button
+                        onClick={() => updateAppointmentStatus(appointment.id, "cancelado")}
+                        disabled={updating === appointment.id}
+                        className="px-3 py-1 text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {updating === appointment.id ? "Atualizando..." : "Cancelar"}
                       </button>
                     )}
 
                     {appointment.status === "confirmado" && (
-                      <button className="px-3 py-1 text-sm bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-md hover:bg-purple-200 dark:hover:bg-purple-800">
-                        Marcar Realizada
+                      <button
+                        onClick={() => updateAppointmentStatus(appointment.id, "realizado")}
+                        disabled={updating === appointment.id}
+                        className="px-3 py-1 text-sm bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-md hover:bg-purple-200 dark:hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {updating === appointment.id ? "Atualizando..." : "Marcar Realizada"}
+                      </button>
+                    )}
+
+                    {appointment.status === "agendado" && (
+                      <button
+                        onClick={() => updateAppointmentStatus(appointment.id, "realizado")}
+                        disabled={updating === appointment.id}
+                        className="px-3 py-1 text-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {updating === appointment.id ? "Atualizando..." : "Finalizar Direto"}
                       </button>
                     )}
                   </div>

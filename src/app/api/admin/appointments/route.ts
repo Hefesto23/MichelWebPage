@@ -2,7 +2,7 @@
 import { apiResponse, getSearchParams, withAuth } from "@/lib/api-helpers";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // ============================================
 // 📋 BUSCAR AGENDAMENTOS
@@ -38,35 +38,72 @@ export const GET = withAuth(async (req: NextRequest) => {
     orderBy: { dataSelecionada: "desc" },
   });
 
-  return apiResponse.success(appointments);
+  console.log("📋 API Appointments - Total encontrados:", appointments.length);
+  console.log("📋 API Appointments - Filtros aplicados:", { status, date, search });
+  console.log("📋 API Appointments - Primeiros 3 resultados:", appointments.slice(0, 3).map(a => ({
+    id: a.id,
+    nome: a.nome,
+    dataSelecionada: a.dataSelecionada,
+    status: a.status
+  })));
+
+  // Normalizar dados antes de retornar
+  const normalizedAppointments = appointments.map(apt => ({
+    ...apt,
+    status: apt.status.toLowerCase(), // Normalizar para minúsculas
+    // Garantir que dataSelecionada seja uma string no formato YYYY-MM-DD
+    dataSelecionada: apt.dataSelecionada instanceof Date 
+      ? apt.dataSelecionada.toISOString().split('T')[0]
+      : new Date(apt.dataSelecionada).toISOString().split('T')[0]
+  }));
+
+  return NextResponse.json({
+    success: true,
+    data: normalizedAppointments
+  });
 });
 
 // ============================================
 // ✏️ ATUALIZAR STATUS DO AGENDAMENTO
 // ============================================
-// export const PUT = withAuth(async (req: NextRequest) => {
-//   const body = await parseJsonBody(req);
+export const PUT = withAuth(async (req: NextRequest) => {
+  const body = await req.json();
 
-//   if (!body) {
-//     return apiResponse.error("Dados inválidos");
-//   }
+  if (!body) {
+    return apiResponse.error("Dados inválidos");
+  }
 
-//   const { id, status } = body;
+  const { id, status } = body;
 
-//   // Validar campos obrigatórios
-//   const validationError = validateRequiredFields(id, ["id", "status"]);
-//   if (validationError) {
-//     return apiResponse.error(validationError);
-//   }
+  if (!id || !status) {
+    return apiResponse.error("ID e status são obrigatórios");
+  }
 
-//   // Atualizar status do agendamento
-//   const appointment = await prisma.appointment.update({
-//     where: { id: parseInt(id) },
-//     data: { status },
-//   });
+  // Validar status permitidos
+  const allowedStatuses = ["agendado", "confirmado", "cancelado", "realizado"];
+  if (!allowedStatuses.includes(status)) {
+    return apiResponse.error("Status inválido");
+  }
 
-//   return apiResponse.success(appointment);
-// });
+  try {
+    // Atualizar status do agendamento
+    const appointment = await prisma.appointment.update({
+      where: { id: parseInt(id) },
+      data: { 
+        status,
+        updatedAt: new Date()
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: appointment
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar agendamento:", error);
+    return apiResponse.error("Erro ao atualizar agendamento");
+  }
+});
 
 // ============================================
 // 🗑️ DELETAR AGENDAMENTO
@@ -88,5 +125,8 @@ export const DELETE = withAuth(async (req: NextRequest) => {
     },
   });
 
-  return apiResponse.success(appointment);
+  return NextResponse.json({
+    success: true,
+    data: appointment
+  });
 });

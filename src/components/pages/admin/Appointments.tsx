@@ -332,9 +332,8 @@ export const Appointments = () => {
 
       {/* Appointments List */}
       <div className="mt-8">
-        <AdminCard title={
-          <div className="flex items-center justify-between">
-            <span>Consultas ({filteredAppointments.length})</span>
+        <AdminCard title={`Consultas (${filteredAppointments.length})`}>
+          <div className="mb-4">
             {selectedMonth && !selectedDate && (
               <span className="text-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded-md">
                 Filtro: {(() => {
@@ -350,7 +349,6 @@ export const Appointments = () => {
               </span>
             )}
           </div>
-        }>
           {filteredAppointments.length > 0 ? (
             <div className="space-y-4">
               {currentAppointments.map((appointment) => (

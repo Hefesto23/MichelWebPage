@@ -4,6 +4,7 @@
 "use client";
 
 import { AdminCard, StatsCard } from "@/components/shared/cards/BaseCard";
+import { fetchWithAuth } from "@/lib/auth";
 import {
   Calendar,
   CheckCircle,
@@ -22,8 +23,27 @@ interface DashboardStats {
   newPatients: number;
   pendingAppointments: number;
   completedAppointments: number;
+  confirmedAppointments: number;
+  cancelledAppointments: number;
   totalImages: number;
   weeklyGrowth: number;
+  monthlyGrowth: number;
+  // Métricas de performance
+  conversionRate: number;
+  cancellationRate: number;
+  attendanceRate: number;
+  avgAppointmentsPerDay: number;
+  weekdayStats: Record<string, number>;
+  popularTimes: Array<{
+    time: string;
+    count: number;
+    percentage: number;
+  }>;
+  modalityStats: Array<{
+    type: string;
+    count: number;
+    percentage: number;
+  }>;
 }
 
 interface RecentActivity {
@@ -31,24 +51,10 @@ interface RecentActivity {
   user: string;
   time: string;
   type: "appointment" | "upload" | "content" | "analytics";
+  details?: string;
 }
 
-// Componente simples de gráfico (você pode substituir por Recharts)
-const SimpleChart = ({ title, data }: { title: string; data: unknown[] }) => {
-  return (
-    <div className="h-64 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center">
-      <div className="text-center">
-        <p className="text-muted-foreground text-lg font-medium">{title}</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          {data.length} registros encontrados
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          (Integração com Recharts recomendada)
-        </p>
-      </div>
-    </div>
-  );
-};
+// Componente removido - usando dados reais no dashboard
 
 export const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -58,8 +64,19 @@ export const Dashboard = () => {
     newPatients: 0,
     pendingAppointments: 0,
     completedAppointments: 0,
+    confirmedAppointments: 0,
+    cancelledAppointments: 0,
     totalImages: 0,
     weeklyGrowth: 0,
+    monthlyGrowth: 0,
+    // Métricas de performance
+    conversionRate: 0,
+    cancellationRate: 0,
+    attendanceRate: 0,
+    avgAppointmentsPerDay: 0,
+    weekdayStats: {},
+    popularTimes: [],
+    modalityStats: [],
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(
     []
@@ -73,57 +90,53 @@ export const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Em um ambiente real, você deve fazer chamadas para API
-      // Exemplo: const response = await fetch('/api/admin/stats', {...});
+      setLoading(true);
+      setError(null);
 
-      // Simular dados
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("📊 Carregando dados do dashboard...");
 
-      setStats({
-        totalAppointments: 147,
-        monthlyAppointments: 23,
-        pageViews: 1234,
-        newPatients: 45,
-        pendingAppointments: 8,
-        completedAppointments: 139,
-        totalImages: 67,
-        weeklyGrowth: 12.5,
-      });
-
-      setRecentActivities([
-        {
-          action: "Nova consulta agendada",
-          user: "Maria Silva",
-          time: "há 2 min",
-          type: "appointment",
-        },
-        {
-          action: "Imagem de perfil atualizada",
-          user: "Admin",
-          time: "há 15 min",
-          type: "upload",
-        },
-        {
-          action: "Consulta confirmada",
-          user: "João Santos",
-          time: "há 30 min",
-          type: "appointment",
-        },
-        {
-          action: "Conteúdo da página sobre editado",
-          user: "Admin",
-          time: "há 1 hora",
-          type: "content",
-        },
-        {
-          action: "Nova avaliação recebida",
-          user: "Ana Costa",
-          time: "há 2 horas",
-          type: "analytics",
-        },
+      // Buscar estatísticas e atividades em paralelo
+      const [statsResponse, activitiesResponse] = await Promise.all([
+        fetchWithAuth("/api/admin/stats"),
+        fetchWithAuth("/api/admin/activities")
       ]);
+
+      if (!statsResponse.ok) {
+        throw new Error("Erro ao carregar estatísticas");
+      }
+
+      if (!activitiesResponse.ok) {
+        console.warn("Erro ao carregar atividades, usando fallback");
+      }
+
+      const statsData = await statsResponse.json();
+      const activitiesData = activitiesResponse.ok ? await activitiesResponse.json() : { success: false };
+
+      if (statsData.success) {
+        setStats(statsData.data);
+        console.log("📊 Estatísticas carregadas:", statsData.data);
+      } else {
+        throw new Error(statsData.error || "Erro ao carregar estatísticas");
+      }
+
+      if (activitiesData.success) {
+        setRecentActivities(activitiesData.data);
+        console.log("📋 Atividades carregadas:", activitiesData.data.length);
+      } else {
+        // Fallback para atividades se a API falhar
+        setRecentActivities([
+          {
+            action: "Sistema iniciado",
+            user: "Sistema",
+            time: "há poucos minutos",
+            type: "analytics",
+            details: "Dashboard carregado com dados reais"
+          }
+        ]);
+      }
+
     } catch (error) {
-      console.error("Erro ao carregar dados do dashboard:", error);
+      console.error("❌ Erro ao carregar dados do dashboard:", error);
       setError("Erro ao carregar estatísticas. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
@@ -184,7 +197,7 @@ export const Dashboard = () => {
         <StatsCard
           title="Total de Consultas"
           value={stats.totalAppointments}
-          change="+12% em relação ao mês anterior"
+          change={`${stats.totalAppointments} consultas registradas`}
           changeType="positive"
           icon={Calendar}
         />
@@ -192,15 +205,15 @@ export const Dashboard = () => {
         <StatsCard
           title="Consultas Este Mês"
           value={stats.monthlyAppointments}
-          change="+5 novas esta semana"
-          changeType="positive"
+          change={`+${Math.round(stats.monthlyGrowth)}% em relação ao mês anterior`}
+          changeType={stats.monthlyGrowth >= 0 ? "positive" : "negative"}
           icon={Clock}
         />
 
         <StatsCard
           title="Visualizações do Site"
           value={stats.pageViews.toLocaleString()}
-          change={`+${stats.weeklyGrowth}% esta semana`}
+          change={`+${Math.round(stats.weeklyGrowth)}% esta semana`}
           changeType="positive"
           icon={Eye}
         />
@@ -232,14 +245,14 @@ export const Dashboard = () => {
         <StatsCard
           title="Imagens no Sistema"
           value={stats.totalImages}
-          change="3 adicionadas esta semana"
+          change={`${stats.totalImages} imagens no sistema`}
           changeType="positive"
           icon={ImageIcon}
         />
 
         <StatsCard
           title="Taxa de Conversão"
-          value={`${((stats.newPatients / stats.pageViews) * 100).toFixed(1)}%`}
+          value={`${stats.pageViews > 0 ? ((stats.newPatients / stats.pageViews) * 100).toFixed(1) : '0.0'}%`}
           change="Visitantes para pacientes"
           changeType="neutral"
           icon={TrendingUp}
@@ -247,37 +260,126 @@ export const Dashboard = () => {
       </div>
 
       {/* Gráficos e Análises */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <AdminCard title="Agendamentos por Dia da Semana">
+          <div className="space-y-3">
+            {Object.entries(stats.weekdayStats).length > 0 ? (
+              Object.entries(stats.weekdayStats)
+                .sort(([,a], [,b]) => b - a)
+                .map(([day, count]) => {
+                  const maxCount = Math.max(...Object.values(stats.weekdayStats));
+                  const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                  return (
+                    <div key={day} className="flex items-center space-x-4">
+                      <span className="w-20 text-sm font-medium">{day}</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div
+                          className="bg-blue-500 h-2 rounded-full"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm text-muted-foreground w-8">
+                        {count}
+                      </span>
+                    </div>
+                  );
+                })
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Nenhum dado encontrado
+              </div>
+            )}
+          </div>
+        </AdminCard>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AdminCard title="Agendamentos por Mês">
-          <SimpleChart title="Evolução de Agendamentos" data={[]} />
+        <AdminCard title="Métricas de Performance">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-primary-foreground">
+                {stats.conversionRate.toFixed(1)}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Taxa de Conversão
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {stats.attendanceRate.toFixed(1)}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Taxa de Comparecimento
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {stats.cancellationRate.toFixed(1)}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Taxa de Cancelamento
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {stats.avgAppointmentsPerDay.toFixed(1)}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Média/Dia (últ. 30d)
+              </div>
+            </div>
+          </div>
         </AdminCard>
 
         <AdminCard title="Consultas por Modalidade">
-          <SimpleChart title="Presencial vs. Online" data={[]} />
+          <div className="space-y-4">
+            {stats.modalityStats.length > 0 ? (
+              stats.modalityStats.map((modality) => (
+                <div key={modality.type} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-primary-foreground rounded-full"></div>
+                    <span className="text-sm font-medium capitalize">
+                      {modality.type === "presencial" ? "Presencial" : "Online"}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold">{modality.count}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({modality.percentage}%)
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Nenhuma modalidade encontrada
+              </div>
+            )}
+          </div>
         </AdminCard>
 
         <AdminCard title="Horários Mais Procurados">
           <div className="space-y-4">
-            {[
-              { time: "14:00", count: 23, percentage: 85 },
-              { time: "15:00", count: 21, percentage: 78 },
-              { time: "16:00", count: 19, percentage: 70 },
-              { time: "10:00", count: 17, percentage: 63 },
-              { time: "09:00", count: 15, percentage: 56 },
-            ].map((slot) => (
-              <div key={slot.time} className="flex items-center space-x-4">
-                <span className="w-16 text-sm font-medium">{slot.time}</span>
-                <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-primary-foreground h-2 rounded-full"
-                    style={{ width: `${slot.percentage}%` }}
-                  />
+            {stats.popularTimes.length > 0 ? (
+              stats.popularTimes.map((slot) => (
+                <div key={slot.time} className="flex items-center space-x-4">
+                  <span className="w-16 text-sm font-medium">{slot.time}</span>
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-primary-foreground h-2 rounded-full"
+                      style={{ width: `${slot.percentage}%` }}
+                    />
+                  </div>
+                  <span className="text-sm text-muted-foreground w-8">
+                    {slot.count}
+                  </span>
                 </div>
-                <span className="text-sm text-muted-foreground w-8">
-                  {slot.count}
-                </span>
+              ))
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Nenhum horário encontrado
               </div>
-            ))}
+            )}
           </div>
         </AdminCard>
 

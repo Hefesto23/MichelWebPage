@@ -101,12 +101,7 @@ export const AgendamentoContent: React.FC<AgendamentoContentProps> = ({ onConten
           </div>
         )}
         
-        {/* Info Cards Skeleton */}
-        <div className="mt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-300 dark:bg-gray-700 rounded-xl animate-pulse"></div>
-          ))}
-        </div>
+        {/* Info Cards Skeleton removido - não mostrar cards durante loading do título/descrição */}
       </div>
     );
   }

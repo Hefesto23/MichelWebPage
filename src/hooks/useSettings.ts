@@ -1,7 +1,7 @@
 // src/hooks/useSettings.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Settings {
   [section: string]: {
@@ -132,7 +132,7 @@ export const useSettings = () => {
   };
 
   // Helper para obter configurações específicas da clínica
-  const getClinicSettings = (): ClinicSettings => {
+  const getClinicSettings = useCallback((): ClinicSettings => {
     const agendamento = settings.agendamento || {};
     
     return {
@@ -152,7 +152,7 @@ export const useSettings = () => {
       email_notifications: agendamento.email_notifications ?? true,
       whatsapp_notifications: agendamento.whatsapp_notifications ?? true,
     };
-  };
+  }, [settings.agendamento]);
 
   // Helper para formatar dias da semana para exibição
   const formatWorkingDays = (workingDays: WorkingDays): string => {

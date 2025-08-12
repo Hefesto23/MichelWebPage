@@ -58,10 +58,29 @@ export const Settings = () => {
     getClinicSettings,
   } = useSettings();
 
-  const initializeSettingSections = useCallback(() => {
-    const clinicSettings = getClinicSettings();
-    
-    const sections: SettingsSection[] = [
+  useEffect(() => {
+    if (!loading && settings) {
+      // Get clinic settings directly without function dependency
+      const agendamento = settings.agendamento || {};
+      const clinicSettings = {
+        working_days: agendamento.working_days || {
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: false,
+          saturday: false,
+        },
+        start_time: agendamento.start_time || "08:00",
+        end_time: agendamento.end_time || "21:00",
+        session_duration: agendamento.session_duration || 50,
+        first_session_duration: agendamento.first_session_duration || 60,
+        advance_days: agendamento.advance_days || 60,
+        email_notifications: agendamento.email_notifications ?? true,
+        whatsapp_notifications: agendamento.whatsapp_notifications ?? true,
+      };
+      
+      const sections: SettingsSection[] = [
       {
         id: "geral",
         name: "Configurações Gerais",
@@ -286,16 +305,11 @@ export const Settings = () => {
           },
         ],
       },
-    ];
+      ];
 
-    setSettingSections(sections);
-  }, [settings, getClinicSettings]);
-
-  useEffect(() => {
-    if (!loading) {
-      initializeSettingSections();
+      setSettingSections(sections);
     }
-  }, [loading, settings, initializeSettingSections]);
+  }, [loading, settings]);
 
 
   const handleSettingChange = (

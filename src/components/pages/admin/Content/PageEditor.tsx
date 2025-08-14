@@ -1661,7 +1661,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             // Handling para divisórias
             const sectionKey = item.section as keyof typeof DEFAULT_DIVISORIAS_CONTENT;
             if (sectionKey !== 'maxCharacters') {
-              // @ts-expect-error - Dynamic divisoria section handling
               if (!contentToSave[sectionKey]) contentToSave[sectionKey] = {};
               // @ts-expect-error - Dynamic divisoria section handling
               contentToSave[sectionKey][item.key] = valueToSave;

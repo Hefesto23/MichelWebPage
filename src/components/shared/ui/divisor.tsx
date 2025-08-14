@@ -1,7 +1,7 @@
 "use client";
 
 import { DEFAULT_DIVISORIAS_CONTENT } from "@/utils/default-content";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface DivisoriaData {
   text: string;
@@ -12,8 +12,8 @@ const Divisor = ({ index = 0 }) => {
   const [divisoriasData, setDivisoriasData] = useState<DivisoriaData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Dados padrão como fallback
-  const defaultQuotes = [
+  // Dados padrão como fallback (memoized para evitar recriação)
+  const defaultQuotes = useMemo(() => [
     {
       text: DEFAULT_DIVISORIAS_CONTENT.divisoria_1.text,
       backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_1.backgroundImage,
@@ -38,10 +38,9 @@ const Divisor = ({ index = 0 }) => {
       text: DEFAULT_DIVISORIAS_CONTENT.divisoria_6.text,
       backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_6.backgroundImage,
     },
-  ];
+  ], []);
 
-  useEffect(() => {
-    const fetchDivisorias = async () => {
+  const fetchDivisorias = useCallback(async () => {
       try {
         const response = await fetch("/api/admin/content/divisorias");
         if (response.ok) {
@@ -90,10 +89,11 @@ const Divisor = ({ index = 0 }) => {
       } finally {
         setLoading(false);
       }
-    };
+    }, [defaultQuotes]);
 
+  useEffect(() => {
     fetchDivisorias();
-  }, []);
+  }, [fetchDivisorias]);
 
   // Usar dados padrões enquanto carrega
   const quotes = loading ? defaultQuotes : divisoriasData;

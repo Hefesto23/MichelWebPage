@@ -109,3 +109,5 @@ jspm_packages/
 
 # Session backups (if any)
 *SESSION-BACKUP*
+
+.vercel

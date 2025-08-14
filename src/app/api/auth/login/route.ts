@@ -81,3 +81,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Erro no login" }, { status: 500 });
   }
 }
+
+export const runtime = 'nodejs';

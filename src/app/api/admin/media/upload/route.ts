@@ -1,86 +1,24 @@
 // src/app/api/admin/media/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { mkdir } from 'fs/promises';
-import path from 'path';
-import sharp from 'sharp';
-import { 
-  UPLOAD_CONFIG, 
-  generateUniqueFilename, 
-  isValidImageFile, 
-  isValidFileSize 
-} from '@/utils/upload-config';
+import { ProductionUploadService } from '@/lib/upload-production';
+import { verifyToken } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 
-// Verificar se os diretórios existem, criar se necessário
-async function ensureDirectoriesExist() {
-  try {
-    await mkdir(UPLOAD_CONFIG.originalsDir, { recursive: true });
-    await mkdir(UPLOAD_CONFIG.thumbnailsDir, { recursive: true });
-  } catch (error) {
-    console.error('Erro ao criar diretórios:', error);
-  }
-}
-
-// Função para processar e salvar imagem
-async function processAndSaveImage(
-  buffer: Buffer, 
-  filename: string
-): Promise<{
-  url: string;
-  thumbnailUrl: string;
-  dimensions: { width: number; height: number };
-}> {
-  const originalPath = path.join(UPLOAD_CONFIG.originalsDir, filename);
-  const thumbnailPath = path.join(UPLOAD_CONFIG.thumbnailsDir, filename);
-  
-  // Processar e salvar imagem original (com compressão)
-  const processedImage = sharp(buffer);
-  const metadata = await processedImage.metadata();
-  
-  // Salvar original otimizado
-  await processedImage
-    .jpeg({ 
-      quality: UPLOAD_CONFIG.compression.quality,
-      progressive: UPLOAD_CONFIG.compression.progressive 
-    })
-    .toFile(originalPath);
-  
-  // Gerar e salvar thumbnail
-  await processedImage
-    .resize(
-      UPLOAD_CONFIG.thumbnail.width, 
-      UPLOAD_CONFIG.thumbnail.height, 
-      { 
-        fit: 'cover',
-        position: 'center'
-      }
-    )
-    .jpeg({ quality: UPLOAD_CONFIG.thumbnail.quality })
-    .toFile(thumbnailPath);
-  
-  return {
-    url: `/uploads/images/originals/${filename}`,
-    thumbnailUrl: `/uploads/images/thumbnails/${filename}`,
-    dimensions: {
-      width: metadata.width || 0,
-      height: metadata.height || 0
-    }
-  };
-}
+const uploadService = new ProductionUploadService();
 
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token || !verifyToken(token)) {
       return NextResponse.json(
         { error: 'Token de autenticação necessário' },
         { status: 401 }
       );
     }
 
-    // Criar diretórios se não existirem
-    await ensureDirectoriesExist();
-    
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     
@@ -94,47 +32,49 @@ export async function POST(request: NextRequest) {
     const results = [];
     const errors = [];
     
+    // Verificar qual serviço está sendo usado
+    const serviceInfo = uploadService.getServiceInfo();
+    console.log(`🔄 Upload usando: ${serviceInfo.service.toUpperCase()} (Production: ${serviceInfo.isProduction})`);
+    
     for (const file of files) {
       try {
-        // Validações
-        if (!isValidImageFile({ mimetype: file.type, originalname: file.name })) {
-          errors.push(`${file.name}: Tipo de arquivo não suportado`);
-          continue;
-        }
+        // Upload usando o serviço de produção (Cloudinary ou local)
+        const uploadResult = await uploadService.uploadImage(file);
         
-        if (!isValidFileSize(file.size)) {
-          errors.push(`${file.name}: Arquivo muito grande (máximo ${UPLOAD_CONFIG.maxFileSize / 1024 / 1024}MB)`);
-          continue;
-        }
-        
-        // Converter para buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        // Gerar nome único
-        const uniqueFilename = generateUniqueFilename(file.name);
-        
-        // Processar e salvar
-        const { url, thumbnailUrl, dimensions } = await processAndSaveImage(
-          buffer, 
-          uniqueFilename
-        );
-        
-        results.push({
-          id: uniqueFilename.split('.')[0], // Usar filename sem extensão como ID
-          filename: uniqueFilename,
-          originalName: file.name,
-          mimeType: file.type,
-          size: file.size,
-          url,
-          thumbnailUrl,
-          dimensions,
-          uploadedAt: new Date().toISOString()
+        // Salvar no banco de dados
+        const uploadRecord = await prisma.upload.create({
+          data: {
+            filename: uploadResult.filename,
+            originalName: uploadResult.originalName,
+            path: uploadResult.url, // URL completa do Cloudinary
+            mimeType: uploadResult.mimeType,
+            size: uploadResult.size,
+            width: uploadResult.width || null,
+            height: uploadResult.height || null,
+            isActive: true
+          }
         });
         
-      } catch (error) {
+        console.log(`✅ Arquivo salvo no banco: ${uploadRecord.filename} (ID: ${uploadRecord.id})`);
+        
+        results.push({
+          id: uploadRecord.id.toString(),
+          filename: uploadResult.filename,
+          originalName: uploadResult.originalName,
+          mimeType: uploadResult.mimeType,
+          size: uploadResult.size,
+          url: uploadResult.url,
+          thumbnailUrl: uploadResult.thumbnailUrl,
+          dimensions: {
+            width: uploadResult.width || 0,
+            height: uploadResult.height || 0
+          },
+          uploadedAt: uploadRecord.createdAt.toISOString()
+        });
+        
+      } catch (error: any) {
         console.error(`Erro ao processar ${file.name}:`, error);
-        errors.push(`${file.name}: Erro interno ao processar arquivo`);
+        errors.push(`${file.name}: ${error.message || 'Erro interno ao processar arquivo'}`);
       }
     }
     
@@ -142,10 +82,11 @@ export async function POST(request: NextRequest) {
       success: true,
       uploaded: results,
       errors: errors.length > 0 ? errors : null,
-      message: `${results.length} arquivo(s) enviado(s) com sucesso`
+      message: `${results.length} arquivo(s) enviado(s) com sucesso via ${serviceInfo.service.toUpperCase()}`,
+      service: serviceInfo
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro no upload:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },

@@ -15,7 +15,7 @@ import {
   MapPin,
   User,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SettingsSection {
   id: string;
@@ -55,7 +55,6 @@ export const Settings = () => {
     settings,
     loading,
     saveMultipleSettings,
-    getClinicSettings,
   } = useSettings();
 
   useEffect(() => {
@@ -352,10 +351,7 @@ export const Settings = () => {
       // Limpar mensagem de sucesso após 3 segundos
       setTimeout(() => setSuccess(null), 3000);
 
-      // Reinicializar as seções com os novos valores
-      setTimeout(() => {
-        initializeSettingSections();
-      }, 500);
+      // Settings will be refreshed automatically via useEffect
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
       setError("Erro ao salvar configurações. Tente novamente.");
@@ -366,8 +362,7 @@ export const Settings = () => {
     setLocalChanges({});
     setSuccess(null);
     setError(null);
-    // Reinicializar as seções com os valores atuais
-    initializeSettingSections();
+    // Settings will be refreshed automatically via useEffect
   };
 
   const restoreDefaults = async () => {
@@ -423,10 +418,7 @@ export const Settings = () => {
       // Limpar mensagem de sucesso após 3 segundos
       setTimeout(() => setSuccess(null), 3000);
 
-      // Reinicializar as seções com os novos valores
-      setTimeout(() => {
-        initializeSettingSections();
-      }, 500);
+      // Settings will be refreshed automatically via useEffect
     } catch (error) {
       console.error("Erro ao restaurar configurações:", error);
       setError("Erro ao restaurar configurações. Tente novamente.");

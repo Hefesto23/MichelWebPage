@@ -1,6 +1,7 @@
 // ============================================
 // 9. src/app/admin/media/upload/page.tsx
 // ============================================
+"use client";
 
 import { MediaUpload } from "@/components/pages/admin/Media";
 import { AdminCard } from "@/components/shared/cards/BaseCard";

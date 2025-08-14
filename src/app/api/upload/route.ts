@@ -3,10 +3,10 @@
 
 import { verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { UploadService } from "@/lib/upload";
+import { ProductionUploadService } from "@/lib/upload-production";
 import { NextRequest, NextResponse } from "next/server";
 
-const uploadService = new UploadService();
+const uploadService = new ProductionUploadService();
 
 export async function POST(req: NextRequest) {
   try {

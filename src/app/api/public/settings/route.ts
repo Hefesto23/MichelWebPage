@@ -3,6 +3,10 @@ import prisma from "@/lib/prisma";
 import { CLINIC_INFO } from "@/utils/constants";
 import { NextResponse } from "next/server";
 
+// Force dynamic rendering (disable cache)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET - Buscar configurações públicas (sem autenticação)
 export async function GET() {
   try {

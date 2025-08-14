@@ -137,9 +137,9 @@ export const AboutContent = () => {
                     className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group border border-gray-200 dark:border-gray-700 min-w-[120px]"
                   >
                     {IconComponent && (
-                      <IconComponent className="w-10 h-10 text-gray-700 dark:text-gray-300 transition-transform duration-300 mb-3" />
+                      <IconComponent className="w-10 h-10 text-foreground transition-transform duration-300 mb-3" />
                     )}
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 transition-transform duration-300 text-center">
+                    <span className="text-sm font-medium text-foreground transition-transform duration-300 text-center">
                       {network.name}
                     </span>
                   </a>

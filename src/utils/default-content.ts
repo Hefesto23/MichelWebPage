@@ -401,6 +401,36 @@ export const DEFAULT_AGENDAMENTO_CONTENT = {
   }
 };
 
+export const DEFAULT_DIVISORIAS_CONTENT = {
+  divisoria_1: {
+    text: "Atendimento Segunda à Sexta das 8:00 às 21:00 - Consultas previamente agendadas para melhor atendimento",
+    backgroundImage: "/assets/quotes/mindfulness.jpg"
+  },
+  divisoria_2: {
+    text: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato",
+    backgroundImage: "/assets/quotes/growth.jpg"
+  },
+  divisoria_3: {
+    text: "Psicoterapia online - modalidade que possibilita atendimento à distância com a mesma qualidade",
+    backgroundImage: "/assets/quotes/journey.jpg"
+  },
+  divisoria_4: {
+    text: "Ambiente acolhedor e sigiloso para seu bem-estar emocional e privacidade garantida",
+    backgroundImage: "/assets/quotes/reflection.jpg"
+  },
+  divisoria_5: {
+    text: "Primeira consulta com duração estendida para melhor compreensão do seu caso",
+    backgroundImage: "/assets/quotes/rebuild.jpg"
+  },
+  divisoria_6: {
+    text: "Acompanhamento contínuo e suporte em momentos de crise emocional",
+    backgroundImage: "/assets/quotes/opportunity.jpg"
+  },
+  maxCharacters: {
+    text: 150
+  }
+};
+
 export const DEFAULT_CONTENT = {
   hero: DEFAULT_HERO_CONTENT,
   welcome: DEFAULT_WELCOME_CONTENT,
@@ -411,4 +441,5 @@ export const DEFAULT_CONTENT = {
   avaliacoes: DEFAULT_AVALIACOES_CONTENT,
   contact: DEFAULT_CONTACT_CONTENT,
   agendamento: DEFAULT_AGENDAMENTO_CONTENT,
+  divisorias: DEFAULT_DIVISORIAS_CONTENT,
 } as const;

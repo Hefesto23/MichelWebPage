@@ -331,6 +331,49 @@ export const PAGE_CONTENT = {
   CONTACT: {
     TITLE: "Contato",
   },
+
+  DIVISORIAS: {
+    TITLE: "Divisórias",
+    SUBTITLE: "Frases de impacto e informações úteis exibidas entre as seções das páginas",
+    SECTIONS: {
+      DIVISORIA_1: {
+        TITLE: "Divisória 1",
+        DESCRIPTION: "Primeira divisória - Horários de atendimento",
+        DEFAULT_TEXT: "Atendimento Segunda à Sexta das 8:00 às 21:00 - Consultas previamente agendadas para melhor atendimento",
+        BACKGROUND_IMAGE: "/assets/quotes/mindfulness.jpg"
+      },
+      DIVISORIA_2: {
+        TITLE: "Divisória 2", 
+        DESCRIPTION: "Segunda divisória - Plantão psicológico",
+        DEFAULT_TEXT: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato",
+        BACKGROUND_IMAGE: "/assets/quotes/growth.jpg"
+      },
+      DIVISORIA_3: {
+        TITLE: "Divisória 3",
+        DESCRIPTION: "Terceira divisória - Psicoterapia online",
+        DEFAULT_TEXT: "Psicoterapia online - modalidade que possibilita atendimento à distância com a mesma qualidade",
+        BACKGROUND_IMAGE: "/assets/quotes/journey.jpg"
+      },
+      DIVISORIA_4: {
+        TITLE: "Divisória 4",
+        DESCRIPTION: "Quarta divisória - Ambiente acolhedor",
+        DEFAULT_TEXT: "Ambiente acolhedor e sigiloso para seu bem-estar emocional e privacidade garantida",
+        BACKGROUND_IMAGE: "/assets/quotes/reflection.jpg"
+      },
+      DIVISORIA_5: {
+        TITLE: "Divisória 5",
+        DESCRIPTION: "Quinta divisória - Primeira consulta",
+        DEFAULT_TEXT: "Primeira consulta com duração estendida para melhor compreensão do seu caso",
+        BACKGROUND_IMAGE: "/assets/quotes/rebuild.jpg"
+      },
+      DIVISORIA_6: {
+        TITLE: "Divisória 6", 
+        DESCRIPTION: "Sexta divisória - Acompanhamento contínuo",
+        DEFAULT_TEXT: "Acompanhamento contínuo e suporte em momentos de crise emocional",
+        BACKGROUND_IMAGE: "/assets/quotes/opportunity.jpg"
+      },
+    }
+  },
 } as const;
 
 // ============================================

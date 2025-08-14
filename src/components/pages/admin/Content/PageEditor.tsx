@@ -10,6 +10,7 @@ import {
   DEFAULT_AVALIACOES_CONTENT,
   DEFAULT_CLINIC_CONTENT,
   DEFAULT_CONTACT_CONTENT,
+  DEFAULT_DIVISORIAS_CONTENT,
   DEFAULT_HERO_CONTENT,
   DEFAULT_SERVICES_CONTENT,
   DEFAULT_TERAPIAS_CONTENT,
@@ -133,6 +134,30 @@ interface SavedContent {
     title?: string;
     description?: string;
     infoCards?: AgendamentoCardItem[];
+  };
+  divisoria_1?: {
+    text?: string;
+    backgroundImage?: string;
+  };
+  divisoria_2?: {
+    text?: string;
+    backgroundImage?: string;
+  };
+  divisoria_3?: {
+    text?: string;
+    backgroundImage?: string;
+  };
+  divisoria_4?: {
+    text?: string;
+    backgroundImage?: string;
+  };
+  divisoria_5?: {
+    text?: string;
+    backgroundImage?: string;
+  };
+  divisoria_6?: {
+    text?: string;
+    backgroundImage?: string;
   };
 }
 
@@ -1133,6 +1158,167 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           },
         ];
 
+      case "divisorias":
+        // Usar conteúdo salvo se existir, senão usar padrão
+        return [
+          {
+            name: "Divisória 1",
+            description: "Primeira divisória - Horários de atendimento",
+            items: [
+              {
+                id: 900,
+                page: "divisorias",
+                section: "divisoria_1",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_1?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na primeira divisória...",
+              },
+              {
+                id: 950,
+                page: "divisorias",
+                section: "divisoria_1",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_1?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "Divisória 2",
+            description: "Segunda divisória - Plantão psicológico",
+            items: [
+              {
+                id: 901,
+                page: "divisorias",
+                section: "divisoria_2",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_2?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na segunda divisória...",
+              },
+              {
+                id: 951,
+                page: "divisorias",
+                section: "divisoria_2",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_2?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "Divisória 3",
+            description: "Terceira divisória - Psicoterapia online",
+            items: [
+              {
+                id: 902,
+                page: "divisorias",
+                section: "divisoria_3",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_3?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na terceira divisória...",
+              },
+              {
+                id: 952,
+                page: "divisorias",
+                section: "divisoria_3",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_3?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "Divisória 4",
+            description: "Quarta divisória - Ambiente acolhedor",
+            items: [
+              {
+                id: 903,
+                page: "divisorias",
+                section: "divisoria_4",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_4?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na quarta divisória...",
+              },
+              {
+                id: 953,
+                page: "divisorias",
+                section: "divisoria_4",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_4?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "Divisória 5", 
+            description: "Quinta divisória - Primeira consulta",
+            items: [
+              {
+                id: 904,
+                page: "divisorias",
+                section: "divisoria_5",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_5?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na quinta divisória...",
+              },
+              {
+                id: 954,
+                page: "divisorias",
+                section: "divisoria_5",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_5?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "Divisória 6",
+            description: "Sexta divisória - Acompanhamento contínuo",
+            items: [
+              {
+                id: 905,
+                page: "divisorias",
+                section: "divisoria_6",
+                key: "text",
+                type: "text",
+                value: savedContent?.divisoria_6?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_6.text,
+                label: "Texto da Divisória",
+                placeholder: "Digite o texto que aparecerá na sexta divisória...",
+              },
+              {
+                id: 955,
+                page: "divisorias",
+                section: "divisoria_6",
+                key: "backgroundImage",
+                type: "image",
+                value: savedContent?.divisoria_6?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_6.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+        ];
+
       default:
         return [];
     }
@@ -1470,6 +1656,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             // Para fields gerais da seção
             if (item.key === "title" || item.key === "description") {
               contentToSave.agendamento[item.key] = valueToSave;
+            }
+          } else if (item.section.startsWith("divisoria_") && item.page === "divisorias") {
+            // Handling para divisórias
+            const sectionKey = item.section as keyof typeof DEFAULT_DIVISORIAS_CONTENT;
+            if (sectionKey !== 'maxCharacters') {
+              // @ts-expect-error - Dynamic divisoria section handling
+              if (!contentToSave[sectionKey]) contentToSave[sectionKey] = {};
+              // @ts-expect-error - Dynamic divisoria section handling
+              contentToSave[sectionKey][item.key] = valueToSave;
             }
           } else if (item.section.startsWith("card_") && item.page === "agendamento") {
             if (!contentToSave.agendamento?.infoCards) {
@@ -2003,7 +2198,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
         <div className="flex items-center space-x-3">
           <Link
-            href={`/${page === "home" ? "" : page}`}
+            href={`/${page === "home" ? "" : page === "divisorias" ? "" : page}`}
             target="_blank"
             className="inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
           >

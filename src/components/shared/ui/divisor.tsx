@@ -1,44 +1,102 @@
+"use client";
+
+import { DEFAULT_DIVISORIAS_CONTENT } from "@/utils/default-content";
+import { useEffect, useState } from "react";
+
+interface DivisoriaData {
+  text: string;
+  backgroundImage: string;
+}
+
 const Divisor = ({ index = 0 }) => {
-  const quotes = [
+  const [divisoriasData, setDivisoriasData] = useState<DivisoriaData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Dados padrão como fallback
+  const defaultQuotes = [
     {
-      info: "Segunda à Sexta das 8:00 as 21:00",
-      info2: "Obs: As consultas necessitam ser previamente agendadas.",
-      info3: "",
-      detail: "* Atendimentos a partir de 20 anos de idade",
-      backgroundImage: "/assets/quotes/mindfulness.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_1.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_1.backgroundImage,
     },
     {
-      info: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato.",
-      info2:
-        "Psicoterapia online - uma modalidade de terapia que possibilita" +
-        "atendimento à distância, incluindo pacientes em diferentes países.",
-      detail: "Veja mais em terapias...",
-      backgroundImage: "/assets/quotes/growth.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_2.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_2.backgroundImage,
     },
     {
-      info: "A mudança é um processo, não um evento.",
-      info2: "",
-      info3: "",
-      detail: "Albert Ellis",
-      backgroundImage: "/assets/quotes/journey.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_3.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_3.backgroundImage,
     },
     {
-      info: "O comportamento é mantido por suas consequências.",
-      detail: "B.F. Skinner",
-      backgroundImage: "/assets/quotes/reflection.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_4.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_4.backgroundImage,
     },
     {
-      info: "A terapia é uma oportunidade de reconstruir a forma como vivenciamos o mundo.",
-      detail: "Donald Meichenbaum",
-      backgroundImage: "/assets/quotes/rebuild.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_5.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_5.backgroundImage,
     },
     {
-      info: "Toda resposta aprendida é uma oportunidade de mudança.",
-      detail: "Joseph Wolpe",
-      backgroundImage: "/assets/quotes/opportunity.jpg",
+      text: DEFAULT_DIVISORIAS_CONTENT.divisoria_6.text,
+      backgroundImage: DEFAULT_DIVISORIAS_CONTENT.divisoria_6.backgroundImage,
     },
   ];
 
+  useEffect(() => {
+    const fetchDivisorias = async () => {
+      try {
+        const response = await fetch("/api/admin/content/divisorias");
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.content) {
+            // Converter dados do CMS para o formato esperado
+            const cmsData = [
+              {
+                text: data.content.divisoria_1?.text || defaultQuotes[0].text,
+                backgroundImage: data.content.divisoria_1?.backgroundImage || defaultQuotes[0].backgroundImage,
+              },
+              {
+                text: data.content.divisoria_2?.text || defaultQuotes[1].text,
+                backgroundImage: data.content.divisoria_2?.backgroundImage || defaultQuotes[1].backgroundImage,
+              },
+              {
+                text: data.content.divisoria_3?.text || defaultQuotes[2].text,
+                backgroundImage: data.content.divisoria_3?.backgroundImage || defaultQuotes[2].backgroundImage,
+              },
+              {
+                text: data.content.divisoria_4?.text || defaultQuotes[3].text,
+                backgroundImage: data.content.divisoria_4?.backgroundImage || defaultQuotes[3].backgroundImage,
+              },
+              {
+                text: data.content.divisoria_5?.text || defaultQuotes[4].text,
+                backgroundImage: data.content.divisoria_5?.backgroundImage || defaultQuotes[4].backgroundImage,
+              },
+              {
+                text: data.content.divisoria_6?.text || defaultQuotes[5].text,
+                backgroundImage: data.content.divisoria_6?.backgroundImage || defaultQuotes[5].backgroundImage,
+              },
+            ];
+            setDivisoriasData(cmsData);
+          } else {
+            // Se não houver dados no CMS, usar padrões
+            setDivisoriasData(defaultQuotes);
+          }
+        } else {
+          // Em caso de erro na API, usar padrões
+          setDivisoriasData(defaultQuotes);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar divisórias:", error);
+        setDivisoriasData(defaultQuotes);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDivisorias();
+  }, []);
+
+  // Usar dados padrões enquanto carrega
+  const quotes = loading ? defaultQuotes : divisoriasData;
   const safeIndex = index % quotes.length;
   const quote = quotes[safeIndex];
 
@@ -59,31 +117,12 @@ const Divisor = ({ index = 0 }) => {
         <div className="max-w-4xl mx-auto bg-black/30 backdrop-blur-sm rounded-xl" 
              style={{ padding: 'clamp(1.5rem, 4vw, 2rem)' }}>
           <blockquote>
-            <p className="font-serif text-white leading-relaxed" 
+            <p className="font-serif text-white leading-relaxed text-center" 
                style={{ 
-                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
-                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
+                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)'
                }}>
-              {quote.info}
+              {quote.text}
             </p>
-            <p className="font-serif text-white leading-relaxed" 
-               style={{ 
-                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
-                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
-               }}>
-              {quote?.info2}
-            </p>
-            <p className="font-serif text-white leading-relaxed" 
-               style={{ 
-                 fontSize: 'clamp(1.125rem, 4vw, 1.875rem)',
-                 marginBottom: 'clamp(1rem, 3vw, 1.5rem)'
-               }}>
-              {quote?.info3}
-            </p>
-            <footer className="text-white/90 font-bold italic" 
-                    style={{ fontSize: 'clamp(0.875rem, 2.5vw, 1.125rem)' }}>
-              {quote.detail}
-            </footer>
           </blockquote>
         </div>
       </div>

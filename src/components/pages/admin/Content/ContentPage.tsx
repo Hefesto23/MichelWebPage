@@ -2,7 +2,7 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { Briefcase, Calendar, Home, Phone, Star, User } from "lucide-react";
+import { Briefcase, Calendar, Home, MessageSquare, Star, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -57,11 +57,11 @@ const contentPages: ContentPage[] = [
     lastUpdated: "2024-05-25T09:15:00Z",
   },
   {
-    key: "contact",
-    name: "Contato",
-    description: "Informações de contato, horários e localização do consultório",
-    icon: Phone,
-    sections: 3,
+    key: "divisorias",
+    name: "Divisórias",
+    description: "Frases de impacto e informações úteis nas divisórias entre seções",
+    icon: MessageSquare,
+    sections: 6,
     lastUpdated: "2024-05-22T13:30:00Z",
   },
 ];

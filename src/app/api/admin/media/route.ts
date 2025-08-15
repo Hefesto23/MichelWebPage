@@ -32,10 +32,10 @@ export const GET = withAuth(async (req: NextRequest) => {
       prisma.upload.count({ where }),
     ]);
 
-    // Mapear para incluir URL completa
+    // Mapear para incluir URL completa (agora só Cloudinary)
     const filesWithUrl = files.map(file => ({
       ...file,
-      url: `/uploads/${file.filename}`,
+      url: file.path, // file.path já contém a URL completa do Cloudinary
     }));
 
     return Response.json({

@@ -1,9 +1,10 @@
 // src/app/api/admin/media/[id]/route.ts
 import { withAuth } from "@/lib/api-helpers";
 import prisma from "@/lib/prisma";
-import { unlink } from "fs/promises";
+import { CloudinaryUploadService } from "@/lib/upload-cloudinary";
 import { NextRequest } from "next/server";
-import path from "path";
+
+const uploadService = new CloudinaryUploadService();
 
 // DELETE - Deletar arquivo específico
 export const DELETE = withAuth(async (req: NextRequest) => {
@@ -30,13 +31,13 @@ export const DELETE = withAuth(async (req: NextRequest) => {
       );
     }
 
-    // Tentar deletar arquivo físico
+    // Deletar do Cloudinary
     try {
-      const filePath = path.join(process.cwd(), "public", "uploads", file.filename);
-      await unlink(filePath);
+      await uploadService.deleteImage(file.path);
+      console.log(`✅ Arquivo deletado do Cloudinary: ${file.path}`);
     } catch (error) {
-      console.error("Erro ao deletar arquivo físico:", error);
-      // Continua mesmo se não conseguir deletar o arquivo físico
+      console.error("❌ Erro ao deletar do Cloudinary:", error);
+      // Continua mesmo se não conseguir deletar do Cloudinary
     }
 
     // Marcar como inativo no banco (soft delete)
@@ -85,10 +86,10 @@ export const GET = withAuth(async (req: NextRequest) => {
       );
     }
 
-    // Adicionar URL completa
+    // URL já está completa no path (Cloudinary)
     const fileWithUrl = {
       ...file,
-      url: `/uploads/${file.filename}`,
+      url: file.path,
     };
 
     return Response.json(fileWithUrl);

@@ -1,10 +1,10 @@
 // src/app/api/admin/media/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { ProductionUploadService } from '@/lib/upload-production';
+import { CloudinaryUploadService } from '@/lib/upload-cloudinary';
 import { verifyToken } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
-const uploadService = new ProductionUploadService();
+const uploadService = new CloudinaryUploadService();
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,14 @@ export async function POST(request: NextRequest) {
     if (!token || !verifyToken(token)) {
       return NextResponse.json(
         { error: 'Token de autenticação necessário' },
-        { status: 401 }
+        { 
+          status: 401,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          }
+        }
       );
     }
 
@@ -25,20 +32,25 @@ export async function POST(request: NextRequest) {
     if (!files || files.length === 0) {
       return NextResponse.json(
         { error: 'Nenhum arquivo enviado' },
-        { status: 400 }
+        { 
+          status: 400,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          }
+        }
       );
     }
     
     const results = [];
     const errors = [];
     
-    // Verificar qual serviço está sendo usado
-    const serviceInfo = uploadService.getServiceInfo();
-    console.log(`🔄 Upload usando: ${serviceInfo.service.toUpperCase()} (Production: ${serviceInfo.isProduction})`);
+    console.log('🔄 Upload usando: CLOUDINARY');
     
     for (const file of files) {
       try {
-        // Upload usando o serviço de produção (Cloudinary ou local)
+        // Upload direto para Cloudinary
         const uploadResult = await uploadService.uploadImage(file);
         
         // Salvar no banco de dados
@@ -82,15 +94,27 @@ export async function POST(request: NextRequest) {
       success: true,
       uploaded: results,
       errors: errors.length > 0 ? errors : null,
-      message: `${results.length} arquivo(s) enviado(s) com sucesso via ${serviceInfo.service.toUpperCase()}`,
-      service: serviceInfo
+      message: `${results.length} arquivo(s) enviado(s) com sucesso via CLOUDINARY`
+    }, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
     });
     
   } catch (error: any) {
     console.error('Erro no upload:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        }
+      }
     );
   }
 }
@@ -98,3 +122,16 @@ export async function POST(request: NextRequest) {
 // Configurações do Next.js para upload
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+// Headers CORS para Vercel
+export async function OPTIONS(_request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}

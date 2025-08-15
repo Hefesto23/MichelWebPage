@@ -36,14 +36,12 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Converter para formato esperado pelo frontend
+    // Converter para formato esperado pelo frontend (agora só Cloudinary)
     const images: ImageInfo[] = uploads.map(upload => ({
       id: upload.id.toString(),
       filename: upload.filename,
-      url: upload.path.startsWith('http') ? upload.path : `/uploads/${upload.path}`,
-      thumbnailUrl: upload.path.startsWith('http') 
-        ? upload.path.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto,f_auto/')
-        : `/uploads/thumbnails/${upload.filename}`,
+      url: upload.path, // upload.path já contém a URL completa do Cloudinary
+      thumbnailUrl: upload.path.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto,f_auto/'),
       size: upload.size,
       uploadedAt: upload.createdAt.toISOString(),
       dimensions: upload.width && upload.height ? {

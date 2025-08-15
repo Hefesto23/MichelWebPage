@@ -1,14 +1,18 @@
 // src/app/api/admin/media/delete/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { unlink } from 'fs/promises';
-import path from 'path';
-import { UPLOAD_CONFIG } from '@/utils/upload-config';
+import { CloudinaryUploadService } from '@/lib/upload-cloudinary';
+import { verifyToken } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+
+const uploadService = new CloudinaryUploadService();
 
 export async function DELETE(request: NextRequest) {
   try {
     // Verificar autenticação
     const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token || !verifyToken(token)) {
       return NextResponse.json(
         { error: 'Token de autenticação necessário' },
         { status: 401 }
@@ -16,50 +20,52 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const filename = searchParams.get('filename');
     
-    if (!filename) {
+    if (!id && !filename) {
       return NextResponse.json(
-        { error: 'Nome do arquivo é obrigatório' },
+        { error: 'ID ou filename do upload é obrigatório' },
         { status: 400 }
       );
     }
     
-    // Validar nome do arquivo (segurança)
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    // Buscar upload no banco de dados (por ID ou filename)
+    let upload;
+    if (id) {
+      upload = await prisma.upload.findUnique({
+        where: { id: parseInt(id) }
+      });
+    } else if (filename) {
+      upload = await prisma.upload.findFirst({
+        where: { 
+          filename: filename,
+          isActive: true 
+        }
+      });
+    }
+    
+    if (!upload) {
       return NextResponse.json(
-        { error: 'Nome de arquivo inválido' },
-        { status: 400 }
+        { error: 'Upload não encontrado' },
+        { status: 404 }
       );
     }
     
-    const originalPath = path.join(UPLOAD_CONFIG.originalsDir, filename);
-    const thumbnailPath = path.join(UPLOAD_CONFIG.thumbnailsDir, filename);
-    
-    const errors = [];
-    
-    // Tentar deletar arquivo original
     try {
-      await unlink(originalPath);
+      // Deletar do Cloudinary usando o path (que contém o public_id)
+      await uploadService.deleteImage(upload.path);
+      console.log(`✅ Imagem deletada do Cloudinary: ${upload.path}`);
     } catch (error) {
-      console.error(`Erro ao deletar original ${filename}:`, error);
-      errors.push('Erro ao deletar arquivo original');
+      console.error(`❌ Erro ao deletar do Cloudinary:`, error);
+      // Continuar mesmo se falhar no Cloudinary
     }
     
-    // Tentar deletar thumbnail
-    try {
-      await unlink(thumbnailPath);
-    } catch (error) {
-      console.error(`Erro ao deletar thumbnail ${filename}:`, error);
-      // Não adicionar ao array de erros se for só o thumbnail
-    }
-    
-    if (errors.length > 0) {
-      return NextResponse.json(
-        { error: errors.join(', ') },
-        { status: 500 }
-      );
-    }
+    // Marcar como inativo no banco (soft delete)
+    await prisma.upload.update({
+      where: { id: upload.id },
+      data: { isActive: false }
+    });
     
     return NextResponse.json({
       success: true,

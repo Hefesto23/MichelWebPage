@@ -1,9 +1,10 @@
 // src/components/shared/media/ImageUploader.tsx
 "use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { Upload, X, AlertCircle, CheckCircle, Image as ImageIcon } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import Image from 'next/image';
+import { CldUploadButton } from 'next-cloudinary';
 
 interface UploadedImage {
   id: string;
@@ -25,132 +26,91 @@ interface ImageUploaderProps {
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
   onUploadSuccess,
   onUploadError,
-  maxFiles = 10,
+  maxFiles: _maxFiles = 10,
   className = ""
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploadResults, setUploadResults] = useState<UploadedImage[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const validateFile = (file: File): string | null => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    
-    if (!allowedTypes.includes(file.type)) {
-      return `${file.name}: Tipo não suportado (apenas JPG, PNG, WebP)`;
-    }
-    
-    if (file.size > maxSize) {
-      return `${file.name}: Arquivo muito grande (máximo 5MB)`;
-    }
-    
-    return null;
-  };
-  
-  const handleFileSelect = useCallback((files: FileList) => {
-    const fileArray = Array.from(files);
-    const validFiles: File[] = [];
-    const fileErrors: string[] = [];
-    
-    // Validar arquivos
-    fileArray.forEach(file => {
-      const error = validateFile(file);
-      if (error) {
-        fileErrors.push(error);
-      } else {
-        validFiles.push(file);
-      }
-    });
-    
-    // Limitar número de arquivos
-    if (selectedFiles.length + validFiles.length > maxFiles) {
-      fileErrors.push(`Máximo de ${maxFiles} arquivos permitido`);
-      return;
-    }
-    
-    setErrors(fileErrors);
-    setSelectedFiles(prev => [...prev, ...validFiles]);
-  }, [selectedFiles, maxFiles]);
-  
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-  
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-  
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileSelect(files);
-    }
-  }, [handleFileSelect]);
-  
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelect(files);
-    }
-  }, [handleFileSelect]);
-  
-  const removeFile = useCallback((index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  }, []);
-  
-  const uploadFiles = async () => {
-    if (selectedFiles.length === 0) return;
-    
-    setIsUploading(true);
-    setUploadProgress(0);
-    setErrors([]);
-    
+  // Função para salvar dados no banco após upload do Cloudinary
+  const saveUploadToDatabase = async (cloudinaryResult: any) => {
     try {
-      const formData = new FormData();
-      selectedFiles.forEach(file => {
-        formData.append('files', file);
-      });
-      
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/media/upload', {
+      const response = await fetch('/api/admin/media/save', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          public_id: cloudinaryResult.public_id,
+          secure_url: cloudinaryResult.secure_url,
+          width: cloudinaryResult.width,
+          height: cloudinaryResult.height,
+          format: cloudinaryResult.format,
+          bytes: cloudinaryResult.bytes,
+          original_filename: cloudinaryResult.original_filename,
+        }),
       });
-      
-      const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.error || 'Erro no upload');
+        throw new Error('Erro ao salvar no banco de dados');
       }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao salvar no banco:', error);
+      throw error;
+    }
+  };
+
+  // Callback para quando o upload do Cloudinary for bem-sucedido
+  const handleUploadSuccess = useCallback(async (result: any, widget?: any) => {
+    console.log('🔍 Upload Cloudinary Success:', {
+      result: result,
+      info: result?.info,
+      widget: widget
+    });
+
+    setIsUploading(true);
+    setErrors([]);
+
+    try {
+      console.log('✅ Upload Cloudinary bem-sucedido:', result.info);
+      console.log('📄 Formato do arquivo:', result.info.format);
+      console.log('📏 Tamanho:', result.info.bytes, 'bytes');
+      console.log('🔗 URL:', result.info.secure_url);
       
-      setUploadResults(result.uploaded);
-      setSelectedFiles([]);
-      setUploadProgress(100);
+      // Salvar no banco de dados
+      const savedUpload = await saveUploadToDatabase(result.info);
       
-      if (result.errors) {
-        setErrors(result.errors);
-      }
+      const uploadedImage: UploadedImage = {
+        id: savedUpload.id,
+        filename: result.info.public_id.split('/').pop() + '.' + result.info.format,
+        originalName: result.info.original_filename || 'image',
+        url: result.info.secure_url,
+        thumbnailUrl: result.info.secure_url.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto,f_auto/'),
+        size: result.info.bytes,
+        dimensions: {
+          width: result.info.width,
+          height: result.info.height
+        }
+      };
+
+      setUploadResults([uploadedImage]);
       
       if (onUploadSuccess) {
-        onUploadSuccess(result.uploaded);
+        console.log('📮 Chamando onUploadSuccess imediatamente após upload');
+        onUploadSuccess([uploadedImage]);
       }
+
+      // NÃO fechar widget automaticamente - deixar usuário clicar em Done
+      // widget.close();
       
     } catch (error) {
-      console.error('Erro no upload:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido no upload';
+      console.error('Erro após upload:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao processar upload';
       setErrors([errorMessage]);
       
       if (onUploadError) {
@@ -158,115 +118,72 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       }
     } finally {
       setIsUploading(false);
-      setTimeout(() => {
-        setUploadProgress(0);
-        setUploadResults([]);
-      }, 3000);
+      // Removido o setTimeout - agora limpamos quando o widget fecha
     }
-  };
-  
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+  }, [onUploadSuccess, onUploadError]);
+
+  // Callback para erros no upload
+  const handleUploadError = useCallback((error: any) => {
+    console.error('❌ Erro no upload Cloudinary:', error);
+    const errorMessage = error?.message || 'Erro no upload';
+    setErrors([errorMessage]);
+    
+    if (onUploadError) {
+      onUploadError(errorMessage);
+    }
+    
+    setIsUploading(false);
+  }, [onUploadError]);
   
   return (
     <div className={`w-full space-y-4 ${className}`}>
-      {/* Área de Drop */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        className={`
-          relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragging 
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-          }
-          ${isUploading ? 'pointer-events-none opacity-50' : ''}
-        `}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleFileInputChange}
-          className="hidden"
-          disabled={isUploading}
-        />
-        
-        <div className="flex flex-col items-center space-y-2">
+      {/* Upload Button usando next-cloudinary */}
+      <div className="relative border-2 border-dashed rounded-lg p-8 text-center transition-colors border-gray-300 dark:border-gray-600">
+        <div className="flex flex-col items-center space-y-4">
           <Upload className="w-10 h-10 text-gray-400" />
           <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-            {isDragging ? 'Solte as imagens aqui' : 'Arraste imagens ou clique para selecionar'}
+            Upload de Imagens
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            PNG, JPG, WebP até 5MB • Máximo {maxFiles} arquivos
+            PNG, JPG, WebP até 5MB • Upload direto para Cloudinary
           </p>
+          
+          <CldUploadButton
+            uploadPreset="michel-psi-uploads"
+            onSuccess={handleUploadSuccess}
+            onError={handleUploadError}
+            onClose={() => {
+              console.log('🚪 Widget Cloudinary fechado');
+              // Limpar estados ao fechar o widget
+              setUploadResults([]);
+              setErrors([]);
+            }}
+            options={{
+              multiple: false,
+              maxFiles: 1,
+              resourceType: "image",
+              clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
+              maxFileSize: 5000000, // 5MB
+              folder: "michel-psi", // Pasta única simplificada
+              showCompletedButton: true, // Mostrar botão Done
+              showUploadMoreButton: false, // Não mostrar "Upload More"
+              singleUploadAutoClose: false // NÃO fechar automaticamente após único upload
+            }}
+            className="py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+          >
+            {isUploading ? 'Enviando...' : 'Selecionar Imagem'}
+          </CldUploadButton>
         </div>
       </div>
       
-      {/* Arquivos Selecionados */}
-      {selectedFiles.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="font-medium text-gray-700 dark:text-gray-300">
-            Arquivos Selecionados ({selectedFiles.length})
-          </h3>
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {selectedFiles.map((file, index) => (
-              <div 
-                key={index} 
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
-              >
-                <div className="flex items-center space-x-3">
-                  <ImageIcon className="w-8 h-8 text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatFileSize(file.size)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeFile(index)}
-                  className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
-                  disabled={isUploading}
-                >
-                  <X className="w-4 h-4 text-gray-500" />
-                </button>
-              </div>
-            ))}
-          </div>
-          
-          {/* Botão de Upload */}
-          <button
-            onClick={uploadFiles}
-            disabled={isUploading || selectedFiles.length === 0}
-            className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-          >
-            {isUploading ? 'Enviando...' : `Enviar ${selectedFiles.length} arquivo(s)`}
-          </button>
-        </div>
-      )}
-      
-      {/* Progresso */}
+      {/* Loading */}
       {isUploading && (
         <div className="space-y-2">
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
+            <div className="bg-blue-600 h-2 rounded-full animate-pulse" />
           </div>
           <p className="text-sm text-center text-gray-600 dark:text-gray-400">
-            Processando imagens...
+            Processando upload...
           </p>
         </div>
       )}

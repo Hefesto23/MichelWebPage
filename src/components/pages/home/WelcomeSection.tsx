@@ -4,7 +4,7 @@
 "use client";
 
 import { DEFAULT_WELCOME_CONTENT } from "@/utils/default-content";
-import Image from "next/image";
+import { CloudinaryImage } from "@/components/shared/CloudinaryImage";
 import { useEffect, useState } from "react";
 
 const parseMarkdownToJSX = (content: string) => {
@@ -138,12 +138,13 @@ export const WelcomeSection = () => {
           </div>
 
           <div className="welcome-image">
-            <Image
+            <CloudinaryImage
               src="/assets/michel1.svg"
               alt="Foto de Michel Psicologo Clinico"
               fill
               className="object-contain"
-              loading="lazy"
+              width={500}
+              height={600}
             />
           </div>
         </div>

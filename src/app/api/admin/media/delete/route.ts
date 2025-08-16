@@ -1,10 +1,17 @@
 // src/app/api/admin/media/delete/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { CloudinaryUploadService } from '@/lib/upload-cloudinary';
 import { verifyToken } from '@/lib/auth';
+import { v2 as cloudinary } from 'cloudinary';
 import prisma from '@/lib/prisma';
 
-const uploadService = new CloudinaryUploadService();
+// Configurar Cloudinary
+if (!cloudinary.config().cloud_name) {
+  cloudinary.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -20,57 +27,74 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const publicId = searchParams.get('publicId');
     const filename = searchParams.get('filename');
     
-    if (!id && !filename) {
-      return NextResponse.json(
-        { error: 'ID ou filename do upload é obrigatório' },
-        { status: 400 }
-      );
-    }
+    console.log('🗑️ Tentando deletar:', { publicId, filename });
     
-    // Buscar upload no banco de dados (por ID ou filename)
-    let upload;
-    if (id) {
-      upload = await prisma.upload.findUnique({
-        where: { id: parseInt(id) }
-      });
-    } else if (filename) {
-      upload = await prisma.upload.findFirst({
-        where: { 
-          filename: filename,
-          isActive: true 
+    // Se temos o publicId, deletar diretamente do Cloudinary
+    if (publicId) {
+      try {
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log(`✅ Resultado do delete no Cloudinary:`, result);
+        
+        if (result.result === 'ok' || result.result === 'not found') {
+          // Também tentar remover do banco se existir
+          if (filename) {
+            await prisma.upload.updateMany({
+              where: { 
+                filename: filename,
+                isActive: true 
+              },
+              data: { isActive: false }
+            });
+          }
+          
+          return NextResponse.json({
+            success: true,
+            message: 'Arquivo deletado com sucesso'
+          });
         }
-      });
+      } catch (cloudinaryError) {
+        console.error('❌ Erro ao deletar do Cloudinary:', cloudinaryError);
+        return NextResponse.json(
+          { error: 'Erro ao deletar arquivo do Cloudinary' },
+          { status: 500 }
+        );
+      }
     }
     
-    if (!upload) {
-      return NextResponse.json(
-        { error: 'Upload não encontrado' },
-        { status: 404 }
-      );
+    // Fallback: tentar deletar pelo filename se não tiver publicId
+    if (filename) {
+      // Construir o public_id baseado no padrão michel-psi/filename
+      const inferredPublicId = `michel-psi/${filename.replace(/\.[^/.]+$/, '')}`;
+      
+      try {
+        const result = await cloudinary.uploader.destroy(inferredPublicId);
+        console.log(`✅ Resultado do delete (inferido):`, result);
+        
+        // Marcar como inativo no banco
+        await prisma.upload.updateMany({
+          where: { 
+            filename: filename,
+            isActive: true 
+          },
+          data: { isActive: false }
+        });
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Arquivo deletado com sucesso'
+        });
+      } catch (error) {
+        console.error('❌ Erro ao deletar (inferido):', error);
+      }
     }
     
-    try {
-      // Deletar do Cloudinary usando o path (que contém o public_id)
-      await uploadService.deleteImage(upload.path);
-      console.log(`✅ Imagem deletada do Cloudinary: ${upload.path}`);
-    } catch (error) {
-      console.error(`❌ Erro ao deletar do Cloudinary:`, error);
-      // Continuar mesmo se falhar no Cloudinary
-    }
-    
-    // Marcar como inativo no banco (soft delete)
-    await prisma.upload.update({
-      where: { id: upload.id },
-      data: { isActive: false }
-    });
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Arquivo deletado com sucesso'
-    });
+    return NextResponse.json(
+      { error: 'Não foi possível identificar o arquivo para deletar' },
+      { status: 400 }
+    );
     
   } catch (error) {
     console.error('Erro ao deletar imagem:', error);

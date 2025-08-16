@@ -21,8 +21,8 @@ export class CloudinaryUploadService {
   private allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   constructor() {
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {

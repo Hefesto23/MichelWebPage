@@ -26,8 +26,10 @@ export const MediaManager = () => {
     fetchFiles();
   }, []);
 
-  const fetchFiles = async () => {
-    setFetchingFiles(true);
+  const fetchFiles = async (skipLoading = false) => {
+    if (!skipLoading) {
+      setFetchingFiles(true);
+    }
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("/api/admin/media/list", {
@@ -43,27 +45,42 @@ export const MediaManager = () => {
     } catch (error) {
       console.error("Erro ao carregar arquivos:", error);
     } finally {
-      setFetchingFiles(false);
+      if (!skipLoading) {
+        setFetchingFiles(false);
+      }
     }
   };
 
-  const deleteFile = async (filename: string) => {
+  const deleteFile = async (fileId: string, filename: string) => {
     if (!confirm("Tem certeza que deseja excluir este arquivo?")) return;
+
+    // Remover imediatamente da lista (otimistic update)
+    const originalFiles = files;
+    setFiles(files.filter((file) => file.id !== fileId));
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/admin/media/delete?filename=${encodeURIComponent(filename)}`, {
+      // O ID do arquivo é o public_id do Cloudinary
+      const response = await fetch(`/api/admin/media/delete?publicId=${encodeURIComponent(fileId)}&filename=${encodeURIComponent(filename)}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
-        setFiles(files.filter((file) => file.filename !== filename));
+      if (!response.ok) {
+        // Se falhar, restaurar a lista original
+        console.error("Erro ao deletar arquivo - restaurando lista");
+        setFiles(originalFiles);
+        alert("Erro ao deletar arquivo. Tente novamente.");
+      } else {
+        console.log("✅ Arquivo deletado com sucesso");
       }
     } catch (error) {
       console.error("Erro ao deletar arquivo:", error);
+      // Restaurar lista em caso de erro
+      setFiles(originalFiles);
+      alert("Erro ao deletar arquivo. Tente novamente.");
     }
   };
 
@@ -89,7 +106,35 @@ export const MediaManager = () => {
       {/* Upload Section */}
       <AdminCard title="Upload de Imagens">
         <ImageUploader
-          onUploadSuccess={fetchFiles}
+          onUploadSuccess={(images) => {
+            console.log('🎯 MediaManager: onUploadSuccess chamado com', images);
+            
+            // Adicionar imediatamente as novas imagens ao estado
+            const newFiles: MediaFile[] = images.map(img => ({
+              id: img.id,
+              filename: img.filename,
+              url: img.url,
+              thumbnailUrl: img.thumbnailUrl,
+              size: img.size,
+              uploadedAt: new Date().toISOString()
+            }));
+            
+            console.log('📁 Adicionando arquivos ao estado:', newFiles);
+            
+            // Adicionar ao início da lista (mais recentes primeiro)
+            setFiles(prevFiles => {
+              const updatedFiles = [...newFiles, ...prevFiles];
+              console.log('📊 Estado atualizado - total de arquivos:', updatedFiles.length);
+              return updatedFiles;
+            });
+            
+            // Fazer fetch após 2 segundos para garantir sincronização com Cloudinary
+            // skipLoading = true para não mostrar loading, já que a imagem já está visível
+            setTimeout(() => {
+              console.log('🔄 Fazendo fetch para sincronizar com Cloudinary...');
+              fetchFiles(true);
+            }, 2000);
+          }}
           onUploadError={(error) => alert(`Erro no upload: ${error}`)}
           maxFiles={10}
         />
@@ -137,7 +182,7 @@ export const MediaManager = () => {
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => deleteFile(file.filename)}
+                      onClick={() => deleteFile(file.id, file.filename)}
                       className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
                       title="Deletar"
                     >

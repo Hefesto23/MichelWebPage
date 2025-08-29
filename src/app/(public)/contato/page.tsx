@@ -1,6 +1,6 @@
 // app/contato/page.tsx
 import { ContactSection } from "@/components/pages/contact/ContactSection";
-import Divisor from "@/components/shared/ui/divisor";
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

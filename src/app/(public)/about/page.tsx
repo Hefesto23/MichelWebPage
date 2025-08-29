@@ -1,5 +1,5 @@
 // src/app/about/page.tsx - REFATORADO COM CMS
-import Divisor from "@/components/shared/ui/divisor";
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
 import { Metadata } from "next";
 import { AboutContent } from "@/components/pages/about/AboutContent";
 

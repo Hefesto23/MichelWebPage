@@ -1,68 +1,11 @@
-"use client";
-
 import { Button } from "@/components/shared/ui/button";
-import useScrollToSection from "@/hooks/useScrollToSection";
-import { DEFAULT_HERO_CONTENT } from "@/utils/default-content";
-import { ArrowDown } from "lucide-react";
+import { getHeroContent } from "@/components/pages/home/hero-content";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ScrollButton } from "./ScrollButton";
 
-export const HeroSection = () => {
-  const scrollToSaibaMais = useScrollToSection("saiba-mais");
-  const [heroText, setHeroText] = useState(DEFAULT_HERO_CONTENT.mainText);
-  const [ctaText, setCtaText] = useState(DEFAULT_HERO_CONTENT.ctaText);
-  const [disclaimer, setDisclaimer] = useState(DEFAULT_HERO_CONTENT.disclaimer);
-  const [backgroundImage, setBackgroundImage] = useState(DEFAULT_HERO_CONTENT.backgroundImage);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Buscar conteúdo personalizado do banco
-    const fetchHeroContent = async () => {
-      try {
-        console.log("🔄 HeroSection: Buscando conteúdo...");
-        const response = await fetch('/api/admin/content/home');
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log("📥 HeroSection: Dados recebidos:", data);
-          
-          if (data.content?.hero) {
-            console.log("✅ HeroSection: Usando conteúdo personalizado");
-            
-            // Atualizar mainText se existir
-            if (data.content.hero.mainText) {
-              setHeroText(data.content.hero.mainText);
-            }
-            
-            // Atualizar ctaText se existir
-            if (data.content.hero.ctaText) {
-              setCtaText(data.content.hero.ctaText);
-            }
-            
-            // Atualizar disclaimer se existir
-            if (data.content.hero.disclaimer) {
-              setDisclaimer(data.content.hero.disclaimer);
-            }
-            
-            // Atualizar backgroundImage se existir
-            if (data.content.hero.backgroundImage) {
-              setBackgroundImage(data.content.hero.backgroundImage);
-            }
-          } else {
-            console.log("ℹ️ HeroSection: Usando conteúdo padrão (nenhum salvo)");
-          }
-        } else {
-          console.log("⚠️ HeroSection: Resposta não OK, usando padrão");
-        }
-      } catch (error) {
-        console.log("❌ HeroSection: Erro ao buscar, usando padrão:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHeroContent();
-  }, []);
+export const HeroSection = async () => {
+  // Buscar conteúdo no servidor com cache otimizado
+  const { mainText, ctaText, disclaimer, backgroundImage } = await getHeroContent();
 
   return (
     <section
@@ -70,51 +13,27 @@ export const HeroSection = () => {
       className="hero-section"
       style={{
         backgroundImage: `url('${backgroundImage}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <div className="hero-overlay section-padding">
         <div className="content-container">
           <div className="hero-content">
-            <h1 className="hero-text">
-              {isLoading ? (
-                <>
-                  <span className="inline-flex items-center space-x-2">
-                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block"></span>
-                    <span>Carregando...</span>
-                  </span>
-                </>
-              ) : (
-                heroText
-              )}
-            </h1>
-            
-            <div className="mt-4 text-white text-lg font-light">
-              {ctaText}
-            </div>
-            
+            <h1 className="hero-text">{mainText}</h1>
+
+            <div className="mt-4 text-white text-lg font-light">{ctaText}</div>
+
             <Link href="/agendamento">
-              <Button className="my-10 hover:opacity-80">
-                Agende sua Consulta!
-              </Button>
+              <Button className="my-10 hover:opacity-80">Agende sua Consulta!</Button>
             </Link>
-            
-            <div className="italic text-lg font-light text-white">
-              {disclaimer}
-            </div>
+
+            <div className="italic text-lg font-light text-white">{disclaimer}</div>
           </div>
         </div>
         <div className="hero-cta">
-          <Button
-            variant="outline"
-            onClick={scrollToSaibaMais}
-            aria-label="Saiba mais sobre o Psicólogo e sua especialidade"
-            className="w-16 h-16 rounded-full text-white border-white text-sm flex items-center justify-center shadow-lg focus:outline-none group animate-softBounce"
-          >
-            <ArrowDown className="w-6 h-6 group-hover:stroke-[3]" />
-          </Button>
+          <ScrollButton />
         </div>
       </div>
     </section>

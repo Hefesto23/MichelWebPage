@@ -27,7 +27,7 @@ const AvaliacoesContent = dynamic(
 );
 
 const Divisor = dynamic(
-  () => import("@/components/shared/ui/divisor"),
+  () => import("@/components/shared/ui/divisor").then(mod => ({ default: mod.DivisorServer })),
   { ssr: false }
 );
 

@@ -2,6 +2,7 @@
 import { validateAuthHeader } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 // GET - Buscar conteúdo salvo para uma página (público para o site)
 export async function GET(
@@ -113,6 +114,16 @@ export async function POST(
       });
       
       savedItems.push(savedItem);
+    }
+
+    // Revalidar cache específico baseado na página
+    if (page === 'home') {
+      revalidateTag('hero-content');
+      revalidateTag('welcome-content');
+      revalidateTag('services-content');
+      revalidateTag('clinic-content');
+    } else if (page === 'divisorias') {
+      revalidateTag('divisorias-content');
     }
 
     return NextResponse.json(

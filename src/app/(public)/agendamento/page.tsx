@@ -2,7 +2,7 @@
 // src/app/agendamento/page.tsx - COM CMS DINÂMICO
 // ============================================
 import { AppointmentFlow } from "@/components/pages/agendamento";
-import Divisor from "@/components/shared/ui/divisor";
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
 

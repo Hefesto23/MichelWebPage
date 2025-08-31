@@ -3,6 +3,8 @@ import { APPOINTMENT } from "@/utils/constants";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 // Configuração do cliente OAuth2
 const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),

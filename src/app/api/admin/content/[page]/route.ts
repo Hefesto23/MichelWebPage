@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Buscar conteúdo salvo para uma página (público para o site)
 export async function GET(
   request: NextRequest,
@@ -124,6 +126,12 @@ export async function POST(
       revalidateTag('clinic-content');
     } else if (page === 'divisorias') {
       revalidateTag('divisorias-content');
+    } else if (page === 'about') {
+      revalidateTag('about-content');
+    } else if (page === 'avaliacoes') {
+      revalidateTag('avaliacoes-content');
+    } else if (page === 'terapias') {
+      revalidateTag('terapias-content');
     }
 
     return NextResponse.json(

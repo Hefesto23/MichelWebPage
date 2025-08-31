@@ -1,35 +1,30 @@
-// src/app/avaliacoes/page.tsx - REFATORADO COM CMS
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
+import { AvaliacoesContentServer } from "@/components/pages/avaliacoes/AvaliacoesContentServer";
 import { Metadata } from "next";
-import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-const AvaliacoesContent = dynamic(
-  () => import("@/components/pages/avaliacoes").then((mod) => ({ default: mod.AvaliacoesContent })),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
-        <div className="content-container">
-          <div className="relative z-10">
-            <div className="section-header animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-            </div>
-            <div className="grid-pages-2col z-content">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
-              ))}
-            </div>
+export const dynamic = 'force-dynamic';
+
+// Skeleton mantendo o estilo original
+function AvaliacoesSkeleton() {
+  return (
+    <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
+      <div className="content-container">
+        <div className="relative z-10">
+          <div className="section-header animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+          </div>
+          <div className="grid-pages-2col z-content">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
+            ))}
           </div>
         </div>
       </div>
-    )
-  }
-);
-
-const Divisor = dynamic(
-  () => import("@/components/shared/ui/divisor").then(mod => ({ default: mod.DivisorServer })),
-  { ssr: false }
-);
+    </div>
+  );
+}
 
 export const metadata: Metadata = {
   title:
@@ -174,7 +169,9 @@ export const metadata: Metadata = {
 export default function Assessment() {
   return (
     <section>
-      <AvaliacoesContent />
+      <Suspense fallback={<AvaliacoesSkeleton />}>
+        <AvaliacoesContentServer />
+      </Suspense>
       <Divisor index={5} />
     </section>
   );

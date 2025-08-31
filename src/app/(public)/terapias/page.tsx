@@ -1,35 +1,30 @@
-// src/app/terapias/page.tsx - REFATORADO COM CMS
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
+import { TerapiasContentServer } from "@/components/pages/terapias/TerapiasContentServer";
 import { Metadata } from "next";
-import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-const TerapiasContent = dynamic(
-  () => import("@/components/pages/terapias").then((mod) => ({ default: mod.TerapiasContent })),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="w-full py-16 relative z-0 min-h-screen">
-        <div className="content-container">
-          <div className="relative z-10">
-            <div className="section-header animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
-              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-            </div>
-            <div className="grid-pages relative z-[3]">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
-              ))}
-            </div>
+export const dynamic = 'force-dynamic';
+
+// Skeleton mantendo o estilo original
+function TerapiasSkeleton() {
+  return (
+    <div className="w-full py-16 relative z-0 min-h-screen">
+      <div className="content-container">
+        <div className="relative z-10">
+          <div className="section-header animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+          </div>
+          <div className="grid-pages relative z-[3]">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-gray-300 rounded-xl animate-pulse"></div>
+            ))}
           </div>
         </div>
       </div>
-    )
-  }
-);
-
-const Divisor = dynamic(
-  () => import("@/components/shared/ui/divisor").then(mod => ({ default: mod.DivisorServer })),
-  { ssr: false }
-);
+    </div>
+  );
+}
 
 export const metadata: Metadata = {
   title: "Terapias | Modalidades de Atendimento - Michel de Camargo",
@@ -40,7 +35,9 @@ export const metadata: Metadata = {
 export default function Therapies() {
   return (
     <section>
-      <TerapiasContent />
+      <Suspense fallback={<TerapiasSkeleton />}>
+        <TerapiasContentServer />
+      </Suspense>
       <Divisor index={4} />
     </section>
   );

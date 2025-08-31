@@ -14,9 +14,11 @@ import {
   ServicesSkeleton,
   ClinicSkeleton,
   DivisorSkeleton
-} from "@/components/shared/skeletons";
+} from "@/components/shared/ui/skeleton";
 import { Metadata } from "next";
 import { Suspense } from "react";
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Michel de Camargo - Psicólogo Clínico | Sorocaba",

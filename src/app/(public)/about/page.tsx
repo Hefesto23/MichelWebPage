@@ -1,7 +1,18 @@
-// src/app/about/page.tsx - REFATORADO COM CMS
 import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
+import { AboutContentServer } from "@/components/pages/about/AboutContentServer";
 import { Metadata } from "next";
-import { AboutContent } from "@/components/pages/about/AboutContent";
+import { Suspense } from "react";
+
+export const dynamic = 'force-dynamic';
+
+// Skeleton mantendo o estilo original
+function AboutSkeleton() {
+  return (
+    <div className="w-full flex justify-center items-center py-20">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+    </div>
+  );
+}
 
 export const metadata: Metadata = {
   title: "Sobre Michel de Camargo | Psicólogo Clínico CRP 06/174807",
@@ -15,7 +26,9 @@ export default function About() {
       <section className="py-16 relative z-0 overflow-hidden">
         <div className="content-container">
           <div className="relative z-10">
-            <AboutContent />
+            <Suspense fallback={<AboutSkeleton />}>
+              <AboutContentServer />
+            </Suspense>
           </div>
         </div>
       </section>

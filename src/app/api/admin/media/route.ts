@@ -3,6 +3,8 @@ import { withAuth } from "@/lib/api-helpers";
 import prisma from "@/lib/prisma";
 import { NextRequest } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Listar todos os arquivos de mídia
 export const GET = withAuth(async (req: NextRequest) => {
   try {

@@ -1,16 +1,43 @@
-// src/utils/index.ts - NOVO ARQUIVO
-
-// Export all constants
-export * from "./constants";
-
-// Export all formatters
-export * from "./formatters";
-
-// Export all validators
-export * from "./validators";
-
-// Export all utilities
+// Core utilities (most used)  
+export * from "./core";
 export * from "./utils";
+export * from "./constants";
+export * from "./default-content";
 
-// Export all helpers
-export * from "./helpers";
+// Advanced utilities - specific exports to avoid conflicts
+export {
+  formatShortDate,
+  formatDateTime, 
+  formatWeekday,
+  formatCPF,
+  formatCEP,
+  formatAppointmentModality,
+  formatFileSize,
+  formatDuration,
+  formatCurrency,
+  formatNumber,
+  formatPercentage,
+  capitalizeWords,
+  formatName,
+  formatFullAddress,
+  calculateAge,
+  formatRelativeTime,
+} from "./formatters";
+
+export {
+  isValidEmail,
+  isValidPhone,
+  isValidCPF,
+  validateRequired,
+} from "./validators";
+
+export {
+  checkTimeSlotAvailability,
+  generateAppointmentConfirmationMessage,
+  generateEmailTemplate,
+  generateBreadcrumbs,
+  isProtectedRoute,
+  generatePageTitle,
+  calculateAppointmentStats,
+  maskSensitiveData,
+} from "./helpers";

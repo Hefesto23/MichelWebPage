@@ -3,6 +3,8 @@ import { withAuth } from "@/lib/api-helpers";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Buscar estatísticas do dashboard
 export const GET = withAuth(async (_req: NextRequest) => {
   try {

@@ -16,6 +16,7 @@ import {
   DEFAULT_TERAPIAS_CONTENT,
   DEFAULT_WELCOME_CONTENT,
 } from "@/utils/default-content";
+import { ClinicImagesManager, type ClinicImage } from "./ClinicImagesManager";
 import {
   ArrowLeft,
   Eye,
@@ -51,16 +52,6 @@ interface ServiceCard {
   active: boolean;
 }
 
-interface ClinicImage {
-  id: number;
-  original: string;
-  thumbnail: string;
-  originalAlt: string;
-  originalTitle: string;
-  description: string;
-  order: number;
-  active: boolean;
-}
 
 interface NetworkItem {
   id: string;
@@ -182,6 +173,12 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const [currentImageField, setCurrentImageField] = useState<number | null>(
     null
   );
+  const [editingClinicImages, setEditingClinicImages] = useState(false);
+  const [clinicData, setClinicData] = useState<{
+    title: string;
+    description: string;
+    images: ClinicImage[];
+  } | null>(null);
 
   const loadPageContent = useCallback(async () => {
     try {
@@ -284,17 +281,28 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           DEFAULT_CLINIC_CONTENT.description;
 
         // Parse das imagens se vier como string JSON
-        let clinicImages = DEFAULT_CLINIC_CONTENT.images;
+        let clinicImages: ClinicImage[] = [];
         if (savedContent?.clinic?.images) {
           try {
-            clinicImages =
+            const savedImages =
               typeof savedContent.clinic.images === "string"
                 ? JSON.parse(savedContent.clinic.images)
                 : savedContent.clinic.images;
+            
+            // Use apenas as imagens salvas, sem auto-expand
+            clinicImages = savedImages;
           } catch {
-            clinicImages = DEFAULT_CLINIC_CONTENT.images;
+            // Se há erro no parse, começar com array vazio
+            clinicImages = [];
           }
         }
+
+        // Update clinic data state for ClinicImagesManager
+        setClinicData({
+          title: clinicTitle,
+          description: clinicDescription,
+          images: clinicImages,
+        });
 
         return [
           {
@@ -485,7 +493,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               ...clinicImages
                 .map((image: ClinicImage, index: number) => [
                   {
-                    id: 35 + index * 5, // 35, 40, 45, etc.
+                    id: 35 + index * 4, // 35, 39, 43, etc. (4 campos por imagem)
                     page: "home",
                     section: "clinic",
                     key: `image${image.id}_originalTitle`,
@@ -495,7 +503,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     placeholder: `Título da imagem ${image.id}...`,
                   },
                   {
-                    id: 36 + index * 5, // 36, 41, 46, etc.
+                    id: 36 + index * 4, // 36, 40, 44, etc.
                     page: "home",
                     section: "clinic",
                     key: `image${image.id}_description`,
@@ -505,7 +513,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     placeholder: `Descrição da imagem ${image.id}...`,
                   },
                   {
-                    id: 37 + index * 5, // 37, 42, 47, etc.
+                    id: 37 + index * 4, // 37, 41, 45, etc.
                     page: "home",
                     section: "clinic",
                     key: `image${image.id}_originalAlt`,
@@ -515,25 +523,16 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     placeholder: `Texto alternativo da imagem ${image.id}...`,
                   },
                   {
-                    id: 38 + index * 5, // 38, 43, 48, etc.
+                    id: 38 + index * 4, // 38, 42, 46, etc.
                     page: "home",
                     section: "clinic",
                     key: `image${image.id}_original`,
                     type: "image" as const,
                     value: image.original,
-                    label: `Imagem ${image.id} - URL`,
+                    label: `Imagem ${image.id} - Imagem (Thumbnail = Mesma)`,
                     placeholder: `URL da imagem ${image.id}...`,
                   },
-                  {
-                    id: 39 + index * 5, // 39, 44, 49, etc.
-                    page: "home",
-                    section: "clinic",
-                    key: `image${image.id}_thumbnail`,
-                    type: "image" as const,
-                    value: image.thumbnail,
-                    label: `Imagem ${image.id} - Thumbnail`,
-                    placeholder: `URL da thumbnail da imagem ${image.id}...`,
-                  },
+                  // Thumbnail removido - será automaticamente igual ao original
                 ])
                 .flat(),
             ],
@@ -1467,6 +1466,11 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     image.description = valueToSave;
                   } else if (field === "original") {
                     image.original = valueToSave;
+                    // Auto-sync: Set thumbnail = original for unified system
+                    image.thumbnail = valueToSave;
+                  } else if (field === "thumbnail") {
+                    // Only set thumbnail if explicitly different from original
+                    image.thumbnail = valueToSave || image.original;
                   }
                 }
               }
@@ -1772,6 +1776,118 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     // Limpar todas as mudanças pendentes
     setChanges({});
     setError(null);
+  };
+
+  const saveClinicImages = async (data: { title: string; description: string; images: ClinicImage[] }) => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      const response = await fetch(`/api/admin/content/${page}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          content: {
+            clinic: data,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        if (handleAuthError(response)) {
+          return;
+        }
+        throw new Error("Erro ao salvar imagens da clínica");
+      }
+
+      // Recarregar conteúdo para atualizar interface
+      await loadPageContent();
+      setEditingClinicImages(false);
+      alert("Galeria da clínica salva com sucesso!");
+      
+    } catch (error) {
+      console.error("Erro ao salvar imagens da clínica:", error);
+      setError("Erro ao salvar galeria. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const _expandClinicImages = async () => {
+    if (page !== "home") return;
+
+    if (!confirm(
+      "Tem certeza que deseja expandir as imagens da clínica para 10 slots? As imagens existentes serão mantidas."
+    )) {
+      return;
+    }
+
+    setResetting(true);
+    setError(null);
+
+    try {
+      // Buscar conteúdo atual
+      const response = await fetch(`/api/admin/content/${page}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      let currentContent = {};
+      if (response.ok) {
+        const result = await response.json();
+        currentContent = result.content || {};
+      }
+
+      // Expandir apenas as imagens da clínica
+      const currentClinic = (currentContent as any)?.clinic || {};
+      const currentImages = currentClinic.images || [];
+      
+      // Adicionar imagens faltantes do padrão
+      const expandedImages = [...currentImages];
+      for (let i = currentImages.length; i < DEFAULT_CLINIC_CONTENT.images.length; i++) {
+        expandedImages.push({
+          ...DEFAULT_CLINIC_CONTENT.images[i],
+          active: i < 5 // Primeiras 5 ativas, resto expansível
+        });
+      }
+
+      // Salvar apenas a seção da clínica expandida
+      const clinicContent = {
+        ...currentClinic,
+        images: expandedImages
+      };
+
+      const saveResponse = await fetch(`/api/admin/content/${page}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          section: "clinic",
+          content: clinicContent,
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error("Erro ao expandir imagens");
+      }
+
+      // Recarregar conteúdo
+      await loadPageContent();
+      setChanges({});
+
+      alert(`Imagens da clínica expandidas para ${expandedImages.length} slots!`);
+    } catch (error) {
+      console.error("Erro ao expandir imagens:", error);
+      setError("Erro ao expandir imagens. Tente novamente.");
+    } finally {
+      setResetting(false);
+    }
   };
 
   const resetToDefaults = async () => {
@@ -2228,6 +2344,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             </button>
           )}
 
+
           <button
             onClick={resetToDefaults}
             disabled={resetting || saving}
@@ -2263,27 +2380,63 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
       {/* Content Sections */}
       <div className="space-y-8">
-        {sections.map((section, sectionIndex) => (
-          <AdminCard key={sectionIndex} title={section.name}>
-            <p className="text-muted-foreground mb-6">{section.description}</p>
-
-            <div className="space-y-6">
-              {section.items.map((item) => (
-                <div key={item.id} className="space-y-2">
-                  <label className="block text-sm font-medium text-foreground">
-                    {item.label}
-                    {changes[item.id] !== undefined && (
-                      <span className="ml-2 text-xs text-orange-600 dark:text-orange-400">
-                        (alterado)
-                      </span>
-                    )}
-                  </label>
-                  {renderContentInput(item)}
+        {sections.map((section, sectionIndex) => {
+          // Special handling for clinic section
+          if (section.name.includes("Clinic - Nosso Espaço") && page === "home") {
+            return (
+              <div key={sectionIndex}>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-lg font-semibold">{section.name}</h3>
+                    <p className="text-muted-foreground">{section.description}</p>
+                  </div>
+                  
+                  <button
+                    onClick={() => setEditingClinicImages(true)}
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    <span>Gerenciar Galeria</span>
+                  </button>
                 </div>
-              ))}
-            </div>
+
+                {/* Show current clinic info */}
+                <AdminCard title="Resumo da Galeria">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <p>Clique em &quot;Gerenciar Galeria&quot; para editar as imagens com a nova interface moderna.</p>
+                    <p className="mt-2">
+                      A nova interface permite: adicionar/remover imagens (1-10), thumbnails automáticos, 
+                      reordenação por arrastar e melhor organização dos campos.
+                    </p>
+                  </div>
+                </AdminCard>
+              </div>
+            );
+          }
+
+          // Regular section rendering
+          return (
+            <AdminCard key={sectionIndex} title={section.name}>
+              <p className="text-muted-foreground mb-6">{section.description}</p>
+
+              <div className="space-y-6">
+                {section.items.map((item) => (
+                  <div key={item.id} className="space-y-2">
+                    <label className="block text-sm font-medium text-foreground">
+                      {item.label}
+                      {changes[item.id] !== undefined && (
+                        <span className="ml-2 text-xs text-orange-600 dark:text-orange-400">
+                          (alterado)
+                        </span>
+                      )}
+                    </label>
+                    {renderContentInput(item)}
+                  </div>
+                ))}
+              </div>
           </AdminCard>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty State */}
@@ -2316,6 +2469,39 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         onSelect={handleImageSelect}
         title="Selecionar Imagem"
       />
+
+      {/* Clinic Images Manager Modal */}
+      {editingClinicImages && page === "home" && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Gerenciar Galeria da Clínica</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Interface moderna com React Hook Form - Mín. 1, máx. 10 imagens
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingClinicImages(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {clinicData && (
+                <ClinicImagesManager
+                  key={`clinic-manager-${editingClinicImages}-${Date.now()}`}
+                  initialData={clinicData}
+                  onSave={saveClinicImages}
+                  saving={saving}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

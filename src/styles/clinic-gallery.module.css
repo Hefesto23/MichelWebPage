@@ -1,0 +1,46 @@
+/* Custom styles for clinic gallery with auto-thumbnails */
+
+.customGallery :global(.image-gallery-thumbnail) {
+  width: 80px !important;
+  height: 60px !important;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.customGallery :global(.image-gallery-thumbnail):hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.customGallery :global(.image-gallery-thumbnail.active) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.customGallery :global(.image-gallery-thumbnail img) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 2px;
+}
+
+.customGallery :global(.image-gallery-thumbnails-wrapper) {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px 0;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.customGallery :global(.image-gallery-thumbnails) {
+  padding: 0 20px;
+}
+
+/* Ensure thumbnails are responsive */
+@media (max-width: 768px) {
+  .customGallery :global(.image-gallery-thumbnail) {
+    width: 60px !important;
+    height: 45px !important;
+  }
+}

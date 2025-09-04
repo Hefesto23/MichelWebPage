@@ -70,7 +70,7 @@ export const ContactMap = () => {
         
         {hasSecondAddress && (
           <p className="text-sm text-muted-foreground italic">
-            * O mapa mostra apenas o endereço principal. Consulte os endereços completos na seção "Atendimento" acima.
+            * O mapa mostra apenas o endereço principal. Consulte os endereços completos na seção &quot;Atendimento&quot; acima.
           </p>
         )}
       </div>

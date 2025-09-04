@@ -7,6 +7,7 @@ import Image from "next/image";
 import React from "react";
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
+import styles from "@/styles/clinic-gallery.module.css";
 
 interface GalleryImage {
   original: string;
@@ -45,35 +46,24 @@ export const ImageGalleryComponent: React.FC<ImageGalleryProps> = ({
     <div className="image-gallery-container w-full flex justify-center items-center">
       <div className="w-full max-w-full mx-auto">
         <ImageGallery
-          items={images}
+          items={images.map(item => ({
+            ...item,
+            thumbnail: item.original // Force thumbnail = original for unified system
+          }))}
           showThumbnails={true}
           showFullscreenButton={true}
           showPlayButton={false}
           autoPlay={false}
           lazyLoad={true}
           renderItem={(item) => renderCustomItem(item)}
-          additionalClass="custom-gallery bg-black w-full"
+          additionalClass={`${styles.customGallery} bg-black w-full`}
+          thumbnailPosition="bottom"
+          useBrowserFullscreen={false}
         />
       </div>
     </div>
   );
 };
 
-export const clinicImages: GalleryImage[] = [
-  {
-    original: "https://picsum.photos/800/600",
-    thumbnail: "https://picsum.photos/800/600",
-    originalAlt: "Espaço de Consultório - Área de Acolhimento",
-    originalTitle: "Espaço de Consultório",
-    description:
-      "Ambiente acolhedor e tranquilo projetado para proporcionar conforto e segurança.",
-  },
-  {
-    original: "https://picsum.photos/800/600",
-    thumbnail: "https://picsum.photos/800/600",
-    originalAlt: "Espaço de Consultório - Sala de Terapia",
-    originalTitle: "Sala de Terapia",
-    description:
-      "Sala de terapia com iluminação natural e design minimalista para promover relaxamento.",
-  },
-];
+// Este array é apenas para referência - as imagens reais vêm do CMS via DEFAULT_CLINIC_CONTENT
+export const clinicImages: GalleryImage[] = [];

@@ -4,7 +4,7 @@ import { fetchCmsContent } from "@/lib/cms-fetch";
 export interface ClinicImage {
   id: number;
   original: string;
-  thumbnail: string;
+  thumbnail: string; // Será igual ao original para simplificar
   originalAlt: string;
   originalTitle: string;
   description: string;

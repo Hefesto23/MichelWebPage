@@ -121,22 +121,12 @@ export const DEFAULT_CLINIC_CONTENT = {
   images: [
     {
       id: 1,
-      original: "https://picsum.photos/800/600",
-      thumbnail: "https://picsum.photos/800/600",
+      original: "/assets/clinic/default-1.jpg",
+      thumbnail: "/assets/clinic/default-1.jpg", // Thumbnail = mesmo que original
       originalAlt: "Espaço de Consultório - Área de Acolhimento",
-      originalTitle: "Espaço de Consultório",
-      description: "Ambiente acolhedor e tranquilo projetado para proporcionar conforto e segurança.",
+      originalTitle: "Área de Acolhimento",
+      description: "Ambiente acolhedor e tranquilo projetado para proporcionar conforto e segurança durante o atendimento.",
       order: 1,
-      active: true
-    },
-    {
-      id: 2,
-      original: "https://picsum.photos/800/600",
-      thumbnail: "https://picsum.photos/800/600",
-      originalAlt: "Espaço de Consultório - Sala de Terapia",
-      originalTitle: "Sala de Terapia",
-      description: "Sala de terapia com iluminação natural e design minimalista para promover relaxamento.",
-      order: 2,
       active: true
     }
   ],

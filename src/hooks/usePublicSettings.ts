@@ -27,7 +27,7 @@ export interface PublicClinicSettings {
   minimum_age: number;
   appointment_note: string;
   additional_notes: string;
-  // Endereço
+  // Endereço principal
   street: string;
   neighborhood: string;
   city: string;
@@ -35,6 +35,12 @@ export interface PublicClinicSettings {
   zip_code: string;
   latitude: string;
   longitude: string;
+  // Segundo endereço (opcional)
+  street2?: string;
+  neighborhood2?: string;
+  city2?: string;
+  state2?: string;
+  zip_code2?: string;
 }
 
 export const usePublicSettings = () => {

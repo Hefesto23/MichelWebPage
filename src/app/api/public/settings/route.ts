@@ -46,7 +46,7 @@ export async function GET() {
       minimum_age: settingsMap["clinica.minimum_age"] || 20,
       appointment_note: settingsMap["clinica.appointment_note"] || CLINIC_INFO.HOURS.NOTE,
       additional_notes: settingsMap["clinica.additional_notes"] || "",
-      // Endereço
+      // Endereço principal
       street: settingsMap["endereco.street"] || CLINIC_INFO.ADDRESS.STREET,
       neighborhood: settingsMap["endereco.neighborhood"] || CLINIC_INFO.ADDRESS.NEIGHBORHOOD,
       city: settingsMap["endereco.city"] || CLINIC_INFO.ADDRESS.CITY,
@@ -54,6 +54,12 @@ export async function GET() {
       zip_code: settingsMap["endereco.zip_code"] || CLINIC_INFO.ADDRESS.ZIP,
       latitude: settingsMap["endereco.latitude"] || CLINIC_INFO.ADDRESS.COORDINATES.LAT.toString(),
       longitude: settingsMap["endereco.longitude"] || CLINIC_INFO.ADDRESS.COORDINATES.LNG.toString(),
+      // Segundo endereço (opcional)
+      street2: settingsMap["endereco.street2"] || "",
+      neighborhood2: settingsMap["endereco.neighborhood2"] || "",
+      city2: settingsMap["endereco.city2"] || "",
+      state2: settingsMap["endereco.state2"] || "",
+      zip_code2: settingsMap["endereco.zip_code2"] || "",
     };
 
     return NextResponse.json({
@@ -86,7 +92,7 @@ export async function GET() {
       minimum_age: 20,
       appointment_note: CLINIC_INFO.HOURS.NOTE,
       additional_notes: "",
-      // Endereço
+      // Endereço principal
       street: CLINIC_INFO.ADDRESS.STREET,
       neighborhood: CLINIC_INFO.ADDRESS.NEIGHBORHOOD,
       city: CLINIC_INFO.ADDRESS.CITY,
@@ -94,6 +100,12 @@ export async function GET() {
       zip_code: CLINIC_INFO.ADDRESS.ZIP,
       latitude: CLINIC_INFO.ADDRESS.COORDINATES.LAT.toString(),
       longitude: CLINIC_INFO.ADDRESS.COORDINATES.LNG.toString(),
+      // Segundo endereço (opcional)
+      street2: "",
+      neighborhood2: "",
+      city2: "",
+      state2: "",
+      zip_code2: "",
     };
 
     return NextResponse.json({

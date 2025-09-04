@@ -13,16 +13,25 @@ export const ContactHours = () => {
   const startTime = settings?.start_time || CLINIC_INFO.HOURS.START;
   const endTime = settings?.end_time || CLINIC_INFO.HOURS.END;
   
-  // Configurações dinâmicas de endereço
-  const street = settings?.street || CLINIC_INFO.ADDRESS.STREET;
-  const neighborhood = settings?.neighborhood || CLINIC_INFO.ADDRESS.NEIGHBORHOOD;
-  const city = settings?.city || CLINIC_INFO.ADDRESS.CITY;
-  const state = settings?.state || CLINIC_INFO.ADDRESS.STATE;
-  const zipCode = settings?.zip_code || CLINIC_INFO.ADDRESS.ZIP;
+  // Configurações dinâmicas de endereços (suporte para 2 endereços)
+  const street1 = settings?.street || CLINIC_INFO.ADDRESS.STREET;
+  const neighborhood1 = settings?.neighborhood || CLINIC_INFO.ADDRESS.NEIGHBORHOOD;
+  const city1 = settings?.city || CLINIC_INFO.ADDRESS.CITY;
+  const state1 = settings?.state || CLINIC_INFO.ADDRESS.STATE;
+  const zipCode1 = settings?.zip_code || CLINIC_INFO.ADDRESS.ZIP;
+  
+  // Segundo endereço (opcional)
+  const street2 = settings?.street2;
+  const neighborhood2 = settings?.neighborhood2;
+  const city2 = settings?.city2;
+  const state2 = settings?.state2;
+  const zipCode2 = settings?.zip_code2;
+  
   const appointmentNote = settings?.appointment_note || CLINIC_INFO.HOURS.NOTE;
 
   return (
     <div className="space-y-6">
+      {/* Primeiro Endereço */}
       <div className="address-item group">
         <MapPin
           className="address-icon group-hover:scale-110 transition-transform duration-300"
@@ -30,15 +39,35 @@ export const ContactHours = () => {
           strokeWidth={3}
         />
         <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
-          <p className="text-lg">{street}</p>
+          <p className="text-lg">{street1}</p>
           <p className="text-lg">
-            {neighborhood}, {city} {state}
+            {neighborhood1}, {city1} {state1}
           </p>
           <p className="text-lg">
-            {zipCode}, Brasil
+            {zipCode1}, Brasil
           </p>
         </div>
       </div>
+
+      {/* Segundo Endereço (se existir e não estiver vazio) */}
+      {street2 && street2.trim() !== "" && (
+        <div className="address-item group">
+          <MapPin
+            className="address-icon group-hover:scale-110 transition-transform duration-300"
+            size={24}
+            strokeWidth={3}
+          />
+          <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
+            <p className="text-lg">{street2}</p>
+            <p className="text-lg">
+              {neighborhood2}, {city2} {state2}
+            </p>
+            <p className="text-lg">
+              {zipCode2}, Brasil
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Hours */}
       <div className="address-item">

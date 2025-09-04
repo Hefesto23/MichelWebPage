@@ -25,6 +25,9 @@ export const ContactMap = () => {
     return `${STREET} - ${NEIGHBORHOOD}, ${CITY} - ${STATE}, ${ZIP}`;
   };
 
+  // Verificar se há segundo endereço (não vazio)
+  const hasSecondAddress = settings?.street2 && settings.street2.trim() !== "";
+
   // Usar coordenadas dinâmicas ou fallback
   const latitude = settings?.latitude || CLINIC_INFO.ADDRESS.COORDINATES.LAT;
   const longitude = settings?.longitude || CLINIC_INFO.ADDRESS.COORDINATES.LNG;
@@ -52,16 +55,25 @@ export const ContactMap = () => {
           className="rounded-lg"
         />
       </div>
-      <button
-        onClick={() => setIsMapExpanded(!isMapExpanded)}
-        className="mt-4 flex items-center hover:text-foreground/80 transition-colors group"
-      >
-        <Maximize2
-          size={20}
-          className="mr-2 group-hover:scale-110 transition-transform duration-300"
-        />
-        {isMapExpanded ? "Reduzir mapa" : "Expandir mapa"}
-      </button>
+      
+      <div className="mt-4 flex flex-col space-y-2">
+        <button
+          onClick={() => setIsMapExpanded(!isMapExpanded)}
+          className="flex items-center hover:text-foreground/80 transition-colors group self-start"
+        >
+          <Maximize2
+            size={20}
+            className="mr-2 group-hover:scale-110 transition-transform duration-300"
+          />
+          {isMapExpanded ? "Reduzir mapa" : "Expandir mapa"}
+        </button>
+        
+        {hasSecondAddress && (
+          <p className="text-sm text-muted-foreground italic">
+            * O mapa mostra apenas o endereço principal. Consulte os endereços completos na seção "Atendimento" acima.
+          </p>
+        )}
+      </div>
     </>
   );
 };

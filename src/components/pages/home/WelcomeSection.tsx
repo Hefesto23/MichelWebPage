@@ -8,7 +8,7 @@ import { parseMarkdownToJSX } from "./MarkdownParser";
 
 export const WelcomeSection = async () => {
   // Buscar conteúdo no servidor com cache otimizado
-  const { title, content } = await getWelcomeContent();
+  const { title, content, profileImage } = await getWelcomeContent();
   return (
     <section id="saiba-mais" className="welcome-section">
       <div className="content-container">
@@ -24,7 +24,7 @@ export const WelcomeSection = async () => {
 
           <div className="welcome-image">
             <CloudinaryImage
-              src="/assets/michel1.svg"
+              src={profileImage}
               alt="Foto de Michel Psicologo Clinico"
               fill
               className="object-contain"

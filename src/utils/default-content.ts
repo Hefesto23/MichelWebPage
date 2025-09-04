@@ -39,6 +39,7 @@ Você não precisa enfrentar tudo sozinho. Estou aqui para oferecer suporte e aj
 **Dê o primeiro passo e agende uma consulta.**
 
 Cuidar da sua saúde emocional é um presente que transforma a maneira como você vive e se relaciona com o mundo.`,
+  profileImage: "/assets/michel1.svg",
   // Limites de caracteres
   maxCharacters: {
     title: 50,

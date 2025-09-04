@@ -255,6 +255,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           savedContent?.welcome?.title || DEFAULT_WELCOME_CONTENT.title;
         const welcomeContent =
           savedContent?.welcome?.content || DEFAULT_WELCOME_CONTENT.content;
+        const welcomeProfileImage =
+          savedContent?.welcome?.profileImage || DEFAULT_WELCOME_CONTENT.profileImage;
 
         const servicesTitle =
           savedContent?.services?.title || DEFAULT_SERVICES_CONTENT.title;
@@ -369,6 +371,16 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 label: "Conteúdo Completo da Seção Welcome",
                 placeholder:
                   "Digite todo o conteúdo da seção de apresentação...",
+              },
+              {
+                id: 100,
+                page: "home",
+                section: "welcome",
+                key: "profileImage",
+                type: "image",
+                value: welcomeProfileImage,
+                label: "Foto do Profissional",
+                placeholder: "Selecione uma imagem para o perfil...",
               },
             ],
           },

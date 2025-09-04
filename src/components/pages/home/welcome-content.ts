@@ -4,6 +4,7 @@ import { fetchCmsContent } from "@/lib/cms-fetch";
 export interface WelcomeContent {
   title: string;
   content: string;
+  profileImage: string;
 }
 
 export async function getWelcomeContent(): Promise<WelcomeContent> {
@@ -17,6 +18,7 @@ export async function getWelcomeContent(): Promise<WelcomeContent> {
       return {
         title: data.content.welcome.title || DEFAULT_WELCOME_CONTENT.title,
         content: data.content.welcome.content || DEFAULT_WELCOME_CONTENT.content,
+        profileImage: data.content.welcome.profileImage || DEFAULT_WELCOME_CONTENT.profileImage,
       };
     }
   });

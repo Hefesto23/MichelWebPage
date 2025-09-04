@@ -41,9 +41,9 @@ export const Header = ({
       <div className="content-container">
         <div className="header-container">
           <div className="header-logo">
-            <div className="w-[200px] h-[75px] flex items-center justify-center">
+            <Link href={ROUTES.HOME} className="w-[200px] h-[75px] flex items-center justify-center cursor-pointer">
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="Logo da Clínica"
                 width={247}
                 height={72}
@@ -51,14 +51,14 @@ export const Header = ({
                 priority
               />
               <Image
-                src="/logo2.svg"
+                src="/logo2.png"
                 alt="Logo da Clínica"
                 width={247}
                 height={72}
                 className="object-contain w-[200px] logo-dark absolute"
                 priority
               />
-            </div>
+            </Link>
           </div>
 
           {/* Mobile Menu Button - Visible below 1200px */}

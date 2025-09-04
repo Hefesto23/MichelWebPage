@@ -48,15 +48,24 @@ export const Footer = () => {
               </div>
             </div>
 
-            {/* Middle Column - MANTIDO EXATAMENTE IGUAL */}
+            {/* Middle Column - Logo com tema dinâmico */}
             <div className="flex justify-center items-start mt-0 pt-1">
-              <Image
-                src="/logo.svg"
-                alt="Consultório de Psicologia Logo"
-                width={265}
-                height={75}
-                className="object-contain"
-              />
+              <div className="relative w-[265px] h-[75px] flex items-center justify-center">
+                <Image
+                  src="/logo.svg"
+                  alt="Consultório de Psicologia Logo"
+                  width={265}
+                  height={75}
+                  className="object-contain logo-light"
+                />
+                <Image
+                  src="/logo2.svg"
+                  alt="Consultório de Psicologia Logo"
+                  width={265}
+                  height={75}
+                  className="object-contain logo-dark absolute"
+                />
+              </div>
             </div>
 
             {/* Third Column */}

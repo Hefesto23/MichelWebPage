@@ -3,6 +3,7 @@ import { ContactCard } from "@/components/shared/cards/BaseCard";
 import { Button } from "@/components/shared/ui/button";
 import { LoadingSpinner } from "@/components/shared/ui/LoadingSpinner";
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
+import { formatarDataBrasil } from "@/utils/utils";
 import { Calendar, Clock } from "lucide-react";
 
 interface AppointmentDetailsProps {
@@ -22,17 +23,7 @@ export default function AppointmentDetails({
   setCarregando,
   handleError,
 }: AppointmentDetailsProps) {
-  // Função para formatar a data - ✅ MANTIDA EXATAMENTE ORIGINAL
-  const formatarData = (dataString: string): string => {
-    const data = new Date(dataString);
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    return data.toLocaleDateString("pt-BR", options);
-  };
+  // Função para formatar a data usando utilitário centralizado
 
   // Função para confirmar cancelamento - ✅ MANTIDA EXATAMENTE ORIGINAL
   const confirmarCancelamento = async () => {
@@ -79,7 +70,7 @@ export default function AppointmentDetails({
                 <div>
                   <p className="text-foreground/70 text-sm mb-1">Data</p>
                   <p className="text-foreground">
-                    {formatarData(formData.dataSelecionada)}
+                    {formatarDataBrasil(formData.dataSelecionada)}
                   </p>
                 </div>
               </div>

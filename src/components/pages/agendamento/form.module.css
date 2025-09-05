@@ -27,7 +27,7 @@
 }
 
 .secondaryButton {
-  @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:bg-secondary;
+  @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:border-foreground;
 }
 
 /* Efeito hover para botões secundários no modo escuro */

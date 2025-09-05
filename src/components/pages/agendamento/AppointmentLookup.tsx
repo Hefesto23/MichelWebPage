@@ -92,6 +92,7 @@ export default function AppointmentLookup({
         </div>
         <div className="flex justify-end">
           <Button
+            variant="outline"
             type="submit"
             disabled={carregando || !formData.codigoConfirmacao}
             className="flex items-center gap-2"

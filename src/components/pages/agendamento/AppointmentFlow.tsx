@@ -187,7 +187,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
             state.step >= AppointmentStep.DATE_TIME && !state.cancelar
               ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-              : "bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
+              : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
           }`}
         >
           Novo Agendamento
@@ -199,7 +199,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
             state.step === AppointmentStep.LOOKUP
               ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-              : "bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
+              : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
           }`}
         >
           Buscar Agendamento

@@ -12,7 +12,8 @@ import {
   startOfDay,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useHorariosCache } from "@/hooks/useHorariosCache";
 import formStyles from "../form.module.css";
 
 const MODALITY = AppointmentModality; // ✅ ÚNICA MUDANÇA: usar constants
@@ -25,7 +26,7 @@ interface DateTimeSelectionProps {
   handleError: (message: string) => void;
 }
 
-export default function DateTimeSelection({
+const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSelection({
   formData,
   updateFormData,
   proximoPasso,
@@ -35,6 +36,9 @@ export default function DateTimeSelection({
 }: DateTimeSelectionProps) {
   // Hook para configurações públicas
   const { settings, loading: settingsLoading, formatWorkingDays, getActiveDaysAsNumbers } = usePublicSettings();
+  
+  // Hook de cache para horários
+  const { fetchHorarios, getCachedData } = useHorariosCache();
   
   // Estado para os horários disponíveis
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
@@ -50,25 +54,25 @@ export default function DateTimeSelection({
     }
   }, [formData.dataSelecionada]);
 
-  // Definir o intervalo de datas permitidas
-  const hoje = startOfDay(new Date());
-  const advanceDays = settings?.advance_days || 60;
-  const fimPeriodo = addMonths(hoje, Math.ceil(advanceDays / 30));
+  // Valores memoizados para cálculos pesados
+  const hoje = useMemo(() => startOfDay(new Date()), []);
+  const advanceDays = useMemo(() => settings?.advance_days || 60, [settings?.advance_days]);
+  const fimPeriodo = useMemo(() => addMonths(hoje, Math.ceil(advanceDays / 30)), [hoje, advanceDays]);
+  const activeDays = useMemo(() => getActiveDaysAsNumbers(), [getActiveDaysAsNumbers]);
 
-  // Função para verificar se um dia é desabilitado baseado nas configurações
-  const isDiaDesabilitado = (data: Date) => {
+  // Função memoizada para verificar se um dia é desabilitado baseado nas configurações
+  const isDiaDesabilitado = useCallback((data: Date) => {
     const dayOfWeek = data.getDay(); // 0 = domingo, 1 = segunda, etc.
-    const activeDays = getActiveDaysAsNumbers();
     
     return (
       isBefore(data, hoje) ||
       isAfter(data, fimPeriodo) ||
       !activeDays.includes(dayOfWeek) // Só permite dias configurados no admin
     );
-  };
+  }, [hoje, fimPeriodo, activeDays]);
 
-  // Função para lidar com a mudança de data
-  const handleDateChange = async (selectedDate: Date | undefined) => {
+  // Função otimizada com cache para lidar com a mudança de data
+  const handleDateChange = useCallback(async (selectedDate: Date | undefined) => {
     if (
       !selectedDate ||
       (formData.dataSelecionada &&
@@ -78,22 +82,27 @@ export default function DateTimeSelection({
     }
 
     setDate(selectedDate);
+    const dataFormatada = format(selectedDate, "yyyy-MM-dd");
+    
+    // Verificar se já tem dados em cache
+    const cachedData = getCachedData(dataFormatada);
+    if (cachedData) {
+      setHorariosDisponiveis(cachedData.horariosDisponiveis || []);
+      updateFormData({
+        dataSelecionada: dataFormatada,
+        horarioSelecionado: "",
+      });
+      return;
+    }
+
     setCarregando(true);
 
     try {
-      // Garantir que a data seja formatada corretamente
-      const dataFormatada = format(selectedDate, "yyyy-MM-dd");
       console.log("📅 Frontend - Data selecionada:", selectedDate);
       console.log("📄 Frontend - Data formatada:", dataFormatada);
 
-      // Buscar horários disponíveis da API
-      const response = await fetch(`/api/calendario/horarios?data=${dataFormatada}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao buscar horários");
-      }
-
+      // Usar cache para buscar horários
+      const data = await fetchHorarios(dataFormatada);
       setHorariosDisponiveis(data.horariosDisponiveis || []);
       
       updateFormData({
@@ -107,20 +116,20 @@ export default function DateTimeSelection({
     } finally {
       setCarregando(false);
     }
-  };
+  }, [formData.dataSelecionada, fetchHorarios, getCachedData, updateFormData, handleError, setCarregando]);
 
-  // Função para selecionar um horário
-  const selecionarHorario = (horario: string) => {
+  // Função memoizada para selecionar um horário
+  const selecionarHorario = useCallback((horario: string) => {
     updateFormData({ horarioSelecionado: horario });
-  };
+  }, [updateFormData]);
 
-  // Função para alternar o estado de primeira consulta
-  const togglePrimeiraConsulta = () => {
+  // Função memoizada para alternar o estado de primeira consulta
+  const togglePrimeiraConsulta = useCallback(() => {
     updateFormData({ primeiraConsulta: !formData.primeiraConsulta });
-  };
+  }, [updateFormData, formData.primeiraConsulta]);
 
-  // Função para validar e avançar para o próximo passo
-  const validarEAvancar = () => {
+  // Função memoizada para validar e avançar para o próximo passo
+  const validarEAvancar = useCallback(() => {
     if (!formData.dataSelecionada) {
       handleError("Por favor, selecione uma data para a consulta.");
       return;
@@ -137,18 +146,18 @@ export default function DateTimeSelection({
     }
 
     proximoPasso();
-  };
+  }, [formData.dataSelecionada, formData.horarioSelecionado, formData.modalidade, handleError, proximoPasso]);
 
-  // Formatar a data em português para exibição
-  const dataFormatada = formData.dataSelecionada
-    ? format(
-        new Date(formData.dataSelecionada + "T12:00:00"),
-        "EEEE, dd 'de' MMMM 'de' yyyy",
-        {
-          locale: ptBR,
-        }
-      )
-    : "";
+  // Formatar a data em português para exibição (memoizada)
+  const dataFormatada = useMemo(() => {
+    if (!formData.dataSelecionada) return "";
+    
+    return format(
+      new Date(formData.dataSelecionada + "T12:00:00"),
+      "EEEE, dd 'de' MMMM 'de' yyyy",
+      { locale: ptBR }
+    );
+  }, [formData.dataSelecionada]);
 
   return (
     <ContactCard title="Escolha a Data e Horário">
@@ -373,4 +382,6 @@ export default function DateTimeSelection({
       </div>
     </ContactCard>
   );
-}
+});
+
+export default DateTimeSelection;

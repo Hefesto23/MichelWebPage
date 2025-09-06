@@ -3,6 +3,7 @@ import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import React, { useMemo } from "react";
 import {
   Calendar,
   Clock,
@@ -22,22 +23,22 @@ interface ConfirmationProps {
   carregando: boolean;
 }
 
-export default function Confirmation({
+const Confirmation = React.memo<ConfirmationProps>(function Confirmation({
   formData,
   passoAnterior,
   enviarFormulario,
   carregando,
 }: ConfirmationProps) {
-  // Formatar a data em português para exibição com timezone correto
-  const dataFormatada = formData.dataSelecionada
-    ? format(
-        new Date(formData.dataSelecionada + "T12:00:00"),
-        "EEEE, dd 'de' MMMM 'de' yyyy",
-        {
-          locale: ptBR,
-        }
-      )
-    : "";
+  // Formatar a data em português para exibição com timezone correto (memoizada)
+  const dataFormatada = useMemo(() => {
+    if (!formData.dataSelecionada) return "";
+    
+    return format(
+      new Date(formData.dataSelecionada + "T12:00:00"),
+      "EEEE, dd 'de' MMMM 'de' yyyy",
+      { locale: ptBR }
+    );
+  }, [formData.dataSelecionada]);
 
   return (
     <ContactCard title="Confirme seus Dados">
@@ -227,7 +228,9 @@ export default function Confirmation({
       </div>
     </ContactCard>
   );
-}
+});
+
+export default Confirmation;
 
 // Componente de VideoIcon para reutilização - ✅ MANTIDO ORIGINAL
 function VideoIcon({ size = 24 }: { size?: number }) {

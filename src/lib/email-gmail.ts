@@ -64,6 +64,9 @@ const formatarData = (dataString: string): string => {
  * Envia email de confirmação de agendamento para usuário e clínica
  */
 export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boolean> {
+  const emailStartTime = Date.now();
+  console.log('📧 Iniciando processamento de emails em background...');
+  
   const dataFormatada = formatarData(dados.data);
   const clinicEmail = process.env.CLINIC_EMAIL || 'raszlster@gmail.com';
   const clinicName = process.env.CLINIC_NAME || 'Michel de Camargo - Psicólogo';
@@ -71,62 +74,79 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
   try {
     // Verificar configuração
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.log("\n🧪 === MODO DE DESENVOLVIMENTO - Gmail SMTP ===");
-      console.log("📧 Para usuário:", dados.to);
-      console.log("📧 Para clínica:", clinicEmail);
-      console.log("📋 Assunto: Confirmação de Agendamento");
-      console.log("📄 Dados:", { nome: dados.nome, data: dataFormatada, horario: dados.horario });
-      console.log("⚠️  Configure GMAIL_USER e GMAIL_APP_PASSWORD no .env para envios reais");
+      console.log("🧪 MODO DE DESENVOLVIMENTO - Simulando envio de emails");
+      console.log(`📧 Para usuário: ${dados.to}, Para clínica: ${clinicEmail}`);
+      console.log(`📄 ${dados.nome} - ${dataFormatada} às ${dados.horario}`);
       return true;
     }
 
     const transporter = createTransporter();
 
-    // Criar templates com identidade visual
-    const htmlUsuario = createConfirmationTemplate({
-      nome: dados.nome,
-      data: dataFormatada,
-      horario: dados.horario,
-      modalidade: dados.modalidade,
-      codigo: dados.codigo,
-    });
+    // 🚀 PREPARAR TEMPLATES EM PARALELO
+    const [htmlUsuario, htmlClinica] = await Promise.all([
+      // Template usuário
+      Promise.resolve(createConfirmationTemplate({
+        nome: dados.nome,
+        data: dataFormatada,
+        horario: dados.horario,
+        modalidade: dados.modalidade,
+        codigo: dados.codigo,
+      })),
+      // Template clínica
+      Promise.resolve(createClinicNotificationTemplate({
+        nome: dados.nome,
+        email: dados.to,
+        telefone: dados.telefone,
+        data: dataFormatada,
+        horario: dados.horario,
+        modalidade: dados.modalidade,
+        codigo: dados.codigo,
+      }))
+    ]);
 
-    const htmlClinica = createClinicNotificationTemplate({
-      nome: dados.nome,
-      email: dados.to,
-      telefone: dados.telefone,
-      data: dataFormatada,
-      horario: dados.horario,
-      modalidade: dados.modalidade,
-      codigo: dados.codigo,
-    });
-
-    console.log('\n📧 Enviando emails de confirmação...');
+    // 🚀 ENVIAR EMAILS EM PARALELO (não sequencial)
+    console.log('⚡ Enviando emails em paralelo...');
     
-    // Enviar email para o usuário
-    console.log('📤 Enviando para usuário:', dados.to);
-    await transporter.sendMail({
-      from: `"${clinicName}" <${clinicEmail}>`,
-      to: dados.to,
-      subject: 'Confirmação de Agendamento de Consulta',
-      html: htmlUsuario,
-    });
-    console.log('✅ Email enviado para usuário com sucesso!');
+    const [resultUsuario, resultClinica] = await Promise.allSettled([
+      // Email para usuário
+      transporter.sendMail({
+        from: `"${clinicName}" <${clinicEmail}>`,
+        to: dados.to,
+        subject: 'Confirmação de Agendamento de Consulta',
+        html: htmlUsuario,
+      }),
+      // Email para clínica
+      transporter.sendMail({
+        from: `"Sistema de Agendamento" <${clinicEmail}>`,
+        to: clinicEmail,
+        subject: `[CLÍNICA] Novo Agendamento: ${dados.nome} - ${dataFormatada}`,
+        html: htmlClinica,
+      })
+    ]);
 
-    // Enviar cópia para a clínica
-    console.log('📤 Enviando cópia para clínica:', clinicEmail);
-    await transporter.sendMail({
-      from: `"Sistema de Agendamento" <${clinicEmail}>`,
-      to: clinicEmail,
-      subject: `[CLÍNICA] Novo Agendamento: ${dados.nome} - ${dataFormatada}`,
-      html: htmlClinica,
-    });
-    console.log('✅ Email enviado para clínica com sucesso!');
+    // Análise dos resultados
+    const usuarioOk = resultUsuario.status === 'fulfilled';
+    const clinicaOk = resultClinica.status === 'fulfilled';
+    
+    const emailTime = Date.now() - emailStartTime;
+    console.log(`📧 Emails processados em ${emailTime}ms:`);
+    console.log(`  👤 Usuário: ${usuarioOk ? '✅ Sucesso' : '❌ Falha'}`);
+    console.log(`  🏥 Clínica: ${clinicaOk ? '✅ Sucesso' : '❌ Falha'}`);
+    
+    // Log de erros específicos
+    if (!usuarioOk) {
+      console.error('❌ Erro email usuário:', (resultUsuario as PromiseRejectedResult).reason);
+    }
+    if (!clinicaOk) {
+      console.error('❌ Erro email clínica:', (resultClinica as PromiseRejectedResult).reason);
+    }
 
-    return true;
+    // Sucesso se pelo menos um email foi enviado
+    return usuarioOk || clinicaOk;
 
   } catch (error) {
-    console.error('❌ Erro ao enviar emails via Gmail SMTP:', error);
+    const emailTime = Date.now() - emailStartTime;
+    console.error(`❌ Erro geral nos emails após ${emailTime}ms:`, error);
     return false;
   }
 }

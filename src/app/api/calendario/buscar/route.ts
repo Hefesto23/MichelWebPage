@@ -3,10 +3,14 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { withRetry, TIMEOUT_CONFIGS } from "@/lib/timeout-utils";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  console.log("🔍 Início da API de busca");
+
   try {
     const { codigo } = await request.json();
 
@@ -19,15 +23,22 @@ export async function POST(request: Request) {
 
     console.log("🔍 Buscando agendamento com código:", codigo);
 
-    // Primeiro, buscar no banco de dados
-    const agendamentoDB = await prisma.appointment.findUnique({
-      where: {
-        codigo: codigo
-      }
-    });
+    // 🚀 BUSCA OTIMIZADA NO BANCO COM TIMEOUT
+    const dbStartTime = Date.now();
+    const agendamentoDB = await withRetry(async () => {
+      return await prisma.appointment.findUnique({
+        where: {
+          codigo: codigo
+        }
+      });
+    }, TIMEOUT_CONFIGS.DATABASE);
+
+    const dbTime = Date.now() - dbStartTime;
+    console.log(`💾 Busca no BD: ${dbTime}ms`);
 
     if (agendamentoDB) {
-      console.log("✅ Agendamento encontrado no banco de dados");
+      const totalTime = Date.now() - startTime;
+      console.log(`✅ Encontrado no BD em ${totalTime}ms total`);
       
       // Formatar dados do banco
       const dadosAgendamento = {
@@ -45,28 +56,44 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         agendamento: dadosAgendamento,
+        responseTime: totalTime,
+        source: "database"
       });
     }
 
     console.log("⚠️ Agendamento não encontrado no BD, buscando no Google Calendar...");
 
-    // Fallback: buscar no Google Calendar (para agendamentos antigos)
-    const auth = new google.auth.GoogleAuth({
-      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),
-      scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
-    });
+    // 🚀 FALLBACK OTIMIZADO: Google Calendar com timeout e limite
+    const gcalStartTime = Date.now();
+    
+    const eventos = await withRetry(async () => {
+      const auth = new google.auth.GoogleAuth({
+        credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),
+        scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
+      });
 
-    const calendar = google.calendar({ version: "v3", auth });
+      const calendar = google.calendar({ version: "v3", auth });
 
-    // Buscar eventos futuros
-    const agora = new Date();
+      // 🔧 FIX: Buscar apenas próximos 6 meses (limite realístico)
+      const agora = new Date();
+      const limiteMaximo = new Date();
+      limiteMaximo.setMonth(limiteMaximo.getMonth() + 6);
 
-    const eventos = await calendar.events.list({
-      calendarId: process.env.GOOGLE_CALENDAR_ID as string,
-      timeMin: agora.toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
-    });
+      console.log("📅 Buscando eventos entre:", agora.toISOString(), "e", limiteMaximo.toISOString());
+
+      return await calendar.events.list({
+        calendarId: process.env.GOOGLE_CALENDAR_ID as string,
+        timeMin: agora.toISOString(),
+        timeMax: limiteMaximo.toISOString(), // 🔧 LIMITE DE 6 MESES
+        singleEvents: true,
+        orderBy: "startTime",
+        maxResults: 100, // 🔧 LIMITE DE 100 EVENTOS (vs infinito)
+        q: codigo, // 🔧 BUSCA POR TEXTO (pode acelerar)
+      });
+    }, TIMEOUT_CONFIGS.GOOGLE_CALENDAR);
+
+    const gcalTime = Date.now() - gcalStartTime;
+    console.log(`📅 Busca no Google Calendar: ${gcalTime}ms (${eventos.data.items?.length || 0} eventos)`);;
 
     // Procurar o evento com o código de confirmação
     const evento = eventos.data.items?.find((evento) => {
@@ -74,15 +101,20 @@ export async function POST(request: Request) {
     });
 
     if (!evento || !evento.id) {
+      const totalTime = Date.now() - startTime;
+      console.log(`❌ Agendamento não encontrado após ${totalTime}ms`);
+      
       return NextResponse.json(
         {
           error: "Agendamento não encontrado",
+          responseTime: totalTime,
         },
         { status: 404 }
       );
     }
 
-    console.log("✅ Agendamento encontrado no Google Calendar");
+    const processStartTime = Date.now();
+    console.log("✅ Agendamento encontrado no Google Calendar, processando...");
 
     // Extrair informações do evento
     const dadosEvento = {
@@ -121,15 +153,31 @@ export async function POST(request: Request) {
       }
     }
 
+    const processTime = Date.now() - processStartTime;
+    const totalTime = Date.now() - startTime;
+    
+    console.log(`🏁 Processamento concluído em ${processTime}ms`);
+    console.log(`🚀 API finalizada em ${totalTime}ms total`);
+
     return NextResponse.json({
       success: true,
       agendamento: dadosEvento,
+      responseTime: totalTime,
+      source: "google_calendar",
+      breakdown: {
+        database: dbTime,
+        googleCalendar: gcalTime,
+        processing: processTime,
+      }
     });
   } catch (error) {
-    console.error("Erro ao buscar agendamento:", error);
+    const errorTime = Date.now() - startTime;
+    console.error(`❌ Erro após ${errorTime}ms:`, error);
+    
     return NextResponse.json(
       {
         error: "Erro ao buscar agendamento",
+        responseTime: errorTime,
       },
       { status: 500 }
     );

@@ -70,7 +70,8 @@ async function generateTimeSlots(): Promise<string[]> {
 // Helper para verificar se o dia está ativo
 async function isDayAllowed(date: string): Promise<boolean> {
   try {
-    const dayOfWeek = new Date(date).getDay(); // 0 = domingo, 1 = segunda, etc.
+    // 🔧 FIX: Criar data com horário específico para evitar problemas de timezone
+    const dayOfWeek = new Date(date + 'T12:00:00').getDay(); // 0 = domingo, 1 = segunda, etc.
     console.log(`🗓️ Data: ${date}, Dia da semana: ${dayOfWeek} (0=Dom, 1=Seg...)`);
     
     const workingDaysSetting = await prisma.settings.findUnique({
@@ -106,7 +107,8 @@ async function isDayAllowed(date: string): Promise<boolean> {
     return isAllowed;
   } catch (error) {
     console.error("Erro ao verificar dia:", error);
-    const dayOfWeek = new Date(date).getDay();
+    // 🔧 FIX: Aplicar mesma correção no fallback
+    const dayOfWeek = new Date(date + 'T12:00:00').getDay();
     // Fallback: Monday to Thursday only
     const allowed = dayOfWeek >= 1 && dayOfWeek <= 4;
     console.log(`🆘 Erro - usando fallback: ${allowed}`);
@@ -140,12 +142,9 @@ export async function GET(request: Request) {
 
     const calendar = google.calendar({ version: "v3", auth });
 
-    // Definir período para buscar eventos (dia inteiro)
-    const dataInicio = new Date(data);
-    dataInicio.setHours(0, 0, 0, 0);
-
-    const dataFim = new Date(data);
-    dataFim.setHours(23, 59, 59, 999);
+    // 🔧 FIX: Definir período para buscar eventos com timezone correto
+    const dataInicio = new Date(data + 'T00:00:00');
+    const dataFim = new Date(data + 'T23:59:59');
 
     // Buscar eventos existentes
     const response = await calendar.events.list({

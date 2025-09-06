@@ -10,7 +10,8 @@ import {
   AppointmentStep,
 } from "@/types/appointment";
 import { isFutureDate, isValidEmail, isValidPhone } from "@/utils/validators";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { useBatchUpdates } from "@/hooks/useBatchUpdates";
 
 // Importa componentes refatorados
 import AppointmentConfirmation from "@/components/pages/agendamento/AppointmentConfirmation";
@@ -58,22 +59,25 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     step: AppointmentStep.DATE_TIME, // Sempre inicia com "Novo Agendamento"
   });
 
-  // Funções auxiliares para atualizar estado
-  const updateFormData = (data: Partial<AppointmentFormData>) => {
+  // Hook para batch updates
+  const { batchObjectUpdates } = useBatchUpdates();
+
+  // Funções auxiliares para atualizar estado (memoizadas)
+  const updateFormData = useCallback((data: Partial<AppointmentFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const updateState = (newState: Partial<AppointmentFormState>) => {
+  const updateState = useCallback((newState: Partial<AppointmentFormState>) => {
     setState((prev) => ({ ...prev, ...newState }));
-  };
+  }, []);
 
-  const handleError = (message: string) => {
+  const handleError = useCallback((message: string) => {
     updateState({ erro: message });
     setTimeout(() => updateState({ erro: null }), 5000);
-  };
+  }, [updateState]);
 
-  // Validação centralizada usando utilitários
-  const validateStep = (step: AppointmentStep): boolean => {
+  // Validação centralizada usando utilitários (memoizada)
+  const validateStep = useCallback((step: AppointmentStep): boolean => {
     switch (step) {
       case AppointmentStep.DATE_TIME:
         if (
@@ -111,21 +115,21 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
       default:
         return true;
     }
-  };
+  }, [formData.dataSelecionada, formData.horarioSelecionado, formData.modalidade, formData.nome, formData.email, formData.telefone, handleError]);
 
-  const proximoPasso = () => {
+  const proximoPasso = useCallback(() => {
     if (validateStep(state.step)) {
       updateState({ step: state.step + 1 });
       window.scrollTo(0, 0);
     }
-  };
+  }, [validateStep, state.step, updateState]);
 
-  const passoAnterior = () => {
+  const passoAnterior = useCallback(() => {
     const novoStep = state.step - 1;
     
-    // Se voltando para DATE_TIME, limpar dados de data e horário
+    // Se voltando para DATE_TIME, limpar dados de data e horário (batch update)
     if (novoStep === AppointmentStep.DATE_TIME) {
-      updateFormData({
+      batchObjectUpdates(setFormData, {
         dataSelecionada: "",
         horarioSelecionado: "",
       });
@@ -133,9 +137,9 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     
     updateState({ step: novoStep });
     window.scrollTo(0, 0);
-  };
+  }, [state.step, batchObjectUpdates, updateState]);
 
-  const enviarFormulario = async (e: React.FormEvent) => {
+  const enviarFormulario = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     updateState({ carregando: true });
 
@@ -161,7 +165,8 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
         throw new Error(data.error || "Erro ao agendar consulta");
       }
 
-      updateFormData({ codigoAgendamento: data.codigo });
+      // Batch updates para melhor performance
+      batchObjectUpdates(setFormData, { codigoAgendamento: data.codigo });
       updateState({ enviado: true });
       window.scrollTo(0, 0);
     } catch (error) {
@@ -173,9 +178,38 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     } finally {
       updateState({ carregando: false });
     }
-  };
+  }, [formData, batchObjectUpdates, updateState, handleError]);
 
-  const renderTabNavigation = () => {
+  // Classes CSS memoizadas para evitar recálculos
+  const activeButtonClasses = useMemo(() => 
+    "py-3 px-6 rounded-lg font-medium transition-all duration-200 bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border",
+    []
+  );
+
+  const inactiveButtonClasses = useMemo(() =>
+    "py-3 px-6 rounded-lg font-medium transition-all duration-200 bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md",
+    []
+  );
+
+  const novoAgendamentoClasses = useMemo(() => 
+    `py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+      state.step >= AppointmentStep.DATE_TIME && !state.cancelar
+        ? activeButtonClasses
+        : inactiveButtonClasses
+    }`,
+    [state.step, state.cancelar, activeButtonClasses, inactiveButtonClasses]
+  );
+
+  const buscarAgendamentoClasses = useMemo(() =>
+    `py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
+      state.step === AppointmentStep.LOOKUP
+        ? activeButtonClasses
+        : inactiveButtonClasses
+    }`,
+    [state.step, activeButtonClasses, inactiveButtonClasses]
+  );
+
+  const renderTabNavigation = useCallback(() => {
     if (mode === "schedule") return null;
 
     return (
@@ -184,11 +218,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           onClick={() => {
             updateState({ step: AppointmentStep.DATE_TIME, cancelar: false });
           }}
-          className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-            state.step >= AppointmentStep.DATE_TIME && !state.cancelar
-              ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-              : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
-          }`}
+          className={novoAgendamentoClasses}
         >
           Novo Agendamento
         </button>
@@ -196,19 +226,15 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           onClick={() => {
             updateState({ step: AppointmentStep.LOOKUP, cancelar: false });
           }}
-          className={`py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-            state.step === AppointmentStep.LOOKUP
-              ? "bg-primary-foreground text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-              : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
-          }`}
+          className={buscarAgendamentoClasses}
         >
           Buscar Agendamento
         </button>
       </div>
     );
-  };
+  }, [mode, updateState, novoAgendamentoClasses, buscarAgendamentoClasses]);
 
-  const renderCurrentStep = () => {
+  const renderCurrentStep = useCallback(() => {
     if (state.erro) {
       return (
         <ContactCard title="Erro">
@@ -300,7 +326,20 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           </ContactCard>
         );
     }
-  };
+  }, [
+    state.erro,
+    state.enviado,
+    state.cancelar,
+    state.step,
+    state.carregando,
+    formData,
+    updateState,
+    updateFormData,
+    proximoPasso,
+    passoAnterior,
+    enviarFormulario,
+    handleError,
+  ]);
 
   return (
     <div className="w-full" data-testid="appointment-container">

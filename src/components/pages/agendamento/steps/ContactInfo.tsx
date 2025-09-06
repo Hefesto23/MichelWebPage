@@ -1,7 +1,7 @@
 // components/agendamento/AppointmentForm/steps/ContactInfo.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard"; // ✅ MANTIDO ORIGINAL
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
-import React from "react";
+import React, { useCallback } from "react";
 import appointmentStyles from "../form.module.css"; // ✅ MANTIDO ORIGINAL
 
 interface ContactInfoProps {
@@ -12,20 +12,20 @@ interface ContactInfoProps {
   carregando: boolean;
 }
 
-export default function ContactInfo({
+const ContactInfo = React.memo<ContactInfoProps>(function ContactInfo({
   formData,
   updateFormData,
   proximoPasso,
   passoAnterior,
   carregando,
 }: ContactInfoProps) {
-  // Validar os campos
-  const validarCampos = () => {
+  // Validar os campos (memoizada)
+  const validarCampos = useCallback(() => {
     if (!formData.nome || !formData.email || !formData.telefone) {
       return false;
     }
     return true;
-  };
+  }, [formData.nome, formData.email, formData.telefone]);
 
   // Submeter o formulário
   const submeterFormulario = (e: React.FormEvent) => {
@@ -118,4 +118,6 @@ export default function ContactInfo({
       </form>
     </ContactCard>
   );
-}
+});
+
+export default ContactInfo;

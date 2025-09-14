@@ -1,46 +1,88 @@
-/* Custom styles for clinic gallery with auto-thumbnails */
+/* ============================================
+   CLINIC GALLERY - Yet Another React Lightbox
+   ============================================ */
 
-.customGallery :global(.image-gallery-thumbnail) {
-  width: 80px !important;
-  height: 60px !important;
-  border: 2px solid transparent;
-  border-radius: 4px;
+/* Gallery Grid Layout */
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.galleryItem {
+  aspect-ratio: 16 / 10;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
-.customGallery :global(.image-gallery-thumbnail):hover {
-  border-color: #3b82f6;
-  transform: scale(1.05);
+.galleryItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
 }
 
-.customGallery :global(.image-gallery-thumbnail.active) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+/* Lightbox wrapper class for custom styling */
+.lightboxWrapper {
+  position: relative;
 }
 
-.customGallery :global(.image-gallery-thumbnail img) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  border-radius: 2px;
+/* Slide Caption Styling */
+.slideCaption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5));
+  padding: 2rem 3rem 1.5rem 3rem;
+  backdrop-filter: blur(8px);
+  color: white;
 }
 
-.customGallery :global(.image-gallery-thumbnails-wrapper) {
-  background: rgba(0, 0, 0, 0.8);
-  padding: 10px 0;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-.customGallery :global(.image-gallery-thumbnails) {
-  padding: 0 20px;
-}
-
-/* Ensure thumbnails are responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .customGallery :global(.image-gallery-thumbnail) {
-    width: 60px !important;
-    height: 45px !important;
+  .galleryGrid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .galleryItem {
+    aspect-ratio: 4 / 3;
+  }
+
+  .slideCaption {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+
+  .slideCaption h3 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .slideCaption p {
+    font-size: 1rem !important;
   }
 }
+
+@media (max-width: 480px) {
+  .galleryGrid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .slideCaption {
+    padding: 1rem 1rem 0.75rem 1rem;
+  }
+
+  .slideCaption h3 {
+    font-size: 1.125rem !important;
+  }
+
+  .slideCaption p {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Note: Global lightbox styles are handled via the styles prop in the component */

@@ -1,5 +1,5 @@
-import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
 import { fetchCmsContent } from "@/lib/cms-fetch";
+import { TerapiasWithPagination } from "./TerapiasWithPagination";
 
 interface Card {
   id: number;
@@ -63,7 +63,7 @@ export const TerapiasContentServer = async () => {
             description: data.content.terapias.description || DEFAULT_CONTENT.description,
             cards: data.content.terapias.therapyModalities || DEFAULT_CONTENT.cards
           };
-        } 
+        }
         // Estrutura legacy com cards separados
         else {
           processedContent = {
@@ -96,29 +96,10 @@ export const TerapiasContentServer = async () => {
   });
 
   return (
-    <div className="w-full py-16 relative z-0 min-h-screen">
-      <div className="content-container">
-        <div className="relative z-10">
-          <div className="section-header">
-            <h2 className="section-title">{content.title}</h2>
-            <p className="section-description">{content.description}</p>
-          </div>
-
-          <div className="grid-pages relative z-[3]">
-            {content.cards
-              .filter(card => card.active)
-              .map((card) => (
-                <ImageLargeCard
-                  key={card.id}
-                  imageUrl={card.imageUrl}
-                  title={card.title}
-                  description={card.description}
-                  href={card.href}
-                />
-              ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <TerapiasWithPagination
+      title={content.title}
+      description={content.description}
+      cards={content.cards}
+    />
   );
 };

@@ -1,5 +1,5 @@
-import { ImageLargeCard } from "@/components/shared/cards/BaseCard";
 import { fetchCmsContent } from "@/lib/cms-fetch";
+import { AvaliacoesWithPagination } from "./AvaliacoesWithPagination";
 
 interface Card {
   id: number;
@@ -88,29 +88,10 @@ export const AvaliacoesContentServer = async () => {
   });
 
   return (
-    <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
-      <div className="content-container">
-        <div className="relative z-10">
-          <div className="section-header">
-            <h2 className="section-title">{content.title}</h2>
-            <p className="section-description">{content.description}</p>
-          </div>
-
-          <div className="grid-pages-2col z-content">
-            {content.cards
-              .filter(card => card.active)
-              .map((card) => (
-                <ImageLargeCard
-                  key={card.id}
-                  imageUrl={card.imageUrl}
-                  title={card.title}
-                  description={card.description}
-                  href={card.href}
-                />
-              ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AvaliacoesWithPagination
+      title={content.title}
+      description={content.description}
+      cards={content.cards}
+    />
   );
 };

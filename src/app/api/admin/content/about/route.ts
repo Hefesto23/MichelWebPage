@@ -1,6 +1,8 @@
 // src/app/api/admin/content/about/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { revalidateTag } from "next/cache";
+import { validateAuthHeader } from "@/lib/auth";
 import { DEFAULT_ABOUT_CONTENT } from '@/utils/default-content';
 
 interface NetworkData {
@@ -134,10 +136,29 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log("📡 API: POST request received for about content");
+
+    const authHeader = request.headers.get("authorization");
+    console.log("🔑 API: Auth header present:", authHeader ? 'Sim' : 'Não');
+
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
+    console.log("✅ API: Autenticação válida, payload:", payload);
     console.log("🔄 API: Salvando conteúdo da página About...");
-    
-    const { content } = await request.json();
-    console.log("📥 API: Dados recebidos:", JSON.stringify(content, null, 2));
+
+    const requestBody = await request.json();
+    console.log("📥 API: Request body completo:", JSON.stringify(requestBody, null, 2));
+
+    const { content } = requestBody;
+    console.log("📥 API: Conteúdo extraído:", JSON.stringify(content, null, 2));
 
     // Preparar dados para salvar no banco
     const itemsToSave: Array<{
@@ -278,8 +299,17 @@ export async function POST(request: Request) {
       }
     });
 
+    // Revalidar cache da página about
+    try {
+      revalidateTag('about-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      // Não falhar a operação por causa do cache
+    }
+
     console.log("✅ API: Conteúdo salvo com sucesso");
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: "Conteúdo salvo com sucesso"
     });
@@ -295,23 +325,45 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
+    console.log("📡 API: DELETE request received for about content");
+
+    const authHeader = request.headers.get("authorization");
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
     console.log("🔄 API: Resetando conteúdo da página About...");
 
     // Desativar todos os registros desta página
     await prisma.content.updateMany({
-      where: { 
+      where: {
         page: "about",
-        isActive: true 
+        isActive: true
       },
-      data: { 
-        isActive: false 
+      data: {
+        isActive: false
       }
     });
 
+    // Revalidar cache da página about
+    try {
+      revalidateTag('about-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      // Não falhar a operação por causa do cache
+    }
+
     console.log("✅ API: Conteúdo resetado com sucesso");
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: "Conteúdo resetado com sucesso"
     });

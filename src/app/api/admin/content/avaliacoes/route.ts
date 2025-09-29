@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { validateAuthHeader } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -73,6 +75,23 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log("📡 API: POST request received for avaliacoes content");
+
+    const authHeader = request.headers.get("authorization");
+    console.log("🔑 API: Auth header present:", authHeader ? 'Sim' : 'Não');
+
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
+    console.log("✅ API: Autenticação válida, payload:", payload);
+
     const data = await request.json();
     console.log("📥 Dados recebidos na API avaliacoes:", JSON.stringify(data, null, 2));
     
@@ -126,6 +145,16 @@ export async function POST(request: Request) {
     }
 
     console.log("💾 Dados salvos no banco:", contentEntries);
+
+    // Revalidar cache da página avaliacoes
+    try {
+      revalidateTag('avaliacoes-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      // Não falhar a operação por causa do cache
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error saving avaliacoes content:", error);
@@ -136,11 +165,33 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
+    console.log("📡 API: DELETE request received for avaliacoes content");
+
+    const authHeader = request.headers.get("authorization");
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
     await prisma.content.deleteMany({
       where: { page: "avaliacoes" }
     });
+
+    // Revalidar cache da página avaliacoes
+    try {
+      revalidateTag('avaliacoes-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      // Não falhar a operação por causa do cache
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

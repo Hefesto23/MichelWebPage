@@ -3,13 +3,14 @@ import prisma from "@/lib/prisma";
 import { CLINIC_INFO } from "@/utils/constants";
 import { NextResponse } from "next/server";
 
-// Force dynamic rendering (disable cache)
+// Force dynamic rendering but allow cache revalidation
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 // GET - Buscar configurações públicas (sem autenticação)
 export async function GET() {
   try {
+    console.log("📡 API Public Settings: Buscando configurações...");
+
     const settings = await prisma.settings.findMany();
     
     // Converter para formato organizado
@@ -62,10 +63,18 @@ export async function GET() {
       zip_code2: settingsMap["endereco.zip_code2"] || "",
     };
 
-    return NextResponse.json({
+    console.log("✅ API Public Settings: Configurações retornadas");
+
+    const response = NextResponse.json({
       success: true,
       data: publicSettings,
     });
+
+    // Adicionar cache headers com tag para revalidation
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+    response.headers.set('Cache-Tag', 'settings-content');
+
+    return response;
   } catch (error) {
     console.error("Erro ao buscar configurações públicas:", error);
     

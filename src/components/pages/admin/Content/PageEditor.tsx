@@ -17,6 +17,7 @@ import {
   DEFAULT_WELCOME_CONTENT,
 } from "@/utils/default-content";
 import { ClinicImagesManager, type ClinicImage } from "./ClinicImagesManager";
+import { CardsManager, type CardData } from "@/components/shared/admin/CardsManager";
 import {
   ArrowLeft,
   Eye,
@@ -179,19 +180,28 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     description: string;
     images: ClinicImage[];
   } | null>(null);
+  const [editingCards, setEditingCards] = useState<'services' | 'terapias' | 'avaliacoes' | null>(null);
+  const [cardsData, setCardsData] = useState<CardData[]>([]);
+  const [savedContent, setSavedContent] = useState<any>(null);
 
   const loadPageContent = useCallback(async () => {
     try {
       setError(null);
 
       // Buscar conteúdo salvo no banco
-      const response = await fetch(`/api/admin/content/${page}`);
+      const response = await fetch(`/api/admin/content/${page}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       let savedContent = null;
 
       if (response.ok) {
         const data = await response.json();
         savedContent = data.content;
-        console.log(`🔍 PageEditor carregou conteúdo para ${page}:`, savedContent);
+        setSavedContent(savedContent);
+      } else {
+        console.error(`❌ PageEditor: Erro ao carregar conteúdo:`, response.status);
       }
 
       const sections = getPageSections(page, savedContent);
@@ -1540,7 +1550,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             if (item.key.startsWith("modality")) {
               // Extrair modality ID e field do key (ex: modality1_title -> modalityId=1, field=title)
               const match = item.key.match(/modality(\d+)_(.+)/);
-              console.log(`🔍 PageEditor: Match do regex:`, { key: item.key, match });
               
               if (match) {
                 const modalityId = parseInt(match[1]);
@@ -1551,7 +1560,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 const modalitiesList = contentToSave.terapias.therapyModalities;
                 const modalityIndex = modalitiesList.findIndex((m: ModalityItem) => m.id === modalityId);
                 
-                console.log(`🔍 PageEditor: Modalidade encontrada no índice:`, modalityIndex);
                 
                 if (modalityIndex !== -1) {
                   const modality = modalitiesList[modalityIndex];
@@ -1677,9 +1685,10 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             // Handling para divisórias
             const sectionKey = item.section as keyof typeof DEFAULT_DIVISORIAS_CONTENT;
             if (sectionKey !== 'maxCharacters') {
-              if (!contentToSave[sectionKey]) contentToSave[sectionKey] = {};
+              if (!contentToSave.divisorias) contentToSave.divisorias = {};
+              if (!contentToSave.divisorias[sectionKey]) contentToSave.divisorias[sectionKey] = {};
               // @ts-expect-error - Dynamic divisoria section handling
-              contentToSave[sectionKey][item.key] = valueToSave;
+              contentToSave.divisorias[sectionKey][item.key] = valueToSave;
             }
           } else if (item.section.startsWith("card_") && item.page === "agendamento") {
             if (!contentToSave.agendamento?.infoCards) {
@@ -1813,6 +1822,100 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       setError("Erro ao salvar galeria. Tente novamente.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openCardsManager = (type: 'services' | 'terapias' | 'avaliacoes', cards: CardData[]) => {
+    setCardsData(cards);
+    setEditingCards(type);
+  };
+
+  const saveCards = async (cards: CardData[]) => {
+    try {
+      console.log('🔄 Iniciando salvamento de cards:', { editingCards, cardsCount: cards.length });
+
+      let endpoint = '';
+      let payload: any = {};
+
+      switch (editingCards) {
+        case 'services':
+          endpoint = '/api/admin/content/home';
+          payload = {
+            content: {
+              ...savedContent,
+              services: {
+                title: savedContent?.services?.title || DEFAULT_SERVICES_CONTENT.title,
+                description: savedContent?.services?.description || DEFAULT_SERVICES_CONTENT.description,
+                cards: cards
+              }
+            }
+          };
+          break;
+        case 'terapias':
+          endpoint = '/api/admin/content/terapias';
+          payload = {
+            content: {
+              ...savedContent,
+              terapias: {
+                title: savedContent?.terapias?.title || DEFAULT_TERAPIAS_CONTENT.title,
+                description: savedContent?.terapias?.description || DEFAULT_TERAPIAS_CONTENT.description,
+                therapyModalities: cards
+              }
+            }
+          };
+          break;
+        case 'avaliacoes':
+          endpoint = '/api/admin/content/avaliacoes';
+          payload = {
+            content: {
+              ...savedContent,
+              avaliacoes: {
+                title: savedContent?.avaliacoes?.title || DEFAULT_AVALIACOES_CONTENT.title,
+                description: savedContent?.avaliacoes?.description || DEFAULT_AVALIACOES_CONTENT.description,
+                testModalities: cards
+              }
+            }
+          };
+          break;
+      }
+
+      console.log('📤 Enviando para endpoint:', endpoint);
+      console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+
+      const token = localStorage.getItem('token');
+      console.log('🔑 Token encontrado:', token ? 'Sim' : 'Não');
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Erro da API:', errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+
+      console.log('✅ API call successful, reloading page content...');
+
+      // Recarregar dados da página
+      await loadPageContent();
+
+      setEditingCards(null);
+      setCardsData([]);
+      console.log('🎉 Cards salvos com sucesso!');
+      alert('Cards salvos com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro completo ao salvar cards:', error);
+      console.error('❌ Stack trace:', error.stack);
+      alert(`Erro ao salvar cards: ${error.message}`);
     }
   };
 
@@ -2381,6 +2484,63 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       {/* Content Sections */}
       <div className="space-y-8">
         {sections.map((section, sectionIndex) => {
+          // Special handling for cards sections
+          const isCardsSection = (
+            (section.name === "Seção Services - Primeiros Passos" && page === "home") ||
+            (section.name === "Modalidades de Terapia" && page === "terapias") ||
+            (section.name === "Testes Psicológicos" && page === "avaliacoes")
+          );
+
+          if (isCardsSection) {
+            let cardsType: 'services' | 'terapias' | 'avaliacoes' = 'services';
+            let currentCards: CardData[] = [];
+
+            if (section.name === "Seção Services - Primeiros Passos" && page === "home") {
+              cardsType = 'services';
+              currentCards = savedContent?.services?.cards || DEFAULT_SERVICES_CONTENT.cards;
+            } else if (section.name === "Modalidades de Terapia" && page === "terapias") {
+              cardsType = 'terapias';
+              // Verificar estrutura do banco de dados para terapias
+              currentCards = savedContent?.terapias?.therapyModalities || DEFAULT_TERAPIAS_CONTENT.therapyModalities;
+            } else if (section.name === "Testes Psicológicos" && page === "avaliacoes") {
+              cardsType = 'avaliacoes';
+              // Verificar estrutura do banco de dados para avaliações
+              currentCards = savedContent?.avaliacoes?.testModalities || DEFAULT_AVALIACOES_CONTENT.testModalities;
+            }
+
+            return (
+              <div key={sectionIndex}>
+                <AdminCard title={section.name}>
+                  <p className="text-muted-foreground mb-6">{section.description}</p>
+
+                  <div className="flex items-center gap-3 mb-6">
+                    <button
+                      onClick={() => openCardsManager(cardsType, currentCards)}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
+                                 rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                      <ImageIcon size={18} />
+                      <span>Gerenciar Cards</span>
+                    </button>
+                  </div>
+
+                  <AdminCard title="Resumo dos Cards">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <p>Clique em &quot;Gerenciar Cards&quot; para editar os cards com a nova interface moderna.</p>
+                      <p className="mt-2">
+                        A nova interface permite: adicionar/remover cards (1-18), paginação automática de 6 em 6,
+                        reordenação por arrastar e melhor organização dos campos.
+                      </p>
+                      <p className="mt-2 font-medium">
+                        Cards atuais: {currentCards.filter(c => c.active).length} ativos / {currentCards.length} total
+                      </p>
+                    </div>
+                  </AdminCard>
+                </AdminCard>
+              </div>
+            );
+          }
+
           // Special handling for clinic section
           if (section.name.includes("Clinic - Nosso Espaço") && page === "home") {
             return (
@@ -2498,6 +2658,47 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                   saving={saving}
                 />
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cards Manager Modal */}
+      {editingCards && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Gerenciar {editingCards === 'services' ? 'Cards de Serviços' :
+                           editingCards === 'terapias' ? 'Modalidades de Terapia' :
+                           'Testes Psicológicos'}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Interface moderna com paginação automática - Mín. 1, máx. 18 cards
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingCards(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <CardsManager
+                cards={cardsData}
+                onSave={saveCards}
+                title={`${editingCards === 'services' ? 'Cards de Serviços' :
+                        editingCards === 'terapias' ? 'Modalidades de Terapia' :
+                        'Testes Psicológicos'}`}
+                description={`Configure os ${editingCards === 'services' ? 'cards da homepage' :
+                             editingCards === 'terapias' ? 'cards de modalidades terapêuticas' :
+                             'cards de testes psicológicos'} que serão exibidos.`}
+                minCards={1}
+                maxCards={18}
+              />
             </div>
           </div>
         </div>

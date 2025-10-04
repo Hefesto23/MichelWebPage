@@ -26,7 +26,7 @@ export default function NotFound() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                 <Link
                   href="/"
-                  className="py-3 px-6 rounded-lg font-medium transition-all duration-200 bg-primary-foreground text-btnFg :hover:text-btnFg shadow-md dark:bg-btn dark:text-btn-fg dark:border-btn-border flex items-center justify-center"
+                  className="py-3 px-6 rounded-lg font-medium bg-primary-foreground text-btnFg dark:bg-btn dark:text-btn-fg dark:border-btn-border flex items-center justify-center"
                 >
                   <svg
                     className="w-5 h-5 mr-2"

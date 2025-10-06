@@ -102,7 +102,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 <h3 className="text-lg font-semibold mb-2 text-foreground transition-colors duration-300 leading-tight">
                   {title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                <p className="text-sm font-bold text-muted-foreground leading-relaxed line-clamp-3">
                   {description}
                 </p>
               </div>
@@ -137,7 +137,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 <h3 className="text-xl font-semibold mb-3 text-foreground transition-colors duration-300 leading-tight">
                   {title}
                 </h3>
-                <p className="text-base text-muted-foreground leading-relaxed">
+                <p className="text-base font-bold text-muted-foreground leading-relaxed">
                   {description}
                 </p>
               </div>
@@ -168,7 +168,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
               {title}
             </h3>
 
-            <p className="text-base text-center text-[var(--secondary-foreground)] dark:text-[var(--foreground)] opacity-85 group-hover:opacity-100 transition-all duration-500 line-height-relaxed px-4">
+            <p className="text-base font-bold text-center text-[var(--secondary-foreground)] dark:text-[var(--foreground)] opacity-85 group-hover:opacity-100 transition-all duration-500 line-height-relaxed px-4">
               {description}
             </p>
           </div>

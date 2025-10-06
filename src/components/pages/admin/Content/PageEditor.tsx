@@ -151,6 +151,10 @@ interface SavedContent {
     text?: string;
     backgroundImage?: string;
   };
+  divisorias?: Record<string, {
+    text?: string;
+    backgroundImage?: string;
+  }>;
 }
 
 interface PageSection {
@@ -1914,8 +1918,12 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       alert('Cards salvos com sucesso!');
     } catch (error) {
       console.error('❌ Erro completo ao salvar cards:', error);
-      console.error('❌ Stack trace:', error.stack);
-      alert(`Erro ao salvar cards: ${error.message}`);
+      if (error instanceof Error) {
+        console.error('❌ Stack trace:', error.stack);
+        alert(`Erro ao salvar cards: ${error.message}`);
+      } else {
+        alert('Erro ao salvar cards');
+      }
     }
   };
 

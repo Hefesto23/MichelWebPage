@@ -96,3 +96,17 @@ model Settings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Modelo para páginas dinâmicas genéricas
+model DynamicPage {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique // URL da página (ex: "politica-privacidade")
+  title       String              // Título da página
+  bannerImage String?             // Imagem do banner (opcional)
+  content     String   @db.Text   // Conteúdo HTML/Markdown
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+}

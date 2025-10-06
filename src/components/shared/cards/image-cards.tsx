@@ -35,7 +35,7 @@ export const ImageCard = React.forwardRef<HTMLDivElement, ImageCardProps>(
             <h3 className={cn("font-semibold mb-2 text-foreground transition-colors duration-300 leading-tight", titleSize)}>
               {title}
             </h3>
-            <p className={cn("text-muted-foreground leading-relaxed", descriptionSize, size === "normal" && "line-clamp-3")}>
+            <p className={cn("font-bold text-muted-foreground leading-relaxed", descriptionSize, size === "normal" && "line-clamp-3")}>
               {description}
             </p>
           </div>

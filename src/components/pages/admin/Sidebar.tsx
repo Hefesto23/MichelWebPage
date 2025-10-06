@@ -13,6 +13,7 @@ import {
   Moon,
   Settings,
   Sun,
+  FileCode,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,6 +24,7 @@ const sidebarItems = [
   { href: "/admin/appointments", label: "Agendamentos", icon: Calendar },
   { href: "/admin/analytics", label: "Estatísticas", icon: BarChart3 },
   { href: "/admin/content", label: "Gerenciar Conteúdo", icon: FileText },
+  { href: "/admin/paginas", label: "Páginas Personalizadas", icon: FileCode },
   { href: "/admin/media", label: "Mídia", icon: ImageIcon },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
 ];

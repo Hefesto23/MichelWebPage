@@ -21,7 +21,7 @@ export const ServiceCard = React.forwardRef<HTMLDivElement, ServiceCardProps>(
           {title}
         </h3>
         
-        <p className="text-base text-center text-[var(--secondary-foreground)] dark:text-[var(--foreground)] opacity-85 group-hover:opacity-100 transition-all duration-500 line-height-relaxed px-4">
+        <p className="text-base font-bold text-center text-[var(--secondary-foreground)] dark:text-[var(--foreground)] opacity-85 group-hover:opacity-100 transition-all duration-500 line-height-relaxed px-4">
           {description}
         </p>
       </div>

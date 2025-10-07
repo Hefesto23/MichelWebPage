@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useHorariosCache } from "@/hooks/useHorariosCache";
+import { useBatchHorarios } from "@/hooks/useBatchHorarios";
 import formStyles from "../form.module.css";
 
 const MODALITY = AppointmentModality; // ✅ ÚNICA MUDANÇA: usar constants
@@ -22,7 +22,6 @@ interface DateTimeSelectionProps {
   updateFormData: (data: Partial<AppointmentFormData>) => void;
   proximoPasso: () => void;
   carregando: boolean;
-  setCarregando: (status: boolean) => void;
   handleError: (message: string) => void;
 }
 
@@ -31,15 +30,11 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   updateFormData,
   proximoPasso,
   carregando,
-  setCarregando,
   handleError,
 }: DateTimeSelectionProps) {
   // Hook para configurações públicas
   const { settings, loading: settingsLoading, formatWorkingDays, getActiveDaysAsNumbers } = usePublicSettings();
-  
-  // Hook de cache para horários
-  const { fetchHorarios, getCachedData } = useHorariosCache();
-  
+
   // Estado para os horários disponíveis
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
   const [date, setDate] = useState<Date | undefined>(
@@ -60,6 +55,9 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   const fimPeriodo = useMemo(() => addMonths(hoje, Math.ceil(advanceDays / 30)), [hoje, advanceDays]);
   const activeDays = useMemo(() => getActiveDaysAsNumbers(), [getActiveDaysAsNumbers]);
 
+  // 🚀 OTIMIZAÇÃO FASE 3: Batch prefetch de TODAS as datas do período
+  const { loading: batchLoading, getHorariosForDate } = useBatchHorarios(hoje, fimPeriodo);
+
   // Função memoizada para verificar se um dia é desabilitado baseado nas configurações
   const isDiaDesabilitado = useCallback((data: Date) => {
     const dayOfWeek = data.getDay(); // 0 = domingo, 1 = segunda, etc.
@@ -71,8 +69,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
     );
   }, [hoje, fimPeriodo, activeDays]);
 
-  // Função otimizada com cache para lidar com a mudança de data
-  const handleDateChange = useCallback(async (selectedDate: Date | undefined) => {
+  // 🚀 OTIMIZAÇÃO FASE 3: Função INSTANTÂNEA - dados já estão em memória!
+  const handleDateChange = useCallback((selectedDate: Date | undefined) => {
     if (
       !selectedDate ||
       (formData.dataSelecionada &&
@@ -81,42 +79,23 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
       return;
     }
 
-    setDate(selectedDate);
     const dataFormatada = format(selectedDate, "yyyy-MM-dd");
-    
-    // Verificar se já tem dados em cache
-    const cachedData = getCachedData(dataFormatada);
-    if (cachedData) {
-      setHorariosDisponiveis(cachedData.horariosDisponiveis || []);
-      updateFormData({
-        dataSelecionada: dataFormatada,
-        horarioSelecionado: "",
-      });
-      return;
-    }
 
-    setCarregando(true);
+    console.log("⚡ Data selecionada (INSTANTÂNEO):", dataFormatada);
 
-    try {
-      console.log("📅 Frontend - Data selecionada:", selectedDate);
-      console.log("📄 Frontend - Data formatada:", dataFormatada);
+    // ✅ Atualizar UI IMEDIATAMENTE
+    setDate(selectedDate);
+    updateFormData({
+      dataSelecionada: dataFormatada,
+      horarioSelecionado: "",
+    });
 
-      // Usar cache para buscar horários
-      const data = await fetchHorarios(dataFormatada);
-      setHorariosDisponiveis(data.horariosDisponiveis || []);
-      
-      updateFormData({
-        dataSelecionada: dataFormatada,
-        horarioSelecionado: "",
-      });
-    } catch (error: unknown) {
-      console.error("Erro ao carregar horários:", error);
-      handleError("Erro ao carregar horários disponíveis. Tente novamente.");
-      setHorariosDisponiveis([]);
-    } finally {
-      setCarregando(false);
-    }
-  }, [formData.dataSelecionada, fetchHorarios, getCachedData, updateFormData, handleError, setCarregando]);
+    // ⚡ BUSCAR DADOS DO BATCH (já em memória, 0ms!)
+    const horariosParaData = getHorariosForDate(dataFormatada);
+    console.log(`✅ Horários disponíveis (batch): ${horariosParaData.length} slots`);
+
+    setHorariosDisponiveis(horariosParaData);
+  }, [formData.dataSelecionada, getHorariosForDate, updateFormData]);
 
   // Função memoizada para selecionar um horário
   const selecionarHorario = useCallback((horario: string) => {
@@ -375,8 +354,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           </div>
         )}
 
-        {/* Feedback de carregamento visível após seleção de data */}
-        {carregando && formData.dataSelecionada && (
+        {/* Feedback de carregamento inicial do batch */}
+        {batchLoading && !formData.dataSelecionada && (
           <div className="mt-4 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
             <div className="flex items-center justify-center gap-3">
               <svg
@@ -400,7 +379,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                 ></path>
               </svg>
               <p className="text-blue-800 dark:text-blue-200 font-semibold">
-                Carregando horários disponíveis...
+                Carregando horários disponíveis para todo o período...
               </p>
             </div>
           </div>
@@ -411,30 +390,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           <div className="mt-6">
             <label className={formStyles.formLabel}>Selecione um Horário</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-              {carregando ? (
-                <div className="col-span-full flex justify-center py-8">
-                  <svg
-                    className="animate-spin h-6 w-6 text-primary"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                </div>
-              ) : horariosDisponiveis.length > 0 ? (
+              {horariosDisponiveis.length > 0 ? (
                 horariosDisponiveis.map((horario) => (
                   <button
                     key={horario}

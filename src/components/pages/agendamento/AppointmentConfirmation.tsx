@@ -7,12 +7,7 @@ import { Button } from "@/components/shared/ui/button";
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
 import { cn } from "@/utils/utils";
 import { useState } from "react";
-import {
-  IoCheckmark,
-  IoCheckmarkCircle,
-  IoCloseCircle,
-  IoCopy,
-} from "react-icons/io5";
+import { IoCheckmark, IoCheckmarkCircle, IoCloseCircle, IoCopy } from "react-icons/io5";
 
 interface AppointmentConfirmationProps {
   formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
@@ -60,23 +55,17 @@ export default function AppointmentConfirmation({
   };
 
   return (
-    <ContactCard
-      title={cancelar ? "Agendamento Cancelado" : "Agendamento Confirmado!"}
-    >
+    <ContactCard title={cancelar ? "Agendamento Cancelado" : "Agendamento Confirmado!"}>
       <div className="space-y-6 text-center">
         {cancelar ? (
           <>
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 rounded-full bg-destructive flex items-center justify-center">
-                <IoCloseCircle
-                  size={32}
-                  className="text-destructive-foreground"
-                />
+                <IoCloseCircle size={32} className="text-destructive-foreground" />
               </div>
             </div>
             <p className="text-foreground">
-              Seu agendamento para o dia{" "}
-              {formatarData(formData.dataSelecionada)} às{" "}
+              Seu agendamento para o dia {formatarData(formData.dataSelecionada)} às{" "}
               {formData.horarioSelecionado} foi cancelado com sucesso.
             </p>
           </>
@@ -90,21 +79,18 @@ export default function AppointmentConfirmation({
             <p className="text-foreground">
               Seu agendamento para o dia{" "}
               <b>
-                {formatarData(formData.dataSelecionada)} às{" "}
-                {formData.horarioSelecionado}
+                {formatarData(formData.dataSelecionada)} às {formData.horarioSelecionado}
               </b>{" "}
               foi confirmado com sucesso.
             </p>
             <div className="text-center my-6">
-              <p className="text-md font-bold text-foreground mb-4">
-                Seu código de confirmação:
-              </p>
+              <p className="text-md font-bold text-foreground mb-4">Seu código de confirmação:</p>
               <div className="bg-background border-2 border-card rounded-lg py-4 px-6 inline-block group relative">
                 <div className="flex items-center gap-3">
                   <span
                     className={cn(
                       "text-3xl font-bold text-card-foreground tracking-wider",
-                      robotoSlab.className
+                      robotoSlab.className,
                     )}
                   >
                     {formData.codigoAgendamento}
@@ -128,13 +114,13 @@ export default function AppointmentConfirmation({
                 )}
               </div>
               <p className="text-md font-bold text-muted-foreground mt-4">
-                !!! Importante - Guarde este código para futuras consultas,
-                cancelamentos ou remarcações.
+                !!! Importante - Guarde este código para futuras consultas, cancelamentos ou
+                remarcações.
               </p>
             </div>
             <p className="text-foreground">
-              Enviamos um e-mail de confirmação para <b>{formData.email}</b> com
-              todos os detalhes da sua consulta.
+              Enviamos um e-mail de confirmação para <b>{formData.email}</b> com todos os detalhes
+              da sua consulta.
               {formData.modalidade === "online" &&
                 " O link para a sessão online será enviado no dia da consulta."}
             </p>
@@ -142,13 +128,11 @@ export default function AppointmentConfirmation({
         )}
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button onClick={() => (window.location.href = "/contato")}>
-            Entre em Contato
-          </Button>
+          <Button onClick={() => (window.location.href = "/contato")}>Entre em Contato</Button>
           <Button
             variant="outline"
             onClick={() => (window.location.href = "/")}
-            className="bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white hover:shadow-md dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md transition-all duration-200"
+            className="bg-background text-card-foreground border-2 border-card hover:bg-card hover:text-card-foreground hover:border-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary transition-all duration-200"
           >
             Voltar para Home
           </Button>

@@ -295,7 +295,6 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
             updateFormData={updateFormData}
             proximoPasso={proximoPasso}
             carregando={state.carregando}
-            setCarregando={(status) => updateState({ carregando: status })}
             handleError={handleError}
           />
         );

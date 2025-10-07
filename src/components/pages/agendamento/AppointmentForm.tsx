@@ -88,7 +88,6 @@ export default function AppointmentForm({
           updateFormData={updateFormData}
           proximoPasso={proximoPasso}
           carregando={carregando}
-          setCarregando={setCarregando}
           handleError={handleError}
         />
       )}

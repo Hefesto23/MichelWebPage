@@ -229,6 +229,7 @@ export const createConfirmationTemplate = (dados: {
   horario: string;
   modalidade: string;
   codigo?: string;
+  endereco?: string; // ✅ ADICIONADO
 }) => {
   const content = `
     <h2 class="title">✅ Agendamento Confirmado!</h2>
@@ -282,9 +283,9 @@ export const createConfirmationTemplate = (dados: {
     </div>
     ` : `
     <div class="alert-box">
-        <p class="alert-title">📍 Consultório:</p>
+        <p class="alert-title">📍 Local do Atendimento:</p>
         <p style="margin: 0; color: ${THEME_COLORS.foreground};">
-            Rua Antônio Ferreira, 171 - Parque Campolim, Sorocaba SP.
+            ${dados.endereco || 'Rua Antônio Ferreira, 171 - Parque Campolim, Sorocaba SP'}
         </p>
     </div>
     `}
@@ -302,6 +303,7 @@ export const createClinicNotificationTemplate = (dados: {
   horario: string;
   modalidade: string;
   codigo?: string;
+  endereco?: string; // ✅ ADICIONADO
 }) => {
   const content = `
     <h2 class="title">🔔 Novo Agendamento Recebido</h2>
@@ -312,19 +314,19 @@ export const createClinicNotificationTemplate = (dados: {
     
     <div class="card">
         <h3 class="card-title">👤 Dados do Cliente</h3>
-        
+
         <div class="info-row">
             <span class="info-icon">👨‍💼</span>
             <span class="info-label">Nome:</span>
             <span class="info-value">${dados.nome}</span>
         </div>
-        
+
         <div class="info-row">
             <span class="info-icon">📧</span>
             <span class="info-label">Email:</span>
             <span class="info-value">${dados.email}</span>
         </div>
-        
+
         ${dados.telefone ? `
         <div class="info-row">
             <span class="info-icon">📱</span>
@@ -332,24 +334,32 @@ export const createClinicNotificationTemplate = (dados: {
             <span class="info-value">${dados.telefone}</span>
         </div>
         ` : ''}
-        
+
         <div class="info-row">
             <span class="info-icon">📅</span>
             <span class="info-label">Data:</span>
             <span class="info-value">${dados.data}</span>
         </div>
-        
+
         <div class="info-row">
             <span class="info-icon">⏰</span>
             <span class="info-label">Horário:</span>
             <span class="info-value">${dados.horario}</span>
         </div>
-        
+
         <div class="info-row">
             <span class="info-icon">🏥</span>
             <span class="info-label">Modalidade:</span>
             <span class="info-value">${dados.modalidade}</span>
         </div>
+
+        ${dados.modalidade === "presencial" && dados.endereco ? `
+        <div class="info-row">
+            <span class="info-icon">📍</span>
+            <span class="info-label">Local:</span>
+            <span class="info-value">${dados.endereco}</span>
+        </div>
+        ` : ''}
     </div>
     
     ${dados.codigo ? `
@@ -382,6 +392,7 @@ export const createCancellationTemplate = (dados: {
   data: string;
   horario: string;
   modalidade: string;
+  endereco?: string; // ✅ ADICIONADO
 }) => {
   const content = `
     <h2 class="title" style="color: ${THEME_COLORS.destructive};">❌ Consulta Cancelada</h2>
@@ -431,6 +442,7 @@ export const createClinicCancellationTemplate = (dados: {
   data: string;
   horario: string;
   modalidade: string;
+  endereco?: string; // ✅ ADICIONADO
 }) => {
   const content = `
     <h2 class="title" style="color: ${THEME_COLORS.destructive};">🚫 Agendamento Cancelado</h2>

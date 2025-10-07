@@ -140,6 +140,7 @@ export async function POST(request: Request) {
       modalidade,
       codigo,
       telefone,
+      endereco, // ✅ ADICIONADO
     }).then(success => {
       console.log(`📧 Email resultado: ${success ? "✅ Sucesso" : "❌ Falha"}`);
     }).catch(error => {

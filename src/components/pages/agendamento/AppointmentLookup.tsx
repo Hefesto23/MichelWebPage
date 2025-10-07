@@ -45,7 +45,7 @@ export default function AppointmentLookup({
 
       const { agendamento } = data;
 
-      // Preencher os dados do agendamento - ✅ MANTIDA EXATAMENTE ORIGINAL
+      // Preencher os dados do agendamento
       updateFormData({
         nome: agendamento.nome,
         email: agendamento.email,
@@ -53,6 +53,7 @@ export default function AppointmentLookup({
         dataSelecionada: agendamento.data,
         horarioSelecionado: agendamento.horario,
         modalidade: agendamento.modalidade,
+        endereco: agendamento.endereco || "", // ✅ ADICIONADO
         mensagem: agendamento.mensagem,
       });
 

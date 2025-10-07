@@ -17,6 +17,7 @@ interface EmailData {
   modalidade: string;
   codigo?: string;
   telefone?: string;
+  endereco?: string; // ✅ ADICIONADO
 }
 
 // Configurar transporter do Gmail SMTP
@@ -91,6 +92,7 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
         horario: dados.horario,
         modalidade: dados.modalidade,
         codigo: dados.codigo,
+        endereco: dados.endereco, // ✅ ADICIONADO
       })),
       // Template clínica
       Promise.resolve(createClinicNotificationTemplate({
@@ -101,6 +103,7 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
         horario: dados.horario,
         modalidade: dados.modalidade,
         codigo: dados.codigo,
+        endereco: dados.endereco, // ✅ ADICIONADO
       }))
     ]);
 
@@ -176,6 +179,7 @@ export async function enviarEmailCancelamentoGmail(dados: EmailData): Promise<bo
       data: dataFormatada,
       horario: dados.horario,
       modalidade: dados.modalidade,
+      endereco: dados.endereco, // ✅ ADICIONADO
     });
 
     const htmlClinica = createClinicCancellationTemplate({
@@ -184,6 +188,7 @@ export async function enviarEmailCancelamentoGmail(dados: EmailData): Promise<bo
       data: dataFormatada,
       horario: dados.horario,
       modalidade: dados.modalidade,
+      endereco: dados.endereco, // ✅ ADICIONADO
     });
 
     console.log('\n📧 Enviando emails de cancelamento...');

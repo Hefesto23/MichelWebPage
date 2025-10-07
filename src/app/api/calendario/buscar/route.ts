@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         data: agendamentoDB.dataSelecionada.toISOString().split("T")[0],
         horario: agendamentoDB.horarioSelecionado,
         modalidade: agendamentoDB.modalidade,
+        endereco: agendamentoDB.endereco || "", // ✅ ADICIONADO
         mensagem: agendamentoDB.mensagem || "",
         status: agendamentoDB.status,
       };
@@ -131,6 +132,7 @@ export async function POST(request: Request) {
       email: "",
       telefone: "",
       modalidade: "",
+      endereco: "", // ✅ ADICIONADO
       mensagem: "",
     };
 
@@ -147,10 +149,17 @@ export async function POST(request: Request) {
           dadosEvento.telefone = trimmed.replace("Telefone:", "").trim();
         } else if (trimmed.startsWith("Modalidade:")) {
           dadosEvento.modalidade = trimmed.replace("Modalidade:", "").trim();
+        } else if (trimmed.startsWith("Endereço:")) { // ✅ ADICIONADO
+          dadosEvento.endereco = trimmed.replace("Endereço:", "").trim();
         } else if (trimmed.startsWith("Mensagem:")) {
           dadosEvento.mensagem = trimmed.replace("Mensagem:", "").trim();
         }
       }
+    }
+
+    // ✅ ADICIONAR: Também extrair do campo location do evento
+    if (evento.location && dadosEvento.modalidade === "presencial") {
+      dadosEvento.endereco = evento.location;
     }
 
     const processTime = Date.now() - processStartTime;

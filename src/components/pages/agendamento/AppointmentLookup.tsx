@@ -1,8 +1,8 @@
 // components/scheduling/AppointmentLookup/index.tsx
 import { ContactCard } from "@/components/shared/cards/BaseCard";
-import { Button } from "@/components/shared/ui/button";
 import { LoadingSpinner } from "@/components/shared/ui/LoadingSpinner";
 import { AppointmentFormData } from "@/types/appointment"; // ✅ ÚNICO TIPO ADICIONADO
+import formStyles from "./form.module.css";
 
 interface AppointmentLookupProps {
   formData: AppointmentFormData; // ✅ USANDO TIPO CENTRALIZADO
@@ -91,15 +91,18 @@ export default function AppointmentLookup({
           />
         </div>
         <div className="flex justify-end">
-          <Button
-            variant="outline"
+          <button
             type="submit"
             disabled={carregando || !formData.codigoConfirmacao}
-            className="flex items-center gap-2"
+            className={`${formStyles.primaryButton} flex items-center gap-2 ${
+              carregando || !formData.codigoConfirmacao
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
           >
             {carregando && <LoadingSpinner size="sm" />}
             {carregando ? "Buscando..." : "Buscar Agendamento"}
-          </Button>
+          </button>
         </div>
       </form>
     </ContactCard>

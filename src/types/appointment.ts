@@ -12,6 +12,7 @@ export interface Appointment extends BaseEntity {
   dataSelecionada: string; // YYYY-MM-DD
   horarioSelecionado: string; // HH:MM
   modalidade: AppointmentModality;
+  endereco?: string; // Endereço selecionado (apenas para presencial)
   primeiraConsulta: boolean;
   mensagem?: string;
   codigo: string;
@@ -32,6 +33,7 @@ export interface AppointmentFormData {
   dataSelecionada: string;
   horarioSelecionado: string;
   modalidade: AppointmentModality;
+  endereco?: string; // Endereço selecionado (apenas para presencial)
   primeiraConsulta: boolean;
   mensagem?: string;
 

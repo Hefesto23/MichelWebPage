@@ -78,6 +78,7 @@ model Appointment {
   dataSelecionada    DateTime
   horarioSelecionado String
   modalidade         String
+  endereco           String?  // Endereço selecionado (apenas para presencial)
   primeiraConsulta   Boolean  @default(false)
   mensagem           String?
   codigo             String   @unique

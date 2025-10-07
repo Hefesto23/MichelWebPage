@@ -148,6 +148,22 @@ const Confirmation = React.memo<ConfirmationProps>(function Confirmation({
                 </p>
               </div>
             </div>
+
+            {/* Endereço (apenas se presencial) */}
+            {formData.modalidade === "presencial" && formData.endereco && (
+              <div className="flex items-start md:col-span-2">
+                <MapPin
+                  className="mr-3 mt-1 text-foreground flex-shrink-0"
+                  size={20}
+                />
+                <div className="flex-1">
+                  <p className={appointmentStyles.infoText}>Local do Atendimento</p>
+                  <p className="text-foreground font-medium">
+                    {formData.endereco}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex mt-6 items-start">

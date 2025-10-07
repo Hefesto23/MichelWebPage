@@ -12,12 +12,17 @@ export async function POST(request: Request) {
   console.log("🚀 Início da API de agendamento");
 
   try {
-    const { nome, email, telefone, data, horario, modalidade, mensagem } =
+    const { nome, email, telefone, data, horario, modalidade, endereco, mensagem } =
       await request.json();
 
     // Validar dados
     if (!nome || !email || !telefone || !data || !horario || !modalidade) {
       return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
+    }
+
+    // Validar endereço se modalidade for presencial
+    if (modalidade === "presencial" && !endereco) {
+      return NextResponse.json({ error: "Endereço é obrigatório para atendimento presencial" }, { status: 400 });
     }
 
     // Gerar código de agendamento antecipadamente
@@ -56,10 +61,12 @@ export async function POST(request: Request) {
               Email: ${email}
               Telefone: ${telefone}
               Modalidade: ${modalidade}
+              ${modalidade === "presencial" && endereco ? `Endereço: ${endereco}` : ""}
               Código: ${codigo}
-              
+
               Mensagem: ${mensagem || "Não informada"}
             `,
+            location: modalidade === "presencial" && endereco ? endereco : undefined,
             start: {
               dateTime: dataHoraInicio.toISOString(),
               timeZone: "America/Sao_Paulo",
@@ -90,6 +97,7 @@ export async function POST(request: Request) {
             dataSelecionada: new Date(dataHoraInicio),
             horarioSelecionado: horario,
             modalidade,
+            endereco: endereco || null,
             primeiraConsulta: true,
             mensagem: mensagem || null,
             codigo,

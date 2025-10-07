@@ -145,8 +145,13 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
       return;
     }
 
+    if (formData.modalidade === MODALITY.IN_PERSON && !formData.endereco) {
+      handleError("Por favor, selecione o local do atendimento presencial.");
+      return;
+    }
+
     proximoPasso();
-  }, [formData.dataSelecionada, formData.horarioSelecionado, formData.modalidade, handleError, proximoPasso]);
+  }, [formData.dataSelecionada, formData.horarioSelecionado, formData.modalidade, formData.endereco, handleError, proximoPasso]);
 
   // Formatar a data em português para exibição (memoizada)
   const dataFormatada = useMemo(() => {
@@ -184,12 +189,78 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                   ? formStyles.primaryButton
                   : formStyles.secondaryButton
               }`}
-              onClick={() => updateFormData({ modalidade: MODALITY.ONLINE })}
+              onClick={() => updateFormData({ modalidade: MODALITY.ONLINE, endereco: "" })}
             >
               Online
             </button>
           </div>
         </div>
+
+        {/* Seleção de endereço (apenas se presencial) */}
+        {formData.modalidade === MODALITY.IN_PERSON && (
+          <div>
+            <label className={formStyles.formLabel}>Escolha o Local do Atendimento</label>
+            <div className="space-y-3">
+              {settings?.street && (
+                <button
+                  type="button"
+                  className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                    formData.endereco === `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`
+                      ? "border-primary-foreground dark:border-btn bg-primary-foreground/10 dark:bg-btn/10"
+                      : "border-border hover:border-primary-foreground/50 dark:hover:border-btn/50"
+                  }`}
+                  onClick={() => updateFormData({ endereco: `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}` })}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      formData.endereco === `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`
+                        ? "border-primary-foreground dark:border-btn"
+                        : "border-border"
+                    }`}>
+                      {formData.endereco === `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}` && (
+                        <div className="w-3 h-3 rounded-full bg-primary-foreground dark:bg-btn"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground">{settings.city}/{settings.state}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{settings.street}</p>
+                      <p className="text-sm text-muted-foreground">{settings.neighborhood}</p>
+                    </div>
+                  </div>
+                </button>
+              )}
+
+              {settings?.street2 && settings?.city2 && (
+                <button
+                  type="button"
+                  className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                    formData.endereco === `${settings.street2}, ${settings.neighborhood2} - ${settings.city2}/${settings.state2}`
+                      ? "border-primary-foreground dark:border-btn bg-primary-foreground/10 dark:bg-btn/10"
+                      : "border-border hover:border-primary-foreground/50 dark:hover:border-btn/50"
+                  }`}
+                  onClick={() => updateFormData({ endereco: `${settings.street2}, ${settings.neighborhood2} - ${settings.city2}/${settings.state2}` })}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      formData.endereco === `${settings.street2}, ${settings.neighborhood2} - ${settings.city2}/${settings.state2}`
+                        ? "border-primary-foreground dark:border-btn"
+                        : "border-border"
+                    }`}>
+                      {formData.endereco === `${settings.street2}, ${settings.neighborhood2} - ${settings.city2}/${settings.state2}` && (
+                        <div className="w-3 h-3 rounded-full bg-primary-foreground dark:bg-btn"></div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground">{settings.city2}/{settings.state2}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{settings.street2}</p>
+                      <p className="text-sm text-muted-foreground">{settings.neighborhood2}</p>
+                    </div>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Opção de Primeira Consulta com Toggle */}
         <div>
@@ -304,6 +375,37 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           </div>
         )}
 
+        {/* Feedback de carregamento visível após seleção de data */}
+        {carregando && formData.dataSelecionada && (
+          <div className="mt-4 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
+            <div className="flex items-center justify-center gap-3">
+              <svg
+                className="animate-spin h-6 w-6 text-blue-600 dark:text-blue-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <p className="text-blue-800 dark:text-blue-200 font-semibold">
+                Carregando horários disponíveis...
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Seleção de horário */}
         {formData.dataSelecionada && (
           <div className="mt-6">
@@ -365,13 +467,15 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
               carregando ||
               !formData.dataSelecionada ||
               !formData.horarioSelecionado ||
-              !formData.modalidade
+              !formData.modalidade ||
+              (formData.modalidade === MODALITY.IN_PERSON && !formData.endereco)
             }
             className={`${formStyles.primaryButton} ${
               carregando ||
               !formData.dataSelecionada ||
               !formData.horarioSelecionado ||
-              !formData.modalidade
+              !formData.modalidade ||
+              (formData.modalidade === MODALITY.IN_PERSON && !formData.endereco)
                 ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}

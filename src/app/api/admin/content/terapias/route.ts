@@ -104,23 +104,25 @@ export async function POST(request: Request) {
 
     const data = await request.json();
     console.log("📥 Dados recebidos na API terapias:", JSON.stringify(data, null, 2));
-    
+
     console.log("🔍 Estrutura dos dados:", {
       hasTerapias: !!data.terapias,
       hasTherapyModalities: !!(data.terapias?.therapyModalities),
       modalitiesCount: data.terapias?.therapyModalities?.length || 0,
       keys: Object.keys(data)
     });
-    
+
+    // Preparar dados para salvar
+    const contentEntries = [];
+
+    // Verificar se os dados estão vindo via PageEditor (structure: data.content.terapias)
+    const terapiasData = data.content?.terapias || data.terapias || data;
+
+    // Deletar todos os registros existentes (hard delete)
     await prisma.content.deleteMany({
       where: { page: "terapias" }
     });
 
-    const contentEntries = [];
-    
-    // Verificar se os dados estão vindo via PageEditor (structure: data.content.terapias)
-    const terapiasData = data.content?.terapias || data.terapias || data;
-    
     if (terapiasData.title) {
       contentEntries.push({
         page: "terapias",
@@ -155,6 +157,7 @@ export async function POST(request: Request) {
       });
     }
 
+    // Criar novos registros
     if (contentEntries.length > 0) {
       await prisma.content.createMany({
         data: contentEntries
@@ -202,6 +205,7 @@ export async function DELETE(request: Request) {
       );
     }
 
+    // Deletar todos os registros desta página (hard delete)
     await prisma.content.deleteMany({
       where: { page: "terapias" }
     });

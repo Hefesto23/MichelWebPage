@@ -3,7 +3,8 @@ import { AvaliacoesContentServer } from "@/components/pages/avaliacoes/Avaliacoe
 import { Metadata } from "next";
 import { Suspense } from "react";
 
-export const dynamic = 'force-dynamic';
+// Cache on-demand: página é cacheada indefinidamente até revalidateTag ser chamado
+// Sem force-dynamic para permitir cache estático com revalidação sob demanda
 
 // Skeleton mantendo o estilo original
 function AvaliacoesSkeleton() {

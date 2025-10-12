@@ -18,7 +18,8 @@ import {
 import { Metadata } from "next";
 import { Suspense } from "react";
 
-export const dynamic = 'force-dynamic';
+// Cache on-demand: páginas são cacheadas indefinidamente até revalidateTag ser chamado
+// Sem force-dynamic para permitir cache estático com revalidação sob demanda
 
 export const metadata: Metadata = {
   title: "Michel de Camargo - Psicólogo Clínico | Sorocaba",

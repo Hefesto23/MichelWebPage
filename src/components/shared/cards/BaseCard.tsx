@@ -6,7 +6,7 @@ import Link from "next/link";
 // Tipos simples
 interface BaseCardProps {
   variant?: "contact" | "admin" | "stats" | "image" | "image-large" | "service";
-  title?: string;
+  title?: string | React.ReactNode;
   children?: React.ReactNode;
   className?: string;
 
@@ -91,7 +91,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
             <div className="relative w-full h-24 flex-shrink-0 overflow-hidden rounded-t-xl">
               <Image
                 src={imageUrl!}
-                alt={title!}
+                alt={typeof title === 'string' ? title : 'Image'}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -126,7 +126,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
             <div className="relative w-full h-48 flex-shrink-0 overflow-hidden rounded-t-xl">
               <Image
                 src={imageUrl!}
-                alt={title!}
+                alt={typeof title === 'string' ? title : 'Image'}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"

@@ -94,15 +94,17 @@ export async function POST(request: Request) {
 
     const data = await request.json();
     console.log("📥 Dados recebidos na API avaliacoes:", JSON.stringify(data, null, 2));
-    
+
+    // Preparar dados para salvar
+    const contentEntries = [];
+
+    // Verificar se os dados estão vindo via PageEditor (structure: data.content.avaliacoes)
+    const avaliacoesData = data.content?.avaliacoes || data.avaliacoes || data;
+
+    // Deletar todos os registros existentes (hard delete)
     await prisma.content.deleteMany({
       where: { page: "avaliacoes" }
     });
-
-    const contentEntries = [];
-    
-    // Verificar se os dados estão vindo via PageEditor (structure: data.content.avaliacoes)
-    const avaliacoesData = data.content?.avaliacoes || data.avaliacoes || data;
     
     if (avaliacoesData.title) {
       contentEntries.push({
@@ -138,6 +140,7 @@ export async function POST(request: Request) {
       });
     }
 
+    // Criar novos registros
     if (contentEntries.length > 0) {
       await prisma.content.createMany({
         data: contentEntries
@@ -180,6 +183,7 @@ export async function DELETE(request: Request) {
       );
     }
 
+    // Deletar todos os registros desta página (hard delete)
     await prisma.content.deleteMany({
       where: { page: "avaliacoes" }
     });

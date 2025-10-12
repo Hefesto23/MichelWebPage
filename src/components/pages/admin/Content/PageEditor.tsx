@@ -481,75 +481,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           {
             name: "Seção Clinic - Nosso Espaço",
             description:
-              "Edite o título, descrição e galeria de imagens da clínica.",
-            items: [
-              {
-                id: 33,
-                page: "home",
-                section: "clinic",
-                key: "title",
-                type: "title" as const,
-                value: clinicTitle,
-                label: "Título da Seção Clinic",
-                placeholder: "Digite o título da seção da clínica...",
-              },
-              {
-                id: 34,
-                page: "home",
-                section: "clinic",
-                key: "description",
-                type: "text" as const,
-                value: clinicDescription,
-                label: "Descrição da Seção Clinic",
-                placeholder: "Digite a descrição da seção da clínica...",
-              },
-              // Imagens individuais
-              ...clinicImages
-                .map((image: ClinicImage, index: number) => [
-                  {
-                    id: 35 + index * 4, // 35, 39, 43, etc. (4 campos por imagem)
-                    page: "home",
-                    section: "clinic",
-                    key: `image${image.id}_originalTitle`,
-                    type: "text" as const,
-                    value: image.originalTitle,
-                    label: `Imagem ${image.id} - Título`,
-                    placeholder: `Título da imagem ${image.id}...`,
-                  },
-                  {
-                    id: 36 + index * 4, // 36, 40, 44, etc.
-                    page: "home",
-                    section: "clinic",
-                    key: `image${image.id}_description`,
-                    type: "text" as const,
-                    value: image.description,
-                    label: `Imagem ${image.id} - Descrição`,
-                    placeholder: `Descrição da imagem ${image.id}...`,
-                  },
-                  {
-                    id: 37 + index * 4, // 37, 41, 45, etc.
-                    page: "home",
-                    section: "clinic",
-                    key: `image${image.id}_originalAlt`,
-                    type: "text" as const,
-                    value: image.originalAlt,
-                    label: `Imagem ${image.id} - Alt Text`,
-                    placeholder: `Texto alternativo da imagem ${image.id}...`,
-                  },
-                  {
-                    id: 38 + index * 4, // 38, 42, 46, etc.
-                    page: "home",
-                    section: "clinic",
-                    key: `image${image.id}_original`,
-                    type: "image" as const,
-                    value: image.original,
-                    label: `Imagem ${image.id} - Imagem (Thumbnail = Mesma)`,
-                    placeholder: `URL da imagem ${image.id}...`,
-                  },
-                  // Thumbnail removido - será automaticamente igual ao original
-                ])
-                .flat(),
-            ],
+              "Gerencie o título, descrição e galeria de imagens da clínica através do botão 'Gerenciar Galeria'.",
+            items: [],
           },
         ];
 
@@ -1370,392 +1303,128 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   };
 
 
-  const saveChanges = async () => {
-    // Permitir salvar mesmo sem mudanças pendentes (para preservar valores atuais)
+  const saveSectionChanges = async (sectionName: string) => {
+    console.log(`💾 PageEditor: Salvando apenas seção ${sectionName}`);
 
-    console.log(`💾 PageEditor: Iniciando save para página ${page}`);
-    console.log(`📝 PageEditor: Mudanças pendentes:`, changes);
-    console.log(`📋 PageEditor: Seções atuais:`, sections);
+    // Find items from this section that have changes
+    const sectionItems = sections
+      .flatMap(s => s.items)
+      .filter(item => item.section === sectionName && changes[item.id] !== undefined);
+
+    if (sectionItems.length === 0) {
+      alert(`Não há alterações para salvar na seção ${sectionName}.`);
+      return;
+    }
 
     setSaving(true);
     setError(null);
 
     try {
-      // Preparar dados para salvar - MESCLAR valores atuais + mudanças
-      const contentToSave: SavedContent = {};
+      // Start with existing saved content
+      const contentToSave: SavedContent = { ...savedContent };
 
-      sections.forEach((section) => {
-        section.items.forEach((item) => {
-          // Usar valor mudança SE existir, senão usar valor atual do item
-          const valueToSave =
-            changes[item.id] !== undefined ? changes[item.id] : item.value;
+      // Update only items from this section
+      sectionItems.forEach((item) => {
+        const valueToSave = changes[item.id];
 
-          // Debug específico para campos de imagem em terapias
-          if (page === "terapias" && item.type === "image") {
-            console.log(`🖼️ PageEditor: Processando campo de imagem:`, {
-              id: item.id,
-              key: item.key,
-              section: item.section,
-              originalValue: item.value,
-              changeValue: changes[item.id],
-              finalValue: valueToSave
-            });
+        if (item.section === "hero") {
+          if (!contentToSave.hero) contentToSave.hero = {};
+          contentToSave.hero[item.key] = valueToSave;
+        } else if (item.section === "welcome") {
+          if (!contentToSave.welcome) contentToSave.welcome = {};
+          contentToSave.welcome[item.key] = valueToSave;
+        } else if (item.section === "services") {
+          if (!contentToSave.services) contentToSave.services = {};
+          if (item.key === "title" || item.key === "description") {
+            contentToSave.services[item.key] = valueToSave;
           }
-
-          if (item.section === "hero") {
-            if (!contentToSave.hero) contentToSave.hero = {};
-            contentToSave.hero[item.key] = valueToSave;
-          } else if (item.section === "welcome") {
-            if (!contentToSave.welcome) contentToSave.welcome = {};
-            contentToSave.welcome[item.key] = valueToSave;
-          } else if (item.section === "services") {
-            if (!contentToSave.services) contentToSave.services = {};
-
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.services[item.key] = valueToSave;
-            }
-
-            // Para campos dos cards
-            if (item.key.startsWith("card")) {
-              if (!contentToSave.services?.cards) {
-                if (!contentToSave.services) contentToSave.services = {};
-                contentToSave.services.cards = [
-                  ...DEFAULT_SERVICES_CONTENT.cards,
-                ];
-              }
-
-              // Extrair card ID e field do key (ex: card1_title -> cardId=1, field=title)
-              const match = item.key.match(/card(\d+)_(.+)/);
-              if (match) {
-                const cardId = parseInt(match[1]);
-                const field = match[2];
-                const cardIndex = cardId - 1; // Array é 0-indexed
-
-                const cardsList = contentToSave.services!.cards!;
-                if (cardsList[cardIndex]) {
-                  const card = cardsList[cardIndex];
-                  if (field === "title") {
-                    card.title = valueToSave;
-                  } else if (field === "description") {
-                    card.description = valueToSave;
-                  } else if (field === "imageUrl") {
-                    card.imageUrl = valueToSave;
-                  }
-                }
-              }
-            }
-          } else if (item.section === "clinic") {
-            if (!contentToSave.clinic) contentToSave.clinic = {};
-
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.clinic[item.key] = valueToSave;
-            }
-
-            // Para campos das imagens
-            if (item.key.startsWith("image")) {
-              if (!contentToSave.clinic?.images) {
-                if (!contentToSave.clinic) contentToSave.clinic = {};
-                contentToSave.clinic.images = [
-                  ...DEFAULT_CLINIC_CONTENT.images,
-                ];
-              }
-
-              // Extrair image ID e field do key (ex: image1_originalTitle -> imageId=1, field=originalTitle)
-              const match = item.key.match(/image(\d+)_(.+)/);
-              if (match) {
-                const imageId = parseInt(match[1]);
-                const field = match[2];
-                const imageIndex = imageId - 1; // Array é 0-indexed
-
-                const imagesList = contentToSave.clinic.images;
-                if (imagesList[imageIndex]) {
-                  const image = imagesList[imageIndex];
-                  if (field === "originalTitle") {
-                    image.originalTitle = valueToSave;
-                  } else if (field === "originalAlt") {
-                    image.originalAlt = valueToSave;
-                  } else if (field === "description") {
-                    image.description = valueToSave;
-                  } else if (field === "original") {
-                    image.original = valueToSave;
-                    // Auto-sync: Set thumbnail = original for unified system
-                    image.thumbnail = valueToSave;
-                  } else if (field === "thumbnail") {
-                    // Only set thumbnail if explicitly different from original
-                    image.thumbnail = valueToSave || image.original;
-                  }
-                }
-              }
-            }
-          } else if (item.section === "about") {
-            if (!contentToSave.about) contentToSave.about = {};
-            contentToSave.about[item.key] = valueToSave;
-          } else if (item.section === "social") {
-            if (!contentToSave.social) contentToSave.social = {};
-            
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.social[item.key] = valueToSave;
-            }
-            
-            // Para campos das redes sociais
-            if (item.key.startsWith("network")) {
-              if (!contentToSave.social?.networks) {
-                if (!contentToSave.social) contentToSave.social = {};
-                contentToSave.social.networks = [...DEFAULT_ABOUT_CONTENT.socialMedia.networks];
-              }
-              
-              // Extrair network ID e field do key (ex: networkfacebook_url -> networkId=facebook, field=url)
-              const match = item.key.match(/network([^_]+)_(.+)/);
-              if (match) {
-                const networkId = match[1];
-                const field = match[2];
-                
-                const socialNetworksList = contentToSave.social.networks;
-                const networkIndex = socialNetworksList.findIndex((n: NetworkItem) => n.id === networkId);
-                
-                if (networkIndex !== -1) {
-                  const network = socialNetworksList[networkIndex];
-                  if (field === "enabled") {
-                    network.enabled = valueToSave === "true";
-                  } else if (field === "url") {
-                    network.url = valueToSave;
-                  } else if (field === "name") {
-                    network.name = valueToSave;
-                  }
-                }
-              }
-            }
-          } else if (item.section === "terapias") {
-            if (!contentToSave.terapias) contentToSave.terapias = {};
-            
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.terapias[item.key] = valueToSave;
-              console.log(`📝 PageEditor: Salvando campo geral terapias.${item.key} = ${valueToSave}`);
-            }
-          } else if (item.section === "modalities") {
-            console.log(`🔧 PageEditor: Processando seção modalities, item:`, {
-              id: item.id,
-              key: item.key,
-              type: item.type,
-              value: item.value,
-              changeValue: changes[item.id],
-              finalValue: valueToSave
-            });
-            if (!contentToSave.terapias?.therapyModalities) {
-              if (!contentToSave.terapias) contentToSave.terapias = {};
-              contentToSave.terapias.therapyModalities = [...DEFAULT_TERAPIAS_CONTENT.therapyModalities];
-            }
-            
-            // Para campos das modalidades
-            if (item.key.startsWith("modality")) {
-              // Extrair modality ID e field do key (ex: modality1_title -> modalityId=1, field=title)
-              const match = item.key.match(/modality(\d+)_(.+)/);
-              
-              if (match) {
-                const modalityId = parseInt(match[1]);
-                const field = match[2];
-                
-                console.log(`🎯 PageEditor: Processando modalidade ${modalityId}, campo ${field}`);
-                
-                const modalitiesList = contentToSave.terapias.therapyModalities;
-                const modalityIndex = modalitiesList.findIndex((m: ModalityItem) => m.id === modalityId);
-                
-                
-                if (modalityIndex !== -1) {
-                  const modality = modalitiesList[modalityIndex];
-                  
-                  console.log(`📝 PageEditor: Atualizando modalidade ${modalityId}.${field}:`, {
-                    antes: modality[field as keyof ModalityItem],
-                    depois: valueToSave,
-                    tipo: field
-                  });
-                  
-                  if (field === "active") {
-                    modality.active = valueToSave === "true";
-                  } else if (field === "title") {
-                    modality.title = valueToSave;
-                  } else if (field === "description") {
-                    modality.description = valueToSave;
-                  } else if (field === "imageUrl") {
-                    modality.imageUrl = valueToSave;
-                    console.log(`🖼️ PageEditor: IMAGEM ATUALIZADA para modalidade ${modalityId}: ${valueToSave}`);
-                  } else if (field === "href") {
-                    modality.href = valueToSave;
-                  }
-                  
-                  console.log(`✅ PageEditor: Modalidade ${modalityId} atualizada:`, modality);
-                } else {
-                  console.log(`❌ PageEditor: Modalidade ${modalityId} NÃO encontrada na lista!`);
-                }
-              }
-            }
-          } else if (item.section === "avaliacoes") {
-            if (!contentToSave.avaliacoes) contentToSave.avaliacoes = {};
-            
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.avaliacoes[item.key] = valueToSave;
-            }
-          } else if (item.section === "tests") {
-            if (!contentToSave.avaliacoes?.testModalities) {
-              if (!contentToSave.avaliacoes) contentToSave.avaliacoes = {};
-              contentToSave.avaliacoes.testModalities = [...DEFAULT_AVALIACOES_CONTENT.testModalities];
-            }
-            
-            // Para campos dos testes
-            if (item.key.startsWith("test")) {
-              // Extrair test ID e field do key (ex: test1_title -> testId=1, field=title)
-              const match = item.key.match(/test(\d+)_(.+)/);
-              if (match) {
-                const testId = parseInt(match[1]);
-                const field = match[2];
-                
-                const testsList = contentToSave.avaliacoes.testModalities;
-                const testIndex = testsList.findIndex((t: ModalityItem) => t.id === testId);
-                
-                if (testIndex !== -1) {
-                  const test = testsList[testIndex];
-                  if (field === "active") {
-                    test.active = valueToSave === "true";
-                  } else if (field === "title") {
-                    test.title = valueToSave;
-                  } else if (field === "description") {
-                    test.description = valueToSave;
-                  } else if (field === "imageUrl") {
-                    test.imageUrl = valueToSave;
-                  } else if (field === "href") {
-                    test.href = valueToSave;
-                  }
-                }
-              }
-            }
-          } else if (item.section === "psychologist") {
-            if (!contentToSave.contact) contentToSave.contact = {};
-            if (!contentToSave.contact.psychologist) contentToSave.contact.psychologist = { ...DEFAULT_CONTACT_CONTENT.psychologist };
-            // @ts-expect-error - Complex contact type handling
-            contentToSave.contact.psychologist[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.psychologist] = valueToSave as unknown;
-          } else if (item.section === "contact" && item.page === "contact") {
-            if (!contentToSave.contact) contentToSave.contact = {};
-            if (!contentToSave.contact.contact) contentToSave.contact.contact = { ...DEFAULT_CONTACT_CONTENT.contact };
-            
-            if (item.key === "instagram") {
-              if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
-              contentToSave.contact.contact.social.instagram = valueToSave;
-            } else if (item.key === "linkedin") {
-              if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
-              contentToSave.contact.contact.social.linkedin = valueToSave;
-            } else {
-              // @ts-expect-error - Complex contact type handling
-              contentToSave.contact.contact[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.contact] = valueToSave as unknown;
-            }
-          } else if (item.section === "clinic" && item.page === "contact") {
-            if (!contentToSave.contact) contentToSave.contact = {};
-            if (!contentToSave.contact.clinic) contentToSave.contact.clinic = { ...DEFAULT_CONTACT_CONTENT.clinic };
-            
-            // Endereço
-            if (['street', 'neighborhood', 'city', 'state', 'zip'].includes(item.key)) {
-              if (!contentToSave.contact.clinic.address) contentToSave.contact.clinic.address = { ...DEFAULT_CONTACT_CONTENT.clinic.address };
-              // @ts-expect-error - Complex contact type handling
-              contentToSave.contact.clinic.address[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.address] = valueToSave as unknown;
-            }
-            // Horários
-            else if (['weekdays', 'start', 'end', 'note', 'ageRestriction'].includes(item.key)) {
-              if (!contentToSave.contact.clinic.hours) contentToSave.contact.clinic.hours = { ...DEFAULT_CONTACT_CONTENT.clinic.hours };
-              // @ts-expect-error - Complex contact type handling
-              contentToSave.contact.clinic.hours[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.hours] = valueToSave as unknown;
-            }
-            // Outros campos da clínica
-            else {
-              // @ts-expect-error - Complex contact type handling
-              contentToSave.contact.clinic[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic] = valueToSave as unknown;
-            }
-          } else if (item.section === "page" && item.page === "contact") {
-            if (!contentToSave.contact) contentToSave.contact = {};
-            if (!contentToSave.contact.page) contentToSave.contact.page = { ...DEFAULT_CONTACT_CONTENT.page };
-            // @ts-expect-error - Complex contact type handling
-            contentToSave.contact.page[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.page] = valueToSave as unknown;
-          } else if (item.section === "header" && item.page === "agendamento") {
-            if (!contentToSave.agendamento) contentToSave.agendamento = {};
-            
-            // Para fields gerais da seção
-            if (item.key === "title" || item.key === "description") {
-              contentToSave.agendamento[item.key] = valueToSave;
-            }
-          } else if (item.section.startsWith("divisoria_") && item.page === "divisorias") {
-            // Handling para divisórias
-            const sectionKey = item.section as keyof typeof DEFAULT_DIVISORIAS_CONTENT;
-            if (sectionKey !== 'maxCharacters') {
-              if (!contentToSave.divisorias) contentToSave.divisorias = {};
-              if (!contentToSave.divisorias[sectionKey]) contentToSave.divisorias[sectionKey] = {};
-              // @ts-expect-error - Dynamic divisoria section handling
-              contentToSave.divisorias[sectionKey][item.key] = valueToSave;
-            }
-          } else if (item.section.startsWith("card_") && item.page === "agendamento") {
-            if (!contentToSave.agendamento?.infoCards) {
-              if (!contentToSave.agendamento) contentToSave.agendamento = {};
-              contentToSave.agendamento.infoCards = [...DEFAULT_AGENDAMENTO_CONTENT.infoCards] as AgendamentoCardItem[];
-            }
-            
-            // Extrair card ID da seção (ex: card_1 -> cardId=1)
-            const match = item.section.match(/card_(\d+)/);
-            if (match) {
-              const cardId = parseInt(match[1]);
-              
-              const cardsList = contentToSave.agendamento.infoCards;
-              const cardIndex = cardsList?.findIndex((c: AgendamentoCardItem) => c.id === cardId) ?? -1;
-              
-              if (cardIndex !== -1 && cardsList) {
-                const card = cardsList[cardIndex];
-                if (item.key === "order") {
-                  card.order = parseInt(valueToSave);
-                } else if (item.key === "title") {
-                  card.title = valueToSave;
-                } else if (item.key === "content") {
-                  card.content = valueToSave;
-                }
-              }
-            }
+        } else if (item.section === "about") {
+          if (!contentToSave.about) contentToSave.about = {};
+          contentToSave.about[item.key] = valueToSave;
+        } else if (item.section === "terapias") {
+          if (!contentToSave.terapias) contentToSave.terapias = {};
+          if (item.key === "title" || item.key === "description") {
+            contentToSave.terapias[item.key] = valueToSave;
           }
-        });
+        } else if (item.section === "avaliacoes") {
+          if (!contentToSave.avaliacoes) contentToSave.avaliacoes = {};
+          if (item.key === "title" || item.key === "description") {
+            contentToSave.avaliacoes[item.key] = valueToSave;
+          }
+        } else if (item.section === "psychologist") {
+          if (!contentToSave.contact) contentToSave.contact = {};
+          if (!contentToSave.contact.psychologist) contentToSave.contact.psychologist = { ...DEFAULT_CONTACT_CONTENT.psychologist };
+          // @ts-expect-error - Complex contact type handling
+          contentToSave.contact.psychologist[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.psychologist] = valueToSave as unknown;
+        } else if (item.section === "contact" && item.page === "contact") {
+          if (!contentToSave.contact) contentToSave.contact = {};
+          if (!contentToSave.contact.contact) contentToSave.contact.contact = { ...DEFAULT_CONTACT_CONTENT.contact };
+
+          if (item.key === "instagram") {
+            if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
+            contentToSave.contact.contact.social.instagram = valueToSave;
+          } else if (item.key === "linkedin") {
+            if (!contentToSave.contact.contact.social) contentToSave.contact.contact.social = { ...DEFAULT_CONTACT_CONTENT.contact.social };
+            contentToSave.contact.contact.social.linkedin = valueToSave;
+          } else {
+            // @ts-expect-error - Complex contact type handling
+            contentToSave.contact.contact[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.contact] = valueToSave as unknown;
+          }
+        } else if (item.section === "clinic" && item.page === "contact") {
+          if (!contentToSave.contact) contentToSave.contact = {};
+          if (!contentToSave.contact.clinic) contentToSave.contact.clinic = { ...DEFAULT_CONTACT_CONTENT.clinic };
+
+          if (['street', 'neighborhood', 'city', 'state', 'zip'].includes(item.key)) {
+            if (!contentToSave.contact.clinic.address) contentToSave.contact.clinic.address = { ...DEFAULT_CONTACT_CONTENT.clinic.address };
+            // @ts-expect-error - Complex contact type handling
+            contentToSave.contact.clinic.address[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.address] = valueToSave as unknown;
+          } else if (['weekdays', 'start', 'end', 'note', 'ageRestriction'].includes(item.key)) {
+            if (!contentToSave.contact.clinic.hours) contentToSave.contact.clinic.hours = { ...DEFAULT_CONTACT_CONTENT.clinic.hours };
+            // @ts-expect-error - Complex contact type handling
+            contentToSave.contact.clinic.hours[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic.hours] = valueToSave as unknown;
+          } else {
+            // @ts-expect-error - Complex contact type handling
+            contentToSave.contact.clinic[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.clinic] = valueToSave as unknown;
+          }
+        } else if (item.section === "page" && item.page === "contact") {
+          if (!contentToSave.contact) contentToSave.contact = {};
+          if (!contentToSave.contact.page) contentToSave.contact.page = { ...DEFAULT_CONTACT_CONTENT.page };
+          // @ts-expect-error - Complex contact type handling
+          contentToSave.contact.page[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.page] = valueToSave as unknown;
+        } else if (item.section.startsWith("divisoria_")) {
+          const divisoriaKey = item.section as keyof SavedContent;
+          if (!contentToSave[divisoriaKey]) {
+            contentToSave[divisoriaKey] = {} as { text?: string; backgroundImage?: string };
+          }
+          (contentToSave[divisoriaKey] as { text?: string; backgroundImage?: string })[item.key as 'text' | 'backgroundImage'] = valueToSave;
+        }
       });
 
-      console.log(`📤 PageEditor: Dados finais para salvar em ${page}:`, contentToSave);
-      console.log(`📤 PageEditor: JSON que será enviado:`, JSON.stringify(contentToSave, null, 2));
+      console.log(`📤 PageEditor: Salvando seção ${sectionName}:`, contentToSave);
 
-      // Salvar no banco
+      // Save to database
       const response = await fetch(`/api/admin/content/${page}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ content: contentToSave }), // Envolvendo em { content: ... } conforme API espera
-      });
-      
-      console.log(`📡 PageEditor: Response do save:`, {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText
+        body: JSON.stringify({ content: contentToSave }),
       });
 
       if (!response.ok) {
-        // Se for erro 401 (token expirado), usar helper para redirecionar
         if (handleAuthError(response)) {
           return;
         }
         throw new Error("Erro ao salvar conteúdo");
       }
 
-      // Atualizar dados locais
+      // Update local state - only for items in this section
       setSections((prev) =>
         prev.map((section) => ({
           ...section,
           items: section.items.map((item) => {
-            if (changes[item.id] !== undefined) {
+            if (item.section === sectionName && changes[item.id] !== undefined) {
               return { ...item, value: changes[item.id] };
             }
             return item;
@@ -1763,11 +1432,20 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         }))
       );
 
-      setChanges({});
-      alert("Conteúdo salvo com sucesso!");
+      // Update savedContent with new values
+      setSavedContent(contentToSave);
+
+      // Clear only changes for this section
+      const newChanges = { ...changes };
+      sectionItems.forEach(item => {
+        delete newChanges[item.id];
+      });
+      setChanges(newChanges);
+
+      alert(`Seção ${sectionName} salva com sucesso!`);
     } catch (error) {
-      console.error("Erro ao salvar:", error);
-      setError("Erro ao salvar o conteúdo. Tente novamente.");
+      console.error("Erro ao salvar seção:", error);
+      setError(`Erro ao salvar seção ${sectionName}. Tente novamente.`);
     } finally {
       setSaving(false);
     }
@@ -1796,6 +1474,35 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       setSaving(true);
       setError(null);
 
+      // Construir dados completos: savedContent + changes pendentes + novas imagens clinic
+      const completeContent: SavedContent = { ...savedContent };
+
+      // Aplicar todas as mudanças pendentes ao conteúdo completo
+      sections.forEach((section) => {
+        section.items.forEach((item) => {
+          const valueToUse = changes[item.id] !== undefined ? changes[item.id] : item.value;
+
+          if (item.section === "hero") {
+            if (!completeContent.hero) completeContent.hero = {};
+            completeContent.hero[item.key] = valueToUse;
+          } else if (item.section === "welcome") {
+            if (!completeContent.welcome) completeContent.welcome = {};
+            completeContent.welcome[item.key] = valueToUse;
+          } else if (item.section === "services") {
+            if (!completeContent.services) completeContent.services = {};
+            if (item.key === "title" || item.key === "description") {
+              completeContent.services[item.key] = valueToUse;
+            }
+          }
+        });
+      });
+
+      // Garantir que services tem os cards salvos
+      if (!completeContent.services?.cards) {
+        if (!completeContent.services) completeContent.services = {};
+        completeContent.services.cards = savedContent?.services?.cards || DEFAULT_SERVICES_CONTENT.cards;
+      }
+
       const response = await fetch(`/api/admin/content/${page}`, {
         method: "POST",
         headers: {
@@ -1804,6 +1511,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         },
         body: JSON.stringify({
           content: {
+            hero: completeContent.hero || DEFAULT_HERO_CONTENT,
+            welcome: completeContent.welcome || DEFAULT_WELCOME_CONTENT,
+            services: completeContent.services || DEFAULT_SERVICES_CONTENT,
             clinic: data,
           },
         }),
@@ -1820,7 +1530,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       await loadPageContent();
       setEditingClinicImages(false);
       alert("Galeria da clínica salva com sucesso!");
-      
+
     } catch (error) {
       console.error("Erro ao salvar imagens da clínica:", error);
       setError("Erro ao salvar galeria. Tente novamente.");
@@ -1838,20 +1548,51 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     try {
       console.log('🔄 Iniciando salvamento de cards:', { editingCards, cardsCount: cards.length });
 
+      // Construir dados completos: savedContent + changes pendentes + novos cards
+      const completeContent: SavedContent = { ...savedContent };
+
+      // Aplicar todas as mudanças pendentes ao conteúdo completo
+      sections.forEach((section) => {
+        section.items.forEach((item) => {
+          const valueToUse = changes[item.id] !== undefined ? changes[item.id] : item.value;
+
+          if (item.section === "hero") {
+            if (!completeContent.hero) completeContent.hero = {};
+            completeContent.hero[item.key] = valueToUse;
+          } else if (item.section === "welcome") {
+            if (!completeContent.welcome) completeContent.welcome = {};
+            completeContent.welcome[item.key] = valueToUse;
+          } else if (item.section === "services") {
+            if (!completeContent.services) completeContent.services = {};
+            if (item.key === "title" || item.key === "description") {
+              completeContent.services[item.key] = valueToUse;
+            }
+          } else if (item.section === "clinic" && item.page === "home") {
+            if (!completeContent.clinic) completeContent.clinic = {};
+            if (item.key === "title" || item.key === "description") {
+              completeContent.clinic[item.key] = valueToUse;
+            }
+          }
+        });
+      });
+
       let endpoint = '';
       let payload: any = {};
 
       switch (editingCards) {
         case 'services':
           endpoint = '/api/admin/content/home';
+          // Garantir que temos todos os dados de todas as seções da home
           payload = {
             content: {
-              ...savedContent,
+              hero: completeContent.hero || DEFAULT_HERO_CONTENT,
+              welcome: completeContent.welcome || DEFAULT_WELCOME_CONTENT,
               services: {
-                title: savedContent?.services?.title || DEFAULT_SERVICES_CONTENT.title,
-                description: savedContent?.services?.description || DEFAULT_SERVICES_CONTENT.description,
+                title: completeContent?.services?.title || DEFAULT_SERVICES_CONTENT.title,
+                description: completeContent?.services?.description || DEFAULT_SERVICES_CONTENT.description,
                 cards: cards
-              }
+              },
+              clinic: completeContent.clinic || DEFAULT_CLINIC_CONTENT
             }
           };
           break;
@@ -1859,10 +1600,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           endpoint = '/api/admin/content/terapias';
           payload = {
             content: {
-              ...savedContent,
               terapias: {
-                title: savedContent?.terapias?.title || DEFAULT_TERAPIAS_CONTENT.title,
-                description: savedContent?.terapias?.description || DEFAULT_TERAPIAS_CONTENT.description,
+                title: completeContent?.terapias?.title || DEFAULT_TERAPIAS_CONTENT.title,
+                description: completeContent?.terapias?.description || DEFAULT_TERAPIAS_CONTENT.description,
                 therapyModalities: cards
               }
             }
@@ -1872,10 +1612,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           endpoint = '/api/admin/content/avaliacoes';
           payload = {
             content: {
-              ...savedContent,
               avaliacoes: {
-                title: savedContent?.avaliacoes?.title || DEFAULT_AVALIACOES_CONTENT.title,
-                description: savedContent?.avaliacoes?.description || DEFAULT_AVALIACOES_CONTENT.description,
+                title: completeContent?.avaliacoes?.title || DEFAULT_AVALIACOES_CONTENT.title,
+                description: completeContent?.avaliacoes?.description || DEFAULT_AVALIACOES_CONTENT.description,
                 testModalities: cards
               }
             }
@@ -2464,21 +2203,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             <RotateCcw className="w-4 h-4" />
             <span>{resetting ? "Restaurando..." : "Restaurar Padrão"}</span>
           </button>
-
-          <button
-            onClick={saveChanges}
-            disabled={saving}
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-foreground text-white rounded-md hover:bg-primary-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            <span>
-              {saving
-                ? "Salvando..."
-                : Object.keys(changes).length > 0
-                  ? "Salvar Alterações"
-                  : "Salvar"}
-            </span>
-          </button>
         </div>
       </div>
 
@@ -2516,21 +2240,46 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               currentCards = savedContent?.avaliacoes?.testModalities || DEFAULT_AVALIACOES_CONTENT.testModalities;
             }
 
+            const sectionHasChanges = section.items.some(item => changes[item.id] !== undefined);
+            const sectionName = section.items[0]?.section || cardsType;
+
             return (
               <div key={sectionIndex}>
-                <AdminCard title={section.name}>
-                  <p className="text-muted-foreground mb-6">{section.description}</p>
-
-                  <div className="flex items-center gap-3 mb-6">
-                    <button
-                      onClick={() => openCardsManager(cardsType, currentCards)}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
-                                 rounded-md hover:bg-primary/90 transition-colors"
-                    >
-                      <ImageIcon size={18} />
-                      <span>Gerenciar Cards</span>
-                    </button>
+                <AdminCard title={
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <span>{section.name}</span>
+                      {sectionHasChanges && (
+                        <span className="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded">
+                          Não salvo
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => openCardsManager(cardsType, currentCards)}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
+                                   rounded-md hover:bg-primary/90 transition-colors text-sm"
+                      >
+                        <ImageIcon size={16} />
+                        <span>Gerenciar Cards</span>
+                      </button>
+                      <button
+                        onClick={() => saveSectionChanges(sectionName)}
+                        disabled={saving || !sectionHasChanges}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm ${
+                          sectionHasChanges
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <Save size={16} />
+                        <span>{sectionHasChanges ? 'Salvar Seção' : 'Sem alterações'}</span>
+                      </button>
+                    </div>
                   </div>
+                }>
+                  <p className="text-muted-foreground mb-6">{section.description}</p>
 
                   <AdminCard title="Resumo dos Cards">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -2551,40 +2300,90 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
           // Special handling for clinic section
           if (section.name.includes("Clinic - Nosso Espaço") && page === "home") {
+            const sectionHasChanges = section.items.some(item => changes[item.id] !== undefined);
+            const sectionName = section.items[0]?.section || "clinic";
+
             return (
               <div key={sectionIndex}>
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold">{section.name}</h3>
-                    <p className="text-muted-foreground">{section.description}</p>
+                <AdminCard title={
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <span>{section.name}</span>
+                      {sectionHasChanges && (
+                        <span className="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded">
+                          Não salvo
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setEditingClinicImages(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
+                                   rounded-md hover:bg-primary/90 transition-colors text-sm"
+                      >
+                        <ImageIcon size={16} />
+                        <span>Gerenciar Galeria</span>
+                      </button>
+                      <button
+                        onClick={() => saveSectionChanges(sectionName)}
+                        disabled={saving || !sectionHasChanges}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm ${
+                          sectionHasChanges
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <Save size={16} />
+                        <span>{sectionHasChanges ? 'Salvar Seção' : 'Sem alterações'}</span>
+                      </button>
+                    </div>
                   </div>
-                  
-                  <button
-                    onClick={() => setEditingClinicImages(true)}
-                    className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    <span>Gerenciar Galeria</span>
-                  </button>
-                </div>
+                }>
+                  <p className="text-muted-foreground mb-6">{section.description}</p>
 
-                {/* Show current clinic info */}
-                <AdminCard title="Resumo da Galeria">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <p>Clique em &quot;Gerenciar Galeria&quot; para editar as imagens com a nova interface moderna.</p>
-                    <p className="mt-2">
-                      A nova interface permite: adicionar/remover imagens (1-10), thumbnails automáticos, 
-                      reordenação por arrastar e melhor organização dos campos.
-                    </p>
-                  </div>
+                  <AdminCard title="Resumo da Galeria">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <p>Clique em &quot;Gerenciar Galeria&quot; para editar as imagens com a nova interface moderna.</p>
+                      <p className="mt-2">
+                        A nova interface permite: adicionar/remover imagens (1-10), thumbnails automáticos,
+                        reordenação por arrastar e melhor organização dos campos.
+                      </p>
+                    </div>
+                  </AdminCard>
                 </AdminCard>
               </div>
             );
           }
 
           // Regular section rendering
+          const sectionHasChanges = section.items.some(item => changes[item.id] !== undefined);
+          const sectionName = section.items[0]?.section || '';
+
           return (
-            <AdminCard key={sectionIndex} title={section.name}>
+            <AdminCard key={sectionIndex} title={
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-3">
+                  <span>{section.name}</span>
+                  {sectionHasChanges && (
+                    <span className="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded">
+                      Não salvo
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => saveSectionChanges(sectionName)}
+                  disabled={saving || !sectionHasChanges}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm ${
+                    sectionHasChanges
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  <Save size={16} />
+                  <span>{sectionHasChanges ? 'Salvar Seção' : 'Sem alterações'}</span>
+                </button>
+              </div>
+            }>
               <p className="text-muted-foreground mb-6">{section.description}</p>
 
               <div className="space-y-6">

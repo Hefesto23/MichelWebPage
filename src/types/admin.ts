@@ -365,7 +365,7 @@ export interface AdminFilters {
 // 🎨 TIPOS DE COMPONENTES ADMIN
 // ============================================
 export interface AdminCardProps {
-  title?: string;
+  title?: string | React.ReactNode;
   subtitle?: string;
   actions?: Array<{
     label: string;

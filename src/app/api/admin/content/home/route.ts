@@ -154,39 +154,17 @@ export async function POST(request: Request) {
 
     console.log(`📝 API: Preparando ${itemsToSave.length} itens para salvar`);
 
-    // Iniciar transação para garantir consistência
-    await prisma.$transaction(async (tx) => {
-      // Desativar todos os registros existentes desta página
-      await tx.content.updateMany({
-        where: {
-          page: "home",
-          isActive: true
-        },
-        data: {
-          isActive: false
-        }
-      });
-
-      // Criar ou atualizar registros usando upsert
-      for (const item of itemsToSave) {
-        await tx.content.upsert({
-          where: {
-            page_section_key: {
-              page: item.page,
-              section: item.section,
-              key: item.key
-            }
-          },
-          update: {
-            value: item.value,
-            type: item.type,
-            isActive: item.isActive,
-            updatedAt: new Date()
-          },
-          create: item
-        });
-      }
+    // Deletar todos os registros existentes (hard delete)
+    await prisma.content.deleteMany({
+      where: { page: "home" }
     });
+
+    // Criar novos registros
+    if (itemsToSave.length > 0) {
+      await prisma.content.createMany({
+        data: itemsToSave
+      });
+    }
 
     // Revalidar cache das seções da home
     try {
@@ -229,15 +207,9 @@ export async function DELETE(request: Request) {
 
     console.log("🔄 API: Resetando conteúdo da página Home...");
 
-    // Desativar todos os registros desta página
-    await prisma.content.updateMany({
-      where: {
-        page: "home",
-        isActive: true
-      },
-      data: {
-        isActive: false
-      }
+    // Deletar todos os registros desta página (hard delete)
+    await prisma.content.deleteMany({
+      where: { page: "home" }
     });
 
     // Revalidar cache das seções da home

@@ -3,8 +3,8 @@
 
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { CLINIC_INFO } from "@/utils/constants";
-import { MapPin, Maximize2 } from "lucide-react";
-import { useState } from "react";
+import { Maximize2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 type AddressType = "primary" | "secondary";
 
@@ -12,6 +12,19 @@ export const ContactMap = () => {
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<AddressType>("primary");
   const { settings } = usePublicSettings();
+
+  // Escutar mudanças de endereço do ContactHours
+  useEffect(() => {
+    const handleAddressChange = (event: CustomEvent<AddressType>) => {
+      setSelectedAddress(event.detail);
+    };
+
+    window.addEventListener('addressChange', handleAddressChange as EventListener);
+
+    return () => {
+      window.removeEventListener('addressChange', handleAddressChange as EventListener);
+    };
+  }, []);
 
   // Função para formatar endereço completo baseado no tipo
   const formatFullAddress = (type: AddressType = "primary"): string => {
@@ -53,34 +66,6 @@ export const ContactMap = () => {
 
   return (
     <>
-      {/* Botões de seleção de endereço - aparecem apenas se houver 2 endereços */}
-      {hasSecondAddress && (
-        <div className="mb-4 flex gap-3 flex-wrap">
-          <button
-            onClick={() => setSelectedAddress("primary")}
-            className={`flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-              selectedAddress === "primary"
-                ? "bg-primary-foreground text-btnFg dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-                : "bg-background text-card-foreground border-2 border-card hover:border-foreground hover:text-card-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:text-secondary-foreground dark:hover:shadow-md"
-            }`}
-          >
-            <MapPin size={20} />
-            Endereço Principal
-          </button>
-          <button
-            onClick={() => setSelectedAddress("secondary")}
-            className={`flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-medium transition-all duration-200 ${
-              selectedAddress === "secondary"
-                ? "bg-primary-foreground text-btnFg dark:bg-btn dark:text-btn-fg dark:border-btn-border"
-                : "bg-background text-card-foreground border-2 border-card hover:border-foreground hover:text-card-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:text-secondary-foreground dark:hover:shadow-md"
-            }`}
-          >
-            <MapPin size={20} />
-            Endereço Secundário
-          </button>
-        </div>
-      )}
-
       <div
         className={`relative overflow-hidden transition-all duration-300 ${
           isMapExpanded ? "h-[500px]" : "h-64"

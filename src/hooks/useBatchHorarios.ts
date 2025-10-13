@@ -1,31 +1,74 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 
 interface UseBatchHorariosResult {
   horarios: Record<string, string[]>;
   loading: boolean;
+  loadingMore: boolean;
   error: string | null;
+  progress: number;
   refetch: () => Promise<void>;
   getHorariosForDate: (date: string) => string[];
+  loadMoreDates: (startDate: Date, endDate: Date) => Promise<void>;
+  hasDateRange: (startDate: Date, endDate: Date) => boolean;
+  loadedRange: { minDate: string | null; maxDate: string | null };
+}
+
+interface UseBatchHorariosOptions {
+  onProgress?: (progress: number) => void;
 }
 
 const REVALIDATE_INTERVAL = 30000; // 30 segundos
 
 /**
  * Hook customizado para batch prefetch de horários disponíveis
- * Busca TODAS as datas do período de uma vez e revalida periodicamente
+ * Busca horários de forma incremental e revalida periodicamente
  */
 export const useBatchHorarios = (
-  startDate: Date,
-  endDate: Date
+  initialStartDate: Date,
+  initialDays: number = 30,
+  options?: UseBatchHorariosOptions
 ): UseBatchHorariosResult => {
   const [horarios, setHorarios] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [dateRanges, setDateRanges] = useState<Set<string>>(new Set());
+  const [loadedRange, setLoadedRange] = useState<{
+    minDate: string | null;
+    maxDate: string | null;
+  }>({ minDate: null, maxDate: null });
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchBatch = useCallback(async (isInitialLoad = false) => {
+  // Notificar progresso via callback
+  const updateProgress = useCallback((value: number) => {
+    setProgress(value);
+    options?.onProgress?.(value);
+  }, [options]);
+
+  // Função para verificar se já temos um intervalo de datas
+  const hasDateRange = useCallback((startDate: Date, endDate: Date): boolean => {
+    const start = format(startDate, 'yyyy-MM-dd');
+    const end = format(endDate, 'yyyy-MM-dd');
+    const rangeKey = `${start}:${end}`;
+    return dateRanges.has(rangeKey);
+  }, [dateRanges]);
+
+  // Função para carregar mais datas (incremental)
+  const loadMoreDates = useCallback(async (startDate: Date, endDate: Date) => {
+    const start = format(startDate, 'yyyy-MM-dd');
+    const end = format(endDate, 'yyyy-MM-dd');
+    const rangeKey = `${start}:${end}`;
+
+    // Se já carregamos esse range, skip
+    if (dateRanges.has(rangeKey)) {
+      console.log(`✅ Range já em cache: ${start} até ${end}`);
+      return;
+    }
+
     // Cancelar requisição anterior se existir
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -34,54 +77,99 @@ export const useBatchHorarios = (
     abortControllerRef.current = new AbortController();
 
     try {
-      if (isInitialLoad) {
-        setLoading(true);
-      }
+      setLoadingMore(true);
+      updateProgress(30);
 
-      const start = format(startDate, 'yyyy-MM-dd');
-      const end = format(endDate, 'yyyy-MM-dd');
-
-      console.log(`🚀 Prefetch batch: ${start} até ${end}`);
+      console.log(`🔄 Carregando mais datas: ${start} até ${end}`);
 
       const response = await fetch(
         `/api/calendario/horarios/batch?startDate=${start}&endDate=${end}`,
         { signal: abortControllerRef.current.signal }
       );
 
+      updateProgress(70);
+
       if (!response.ok) {
-        throw new Error('Erro ao buscar horários em lote');
+        throw new Error('Erro ao buscar horários');
       }
 
       const data = await response.json();
 
-      console.log(`✅ Batch recebido: ${Object.keys(data).length} datas`);
+      // Merge com dados existentes
+      setHorarios(prev => ({ ...prev, ...data }));
+      setDateRanges(prev => {
+        const newSet = new Set(prev);
+        newSet.add(rangeKey);
+        return newSet;
+      });
 
-      setHorarios(data);
+      // Atualizar range de datas carregadas
+      setLoadedRange(prev => {
+        const newMin = !prev.minDate || start < prev.minDate ? start : prev.minDate;
+        const newMax = !prev.maxDate || end > prev.maxDate ? end : prev.maxDate;
+        return { minDate: newMin, maxDate: newMax };
+      });
+
       setError(null);
+      updateProgress(100);
+
+      console.log(`✅ Carregado +${Object.keys(data).length} datas`);
     } catch (err: any) {
       if (err.name === 'AbortError') {
         console.log('🚫 Requisição cancelada');
         return;
       }
 
-      console.error('Erro no batch prefetch:', err);
+      console.error('Erro ao carregar mais datas:', err);
       setError(err.message || 'Erro ao carregar horários');
+      updateProgress(0);
     } finally {
-      if (isInitialLoad) {
+      setLoadingMore(false);
+    }
+  }, [dateRanges, updateProgress]);
+
+  // Fetch inicial (apenas initialDays)
+  useEffect(() => {
+    const fetchInitial = async () => {
+      try {
+        setLoading(true);
+        updateProgress(20);
+
+        const endDate = addDays(initialStartDate, initialDays);
+
+        console.log(`🚀 Carregamento inicial: ${initialDays} dias`);
+
+        await loadMoreDates(initialStartDate, endDate);
+
+        updateProgress(100);
+      } catch (err) {
+        console.error('Erro no carregamento inicial:', err);
+      } finally {
         setLoading(false);
       }
-    }
-  }, [startDate, endDate]);
+    };
 
-  // Fetch inicial + setup de revalidação periódica
-  useEffect(() => {
-    // Fetch inicial
-    fetchBatch(true);
+    fetchInitial();
 
-    // Revalidar a cada 30 segundos (dados sempre frescos!)
+    // Setup de revalidação periódica (apenas para ranges já carregados)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: Este useEffect deve rodar apenas no mount inicial
     intervalRef.current = setInterval(() => {
-      console.log('🔄 Revalidando horários em background...');
-      fetchBatch(false);
+      if (dateRanges.size > 0 && !loading && !loadingMore) {
+        console.log('🔄 Revalidando horários em background...');
+        // Revalidar primeiro range (mais recente)
+        const rangesArray = Array.from(dateRanges.values());
+        const firstRange = rangesArray[0];
+        const [start, end] = firstRange.split(':');
+
+        fetch(`/api/calendario/horarios/batch?startDate=${start}&endDate=${end}`)
+          .then(res => res.json())
+          .then(data => {
+            setHorarios(prev => ({ ...prev, ...data }));
+            console.log('✅ Revalidação completa');
+          })
+          .catch(err => console.error('Erro na revalidação:', err));
+      }
     }, REVALIDATE_INTERVAL);
 
     // Cleanup
@@ -93,7 +181,7 @@ export const useBatchHorarios = (
         abortControllerRef.current.abort();
       }
     };
-  }, [fetchBatch]);
+  }, []); // Apenas no mount
 
   // Helper para obter horários de uma data específica
   const getHorariosForDate = useCallback((date: string): string[] => {
@@ -102,14 +190,27 @@ export const useBatchHorarios = (
 
   // Função para forçar refetch manual
   const refetch = useCallback(async () => {
-    await fetchBatch(true);
-  }, [fetchBatch]);
+    setLoading(true);
+    setDateRanges(new Set());
+    setHorarios({});
+    setLoadedRange({ minDate: null, maxDate: null }); // Reset range
+
+    const endDate = addDays(initialStartDate, initialDays);
+    await loadMoreDates(initialStartDate, endDate);
+
+    setLoading(false);
+  }, [initialStartDate, initialDays, loadMoreDates]);
 
   return {
     horarios,
     loading,
+    loadingMore,
     error,
+    progress,
     refetch,
     getHorariosForDate,
+    loadMoreDates,
+    hasDateRange,
+    loadedRange,
   };
 };

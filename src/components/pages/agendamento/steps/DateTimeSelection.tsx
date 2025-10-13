@@ -8,8 +8,9 @@ import {
   addMonths,
   format,
   isAfter,
-  isBefore,
   startOfDay,
+  startOfMonth,
+  endOfMonth,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -40,6 +41,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   const [date, setDate] = useState<Date | undefined>(
     formData.dataSelecionada ? new Date(formData.dataSelecionada + "T12:00:00") : undefined
   );
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [loadingHorarios, setLoadingHorarios] = useState(false);
 
   // Limpar estado local quando dados do formulário são resetados
   useEffect(() => {
@@ -55,21 +58,61 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   const fimPeriodo = useMemo(() => addMonths(hoje, Math.ceil(advanceDays / 30)), [hoje, advanceDays]);
   const activeDays = useMemo(() => getActiveDaysAsNumbers(), [getActiveDaysAsNumbers]);
 
-  // 🚀 OTIMIZAÇÃO FASE 3: Batch prefetch de TODAS as datas do período
-  const { loading: batchLoading, getHorariosForDate } = useBatchHorarios(hoje, fimPeriodo);
+  // 🚀 OTIMIZAÇÃO: Batch prefetch incremental (30 dias iniciais)
+  const {
+    loading: batchLoading,
+    loadingMore,
+    error: batchError,
+    progress,
+    getHorariosForDate,
+    loadMoreDates,
+    hasDateRange,
+    refetch,
+    loadedRange
+  } = useBatchHorarios(hoje, 30);
+
+  // 🚀 Pré-carregar próximo mês quando usuário navega
+  useEffect(() => {
+    // Calcular range do mês atual + próximo mês
+    const monthStart = startOfMonth(currentMonth);
+    const nextMonthEnd = endOfMonth(addMonths(currentMonth, 1));
+
+    // Se ainda não temos esses dados, carregar
+    if (!batchLoading && !hasDateRange(monthStart, nextMonthEnd)) {
+      console.log(`🔄 Pré-carregando: ${format(monthStart, 'MMM/yyyy')} + próximo mês`);
+      loadMoreDates(monthStart, nextMonthEnd);
+    }
+  }, [currentMonth, batchLoading, hasDateRange, loadMoreDates]);
+
+  // 🏠 Auto-selecionar primeiro local quando modalidade presencial for escolhida
+  useEffect(() => {
+    // Condições:
+    // 1. Modalidade presencial selecionada
+    // 2. Nenhum endereço selecionado ainda
+    // 3. Settings carregados com endereço disponível
+    if (
+      formData.modalidade === MODALITY.IN_PERSON &&
+      !formData.endereco &&
+      settings?.street
+    ) {
+      const primeiroEndereco = `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`;
+      console.log('🏠 Auto-selecionando primeiro local:', primeiroEndereco);
+      updateFormData({ endereco: primeiroEndereco });
+    }
+  }, [formData.modalidade, formData.endereco, settings, updateFormData]);
 
   // Função memoizada para verificar se um dia é desabilitado baseado nas configurações
   const isDiaDesabilitado = useCallback((data: Date) => {
     const dayOfWeek = data.getDay(); // 0 = domingo, 1 = segunda, etc.
-    
+
     return (
-      isBefore(data, hoje) ||
+      !isAfter(data, hoje) ||  // Desabilita hoje + datas passadas (só permite amanhã em diante)
       isAfter(data, fimPeriodo) ||
       !activeDays.includes(dayOfWeek) // Só permite dias configurados no admin
     );
   }, [hoje, fimPeriodo, activeDays]);
 
-  // 🚀 OTIMIZAÇÃO FASE 3: Função INSTANTÂNEA - dados já estão em memória!
+  // 🚀 Função de seleção de data com feedback visual
   const handleDateChange = useCallback((selectedDate: Date | undefined) => {
     if (
       !selectedDate ||
@@ -81,7 +124,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
 
     const dataFormatada = format(selectedDate, "yyyy-MM-dd");
 
-    console.log("⚡ Data selecionada (INSTANTÂNEO):", dataFormatada);
+    console.log("⚡ Data selecionada:", dataFormatada);
 
     // ✅ Atualizar UI IMEDIATAMENTE
     setDate(selectedDate);
@@ -90,11 +133,17 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
       horarioSelecionado: "",
     });
 
-    // ⚡ BUSCAR DADOS DO BATCH (já em memória, 0ms!)
-    const horariosParaData = getHorariosForDate(dataFormatada);
-    console.log(`✅ Horários disponíveis (batch): ${horariosParaData.length} slots`);
+    // Mostrar loading enquanto busca horários
+    setLoadingHorarios(true);
 
-    setHorariosDisponiveis(horariosParaData);
+    // Simular pequeno delay para feedback visual (dados já estão em memória)
+    setTimeout(() => {
+      const horariosParaData = getHorariosForDate(dataFormatada);
+      console.log(`✅ Horários disponíveis: ${horariosParaData.length} slots`);
+
+      setHorariosDisponiveis(horariosParaData);
+      setLoadingHorarios(false);
+    }, 150); // 150ms para feedback visual suave
   }, [formData.dataSelecionada, getHorariosForDate, updateFormData]);
 
   // Função memoizada para selecionar um horário
@@ -275,71 +324,156 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           </div>
         </div>
 
-        {/* Calendário */}
+        {/* Calendário com overlay de loading */}
         <label className={formStyles.formLabel}>
           Selecione uma data para a consulta
         </label>
-        <div className="w-full max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-2 sm:p-4 border-2 border-border overflow-x-auto" data-testid="calendar">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleDateChange}
-            disabled={isDiaDesabilitado}
-            startMonth={hoje}
-            endMonth={fimPeriodo}
-            timeZone="America/Sao_Paulo"
-            locale={ptBR}
-            classNames={{
-              month_caption:
-                "flex w-full pb-6 border-b border-border items-baseline justify-center",
-              caption_label: "text-3xl font-bold capitalize text-center",
-              nav: "flex justify-between w-full",
-              nav_button:
-                "flex items-center justify-center focus:outline-none focus:ring-0",
-              nav_button_previous: "absolute left-0",
-              nav_button_next: "absolute right-0",
-              chevron:
-                "fill-foreground dark:fill-blue-700 w-10 h-10 inline-block align-baseline",
+        <div className="relative">
+          <div className="w-full max-w-xl mx-auto bg-black/15 rounded-[0.5rem] p-2 sm:p-4 border-2 border-border overflow-x-auto" data-testid="calendar">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={handleDateChange}
+              onMonthChange={setCurrentMonth}
+              disabled={batchLoading || isDiaDesabilitado}
+              startMonth={hoje}
+              endMonth={fimPeriodo}
+              timeZone="America/Sao_Paulo"
+              locale={ptBR}
+              classNames={{
+                month_caption:
+                  "flex w-full pb-6 border-b border-border items-baseline justify-center",
+                caption_label: "text-3xl font-bold capitalize text-center",
+                nav: "flex justify-between w-full",
+                nav_button:
+                  "flex items-center justify-center focus:outline-none focus:ring-0",
+                nav_button_previous: "absolute left-0",
+                nav_button_next: "absolute right-0",
+                chevron:
+                  "fill-foreground dark:fill-blue-700 w-10 h-10 inline-block align-baseline",
 
-              weekday: "font-extrabold text-xl text-center h-16",
-              months: "w-full",
-              month: "grid grid-cols-1",
-              day: "h-14 w-14 text-center",
-              day_button: "font-extrabold text-xl",
-              today: "border-b-4 border-primary-foreground",
-              selected:
-                "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",
-            }}
-            footer={
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-md text-muted-foreground text-center font-bold">
-                  {settingsLoading ? (
-                    "Carregando horários..."
-                  ) : (
-                    <>
-                      Atendimento disponível{" "}
-                      <span className="font-extrabold capitalize">
-                        {formatWorkingDays().toLowerCase()}
+                weekday: "font-extrabold text-xl text-center h-16",
+                months: "w-full",
+                month: "grid grid-cols-1",
+                day: "h-14 w-14 text-center",
+                day_button: "font-extrabold text-xl",
+                today: "border-b-4 border-primary-foreground",
+                selected:
+                  "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",
+              }}
+              footer={
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-md text-muted-foreground text-center font-bold">
+                    {settingsLoading ? (
+                      "Carregando horários..."
+                    ) : (
+                      <>
+                        Atendimento disponível{" "}
+                        <span className="font-extrabold capitalize">
+                          {formatWorkingDays().toLowerCase()}
+                        </span>
+                        {settings && (
+                          <>
+                            {" "}das{" "}
+                            <span className="font-extrabold">
+                              {settings.start_time}
+                            </span>
+                            {" às "}
+                            <span className="font-extrabold">
+                              {settings.end_time}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </p>
+
+                  {/* Status de carregamento incremental no footer */}
+                  {loadingMore && (
+                    <div className="mt-2 flex items-center justify-center gap-2 text-sm animate-in fade-in duration-300">
+                      <svg className="animate-spin h-3 w-3 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span className="text-blue-700 dark:text-blue-300 font-medium">
+                        Carregando próximo mês...
                       </span>
-                      {settings && (
-                        <>
-                          {" "}das{" "}
-                          <span className="font-extrabold">
-                            {settings.start_time}
-                          </span>
-                          {" às "}
-                          <span className="font-extrabold">
-                            {settings.end_time}
-                          </span>
-                        </>
-                      )}
-                    </>
+                    </div>
                   )}
+                </div>
+              }
+            />
+          </div>
+
+          {/* Overlay de loading inicial */}
+          {batchLoading && (
+            <div className="absolute inset-0 bg-background/95 backdrop-blur-sm rounded-[0.5rem] flex items-center justify-center z-10 animate-in fade-in duration-300">
+              <div className="bg-card border-2 border-primary/20 rounded-xl p-8 shadow-2xl max-w-sm mx-4 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                  <svg className="animate-spin h-10 w-10 text-primary" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                </div>
+
+                <h3 className="text-lg font-bold text-foreground mb-2">
+                  Preparando calendário
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Carregando horários disponíveis para os próximos{' '}
+                  <span className="font-bold text-foreground">30 dias</span>
                 </p>
+
+                {/* Barra de progresso */}
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-500"
+                    style={{ width: `${progress || 60}%` }}
+                  />
+                </div>
               </div>
-            }
-          />
+            </div>
+          )}
+
+          {/* Toast discreto para loading incremental (canto superior direito) */}
+          {loadingMore && !batchLoading && (
+            <div className="absolute top-2 right-2 z-20 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-xl px-4 py-2.5 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="relative">
+                <svg className="animate-spin h-4 w-4 text-primary" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-foreground">
+                Carregando mais datas...
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* Badge de status e período carregado */}
+        {!batchLoading && loadedRange.minDate && loadedRange.maxDate && (
+          <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-4 py-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span>
+                Horários carregados:{' '}
+                <span className="font-bold text-foreground">
+                  {format(new Date(loadedRange.minDate + 'T12:00:00'), 'dd/MMM')} - {format(new Date(loadedRange.maxDate + 'T12:00:00'), 'dd/MMM/yyyy')}
+                </span>
+              </span>
+            </div>
+
+            {!loadingMore && (
+              <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="font-medium">Atualizado</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Exibir data selecionada */}
         {formData.dataSelecionada && (
@@ -354,44 +488,51 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           </div>
         )}
 
-        {/* Feedback de carregamento inicial do batch */}
-        {batchLoading && !formData.dataSelecionada && (
-          <div className="mt-4 p-6 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
-            <div className="flex items-center justify-center gap-3">
-              <svg
-                className="animate-spin h-6 w-6 text-blue-600 dark:text-blue-400"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+        {/* Banner de erro se houver */}
+        {batchError && !batchLoading && (
+          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <p className="text-blue-800 dark:text-blue-200 font-semibold">
-                Carregando horários disponíveis para todo o período...
-              </p>
+
+              <div className="flex-1">
+                <p className="text-red-900 dark:text-red-100 font-semibold mb-1">
+                  Erro ao carregar horários
+                </p>
+                <p className="text-red-700 dark:text-red-300 text-sm mb-3">
+                  {batchError || 'Não foi possível buscar os horários disponíveis. Verifique sua conexão.'}
+                </p>
+
+                <button
+                  onClick={refetch}
+                  className="text-sm font-medium text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 underline"
+                >
+                  Tentar novamente
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Seleção de horário */}
+        {/* Seleção de horário com skeleton e estado vazio melhorado */}
         {formData.dataSelecionada && (
           <div className="mt-6">
             <label className={formStyles.formLabel}>Selecione um Horário</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-              {horariosDisponiveis.length > 0 ? (
-                horariosDisponiveis.map((horario) => (
+
+            {/* Loading state com skeleton */}
+            {loadingHorarios ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {[...Array(8)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-12 bg-muted animate-pulse rounded-lg"
+                  ></div>
+                ))}
+              </div>
+            ) : horariosDisponiveis.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                {horariosDisponiveis.map((horario) => (
                   <button
                     key={horario}
                     type="button"
@@ -405,13 +546,25 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                   >
                     {horario}
                   </button>
-                ))
-              ) : (
-                <p className="col-span-full text-center py-4 text-destructive">
-                  Nenhum horário disponível para esta data
+                ))}
+              </div>
+            ) : (
+              /* Estado vazio melhorado */
+              <div className="text-center py-8 px-4 bg-muted/50 rounded-lg">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-destructive/10 mb-3">
+                  <svg className="w-6 h-6 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-base font-semibold text-foreground mb-1">
+                  Nenhum horário disponível
                 </p>
-              )}
-            </div>
+                <p className="text-sm text-muted-foreground">
+                  Todos os horários desta data já estão ocupados.<br />
+                  Por favor, tente outra data.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

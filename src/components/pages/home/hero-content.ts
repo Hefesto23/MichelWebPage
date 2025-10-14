@@ -1,5 +1,5 @@
 import { DEFAULT_HERO_CONTENT } from "@/utils/default-content";
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createCachedContentFetcher } from "@/lib/cms-direct";
 
 export interface HeroContent {
   mainText: string;
@@ -8,20 +8,26 @@ export interface HeroContent {
   backgroundImage: string;
 }
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('hero-content')
+ */
 export async function getHeroContent(): Promise<HeroContent> {
-  return fetchCmsContent({
-    endpoint: "home",
-    cacheTag: "hero-content", 
-    fallback: DEFAULT_HERO_CONTENT,
-    parser: (data) => {
-      if (!data.content?.hero) return DEFAULT_HERO_CONTENT;
-      
-      return {
-        mainText: data.content.hero.mainText || DEFAULT_HERO_CONTENT.mainText,
-        ctaText: data.content.hero.ctaText || DEFAULT_HERO_CONTENT.ctaText,
-        disclaimer: data.content.hero.disclaimer || DEFAULT_HERO_CONTENT.disclaimer,
-        backgroundImage: data.content.hero.backgroundImage || DEFAULT_HERO_CONTENT.backgroundImage,
-      };
-    }
-  });
+  const fetcher = createCachedContentFetcher<Partial<HeroContent>>(
+    "home",
+    "hero",
+    "hero-content"
+  );
+
+  const content = await fetcher();
+
+  // Merge com valores padrão
+  return {
+    mainText: content.mainText || DEFAULT_HERO_CONTENT.mainText,
+    ctaText: content.ctaText || DEFAULT_HERO_CONTENT.ctaText,
+    disclaimer: content.disclaimer || DEFAULT_HERO_CONTENT.disclaimer,
+    backgroundImage: content.backgroundImage || DEFAULT_HERO_CONTENT.backgroundImage,
+  };
 }

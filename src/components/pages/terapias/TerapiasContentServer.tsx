@@ -1,4 +1,4 @@
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createPageContentFetcher } from "@/lib/cms-direct";
 import { TerapiasWithPagination } from "./TerapiasWithPagination";
 
 interface Card {
@@ -47,53 +47,67 @@ const DEFAULT_CONTENT: TerapiasContentData = {
   ]
 };
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('terapias-content')
+ */
 export const TerapiasContentServer = async () => {
-  const content: TerapiasContentData = await fetchCmsContent({
-    endpoint: "terapias",
-    cacheTag: "terapias-content",
-    fallback: DEFAULT_CONTENT,
-    parser: (data) => {
-      if (data.content && Object.keys(data.content).length > 0) {
-        let processedContent: TerapiasContentData = DEFAULT_CONTENT;
+  const fetcher = createPageContentFetcher<any>("terapias", "terapias-content");
+  const rawContent = await fetcher();
 
-        // Verificar estrutura do PageEditor (data.content.terapias)
-        if (data.content.terapias) {
-          processedContent = {
-            title: data.content.terapias.title || DEFAULT_CONTENT.title,
-            description: data.content.terapias.description || DEFAULT_CONTENT.description,
-            cards: data.content.terapias.therapyModalities || DEFAULT_CONTENT.cards
-          };
+  let content: TerapiasContentData = DEFAULT_CONTENT;
+
+  if (rawContent && Object.keys(rawContent).length > 0) {
+    // Extrair title e description da seção terapias
+    const title = rawContent.terapias?.title || DEFAULT_CONTENT.title;
+    const description = rawContent.terapias?.description || DEFAULT_CONTENT.description;
+
+    // Processar cards das seções card_* (formato do banco de dados)
+    const therapyModalities: Card[] = [];
+
+    Object.keys(rawContent).forEach(key => {
+      if (key.startsWith('card_')) {
+        try {
+          // rawContent[key] é um objeto { data: "JSON string" }
+          const cardSection = rawContent[key];
+          const cardDataString = cardSection.data || cardSection;
+          const cardData = typeof cardDataString === 'string'
+            ? JSON.parse(cardDataString)
+            : cardDataString;
+          therapyModalities.push(cardData);
+        } catch (e) {
+          console.error('Error parsing therapy card data:', e);
         }
-        // Estrutura legacy com cards separados
-        else {
-          processedContent = {
-            title: data.content.title || DEFAULT_CONTENT.title,
-            description: data.content.description || DEFAULT_CONTENT.description,
-            cards: []
-          };
-
-          // Processar cards do banco de dados
-          const cardKeys = Object.keys(data.content).filter(key => key.startsWith('card_'));
-          cardKeys.forEach(key => {
-            try {
-              const cardData = JSON.parse(data.content[key]);
-              processedContent.cards.push(cardData);
-            } catch (e) {
-              console.error('Error parsing card data:', e);
-            }
-          });
-
-          // Se não há cards salvos, usar padrão
-          if (processedContent.cards.length === 0) {
-            processedContent.cards = DEFAULT_CONTENT.cards;
-          }
-        }
-
-        return processedContent;
       }
-      return DEFAULT_CONTENT;
+    });
+
+    // Verificar se existem cards no formato PageEditor (therapyModalities direto)
+    if (rawContent.terapias?.therapyModalities && Array.isArray(rawContent.terapias.therapyModalities)) {
+      content = {
+        title,
+        description,
+        cards: rawContent.terapias.therapyModalities
+      };
     }
-  });
+    // Usar cards processados das seções card_*
+    else if (therapyModalities.length > 0) {
+      content = {
+        title,
+        description,
+        cards: therapyModalities
+      };
+    }
+    // Fallback para default
+    else {
+      content = {
+        title,
+        description,
+        cards: DEFAULT_CONTENT.cards
+      };
+    }
+  }
 
   return (
     <TerapiasWithPagination

@@ -1,5 +1,5 @@
 import { DEFAULT_WELCOME_CONTENT } from "@/utils/default-content";
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createCachedContentFetcher } from "@/lib/cms-direct";
 
 export interface WelcomeContent {
   title: string;
@@ -7,19 +7,25 @@ export interface WelcomeContent {
   profileImage: string;
 }
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('welcome-content')
+ */
 export async function getWelcomeContent(): Promise<WelcomeContent> {
-  return fetchCmsContent({
-    endpoint: "home",
-    cacheTag: "welcome-content",
-    fallback: DEFAULT_WELCOME_CONTENT,
-    parser: (data) => {
-      if (!data.content?.welcome) return DEFAULT_WELCOME_CONTENT;
-      
-      return {
-        title: data.content.welcome.title || DEFAULT_WELCOME_CONTENT.title,
-        content: data.content.welcome.content || DEFAULT_WELCOME_CONTENT.content,
-        profileImage: data.content.welcome.profileImage || DEFAULT_WELCOME_CONTENT.profileImage,
-      };
-    }
-  });
+  const fetcher = createCachedContentFetcher<Partial<WelcomeContent>>(
+    "home",
+    "welcome",
+    "welcome-content"
+  );
+
+  const content = await fetcher();
+
+  // Merge com valores padrão
+  return {
+    title: content.title || DEFAULT_WELCOME_CONTENT.title,
+    content: content.content || DEFAULT_WELCOME_CONTENT.content,
+    profileImage: content.profileImage || DEFAULT_WELCOME_CONTENT.profileImage,
+  };
 }

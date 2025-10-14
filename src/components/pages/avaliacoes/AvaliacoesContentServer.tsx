@@ -1,4 +1,4 @@
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createPageContentFetcher } from "@/lib/cms-direct";
 import { AvaliacoesWithPagination } from "./AvaliacoesWithPagination";
 
 interface Card {
@@ -39,53 +39,67 @@ const DEFAULT_CONTENT: AvaliacoesContentData = {
   ]
 };
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('avaliacoes-content')
+ */
 export const AvaliacoesContentServer = async () => {
-  const content: AvaliacoesContentData = await fetchCmsContent({
-    endpoint: "avaliacoes",
-    cacheTag: "avaliacoes-content",
-    fallback: DEFAULT_CONTENT,
-    parser: (data) => {
-      if (data.content && Object.keys(data.content).length > 0) {
-        let processedContent: AvaliacoesContentData = DEFAULT_CONTENT;
+  const fetcher = createPageContentFetcher<any>("avaliacoes", "avaliacoes-content");
+  const rawContent = await fetcher();
 
-        // Verificar estrutura do PageEditor (data.content.avaliacoes)
-        if (data.content.avaliacoes) {
-          processedContent = {
-            title: data.content.avaliacoes.title || DEFAULT_CONTENT.title,
-            description: data.content.avaliacoes.description || DEFAULT_CONTENT.description,
-            cards: data.content.avaliacoes.testModalities || DEFAULT_CONTENT.cards
-          };
-        } 
-        // Estrutura legacy com cards separados
-        else {
-          processedContent = {
-            title: data.content.title || DEFAULT_CONTENT.title,
-            description: data.content.description || DEFAULT_CONTENT.description,
-            cards: []
-          };
+  let content: AvaliacoesContentData = DEFAULT_CONTENT;
 
-          // Processar cards do banco de dados
-          const cardKeys = Object.keys(data.content).filter(key => key.startsWith('card_'));
-          cardKeys.forEach(key => {
-            try {
-              const cardData = JSON.parse(data.content[key]);
-              processedContent.cards.push(cardData);
-            } catch (e) {
-              console.error('Error parsing card data:', e);
-            }
-          });
+  if (rawContent && Object.keys(rawContent).length > 0) {
+    // Extrair title e description da seção avaliacoes
+    const title = rawContent.avaliacoes?.title || DEFAULT_CONTENT.title;
+    const description = rawContent.avaliacoes?.description || DEFAULT_CONTENT.description;
 
-          // Se não há cards salvos, usar padrão
-          if (processedContent.cards.length === 0) {
-            processedContent.cards = DEFAULT_CONTENT.cards;
-          }
+    // Processar cards das seções card_* (formato do banco de dados)
+    const testModalities: Card[] = [];
+
+    Object.keys(rawContent).forEach(key => {
+      if (key.startsWith('card_')) {
+        try {
+          // rawContent[key] é um objeto { data: "JSON string" }
+          const cardSection = rawContent[key];
+          const cardDataString = cardSection.data || cardSection;
+          const cardData = typeof cardDataString === 'string'
+            ? JSON.parse(cardDataString)
+            : cardDataString;
+          testModalities.push(cardData);
+        } catch (e) {
+          console.error('Error parsing avaliacoes card data:', e);
         }
-
-        return processedContent;
       }
-      return DEFAULT_CONTENT;
+    });
+
+    // Verificar se existem cards no formato PageEditor (testModalities direto)
+    if (rawContent.avaliacoes?.testModalities && Array.isArray(rawContent.avaliacoes.testModalities)) {
+      content = {
+        title,
+        description,
+        cards: rawContent.avaliacoes.testModalities
+      };
     }
-  });
+    // Usar cards processados das seções card_*
+    else if (testModalities.length > 0) {
+      content = {
+        title,
+        description,
+        cards: testModalities
+      };
+    }
+    // Fallback para default
+    else {
+      content = {
+        title,
+        description,
+        cards: DEFAULT_CONTENT.cards
+      };
+    }
+  }
 
   return (
     <AvaliacoesWithPagination

@@ -1,5 +1,5 @@
 import { DEFAULT_CLINIC_CONTENT } from "@/utils/default-content";
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createCachedContentFetcher } from "@/lib/cms-direct";
 
 export interface ClinicImage {
   id: number;
@@ -18,33 +18,25 @@ export interface ClinicContent {
   images: ClinicImage[];
 }
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('clinic-content')
+ */
 export async function getClinicContent(): Promise<ClinicContent> {
-  return fetchCmsContent({
-    endpoint: "home",
-    cacheTag: "clinic-content",
-    fallback: DEFAULT_CLINIC_CONTENT,
-    parser: (data) => {
-      if (!data.content?.clinic) return DEFAULT_CLINIC_CONTENT;
-      
-      const clinicData = data.content.clinic;
-      
-      // Parse das imagens se vier como string JSON
-      let clinicImages = DEFAULT_CLINIC_CONTENT.images;
-      if (clinicData.images) {
-        try {
-          clinicImages = typeof clinicData.images === "string"
-            ? JSON.parse(clinicData.images)
-            : clinicData.images;
-        } catch {
-          clinicImages = DEFAULT_CLINIC_CONTENT.images;
-        }
-      }
-      
-      return {
-        title: clinicData.title || DEFAULT_CLINIC_CONTENT.title,
-        description: clinicData.description || DEFAULT_CLINIC_CONTENT.description,
-        images: clinicImages,
-      };
-    }
-  });
+  const fetcher = createCachedContentFetcher<Partial<ClinicContent>>(
+    "home",
+    "clinic",
+    "clinic-content"
+  );
+
+  const content = await fetcher();
+
+  // Merge com valores padrão
+  return {
+    title: content.title || DEFAULT_CLINIC_CONTENT.title,
+    description: content.description || DEFAULT_CLINIC_CONTENT.description,
+    images: content.images || DEFAULT_CLINIC_CONTENT.images,
+  };
 }

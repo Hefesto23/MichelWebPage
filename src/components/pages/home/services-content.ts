@@ -1,5 +1,5 @@
 import { DEFAULT_SERVICES_CONTENT } from "@/utils/default-content";
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createCachedContentFetcher } from "@/lib/cms-direct";
 
 export interface ServiceCard {
   id: number;
@@ -17,19 +17,25 @@ export interface ServicesContent {
   cards: ServiceCard[];
 }
 
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('services-content')
+ */
 export async function getServicesContent(): Promise<ServicesContent> {
-  return fetchCmsContent({
-    endpoint: "home",
-    cacheTag: "services-content",
-    fallback: DEFAULT_SERVICES_CONTENT,
-    parser: (data) => {
-      if (!data.content?.services) return DEFAULT_SERVICES_CONTENT;
-      
-      return {
-        title: data.content.services.title || DEFAULT_SERVICES_CONTENT.title,
-        description: data.content.services.description || DEFAULT_SERVICES_CONTENT.description,
-        cards: data.content.services.cards || DEFAULT_SERVICES_CONTENT.cards,
-      };
-    }
-  });
+  const fetcher = createCachedContentFetcher<Partial<ServicesContent>>(
+    "home",
+    "services",
+    "services-content"
+  );
+
+  const content = await fetcher();
+
+  // Merge com valores padrão
+  return {
+    title: content.title || DEFAULT_SERVICES_CONTENT.title,
+    description: content.description || DEFAULT_SERVICES_CONTENT.description,
+    cards: content.cards || DEFAULT_SERVICES_CONTENT.cards,
+  };
 }

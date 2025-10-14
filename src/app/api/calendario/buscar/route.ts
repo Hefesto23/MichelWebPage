@@ -2,10 +2,8 @@
 
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { withRetry, TIMEOUT_CONFIGS } from "@/lib/timeout-utils";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   const startTime = Date.now();

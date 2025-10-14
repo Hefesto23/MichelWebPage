@@ -1,11 +1,9 @@
 // src/app/api/admin/content/divisorias/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { revalidateTag } from "next/cache";
 import { validateAuthHeader } from "@/lib/auth";
 import { DEFAULT_DIVISORIAS_CONTENT } from '@/utils/default-content';
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {

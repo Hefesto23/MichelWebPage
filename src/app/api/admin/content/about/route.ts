@@ -1,6 +1,6 @@
 // src/app/api/admin/content/about/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { revalidateTag } from "next/cache";
 import { validateAuthHeader } from "@/lib/auth";
 import { DEFAULT_ABOUT_CONTENT } from '@/utils/default-content';
@@ -15,8 +15,6 @@ interface OrganizedContent {
   about: Record<string, string>;
   social: Record<string, string | NetworkData>;
 }
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {
@@ -35,11 +33,13 @@ export async function GET() {
 
     if (contentItems.length === 0) {
       console.log("⚠️  API: Nenhum conteúdo encontrado, usando padrão");
-      return NextResponse.json({ 
-        success: true, 
-        content: { 
-          about: DEFAULT_ABOUT_CONTENT 
-        } 
+      const { socialMedia, ...aboutData } = DEFAULT_ABOUT_CONTENT;
+      return NextResponse.json({
+        success: true,
+        content: {
+          about: aboutData,
+          social: socialMedia
+        }
       });
     }
 
@@ -56,29 +56,38 @@ export async function GET() {
       if (section === "about") {
         organizedContent.about[key] = value;
       } else if (section === "social") {
-        // Para redes sociais, organizar por networkId
-        const networkMatch = key.match(/network(.+)_(.+)/);
-        if (networkMatch) {
-          const networkId = networkMatch[1];
-          const field = networkMatch[2];
-          
-          if (!organizedContent.social[networkId]) {
-            organizedContent.social[networkId] = {} as NetworkData;
-          }
-          
-          const networkData = organizedContent.social[networkId] as NetworkData;
-          
-          // Converter string para boolean para o campo enabled
-          if (field === "enabled") {
-            networkData.enabled = value === "true";
-          } else if (field === "url") {
-            networkData.url = value;
-          } else {
-            networkData[field] = value;
+        // Verificar se é o campo networks (JSON array completo)
+        if (key === "networks") {
+          try {
+            organizedContent.social.networks = JSON.parse(value);
+          } catch {
+            console.warn("⚠️ API: Erro ao fazer parse de networks");
           }
         } else {
-          // Campos diretos da seção social (title, description)
-          organizedContent.social[key] = value;
+          // Para redes sociais individuais (campos deprecated)
+          const networkMatch = key.match(/network(.+)_(.+)/);
+          if (networkMatch) {
+            const networkId = networkMatch[1];
+            const field = networkMatch[2];
+
+            if (!organizedContent.social[networkId]) {
+              organizedContent.social[networkId] = {} as NetworkData;
+            }
+
+            const networkData = organizedContent.social[networkId] as NetworkData;
+
+            // Converter string para boolean para o campo enabled
+            if (field === "enabled") {
+              networkData.enabled = value === "true";
+            } else if (field === "url") {
+              networkData.url = value;
+            } else {
+              networkData[field] = value;
+            }
+          } else {
+            // Campos diretos da seção social (title, description)
+            organizedContent.social[key] = value;
+          }
         }
       }
     });
@@ -90,44 +99,68 @@ export async function GET() {
     };
 
     // Processar redes sociais
-    if (Object.keys(organizedContent.social).length > 1) { // Mais de 1 porque sempre terá pelo menos {}
-      const socialMedia = {
+    if (Object.keys(organizedContent.social).length > 0) {
+      console.log("🌐 API GET: organizedContent.social:", JSON.stringify(organizedContent.social, null, 2));
+
+      const socialData: any = {
         ...DEFAULT_ABOUT_CONTENT.socialMedia,
         title: (organizedContent.social.title as string) || DEFAULT_ABOUT_CONTENT.socialMedia.title,
         description: (organizedContent.social.description as string) || DEFAULT_ABOUT_CONTENT.socialMedia.description,
-        networks: DEFAULT_ABOUT_CONTENT.socialMedia.networks.map(defaultNetwork => {
+      };
+
+      // Priorizar campo 'networks' (JSON array) se existir
+      if (organizedContent.social.networks && Array.isArray(organizedContent.social.networks)) {
+        console.log("✅ API GET: Usando campo networks do banco (JSON array)");
+        socialData.networks = organizedContent.social.networks;
+      } else {
+        console.log("🔧 API GET: Montando networks a partir de campos individuais");
+        // Fallback: montar networks a partir dos campos individuais (deprecated)
+        socialData.networks = DEFAULT_ABOUT_CONTENT.socialMedia.networks.map(defaultNetwork => {
           const customNetwork = organizedContent.social[defaultNetwork.id] as NetworkData;
+          console.log(`  🔍 Verificando ${defaultNetwork.id}:`, customNetwork);
           if (customNetwork && typeof customNetwork === 'object') {
-            return {
+            const mergedNetwork = {
               ...defaultNetwork,
               enabled: customNetwork.enabled ?? defaultNetwork.enabled,
-              url: customNetwork.url ?? defaultNetwork.url
+              url: customNetwork.url ?? defaultNetwork.url,
+              order: customNetwork.order ? parseInt(String(customNetwork.order)) : defaultNetwork.order
             };
+            console.log(`  ✅ Network ${defaultNetwork.id} merge:`, mergedNetwork);
+            return mergedNetwork;
           }
+          console.log(`  ⚠️ Network ${defaultNetwork.id}: usando default`);
           return defaultNetwork;
-        })
-      };
-      
-      aboutContent.socialMedia = socialMedia;
+        });
+      }
+
+      console.log("🌐 API GET: socialData.networks final:", JSON.stringify(socialData.networks, null, 2));
+      aboutContent.socialMedia = socialData;
     }
 
     console.log("✅ API: Conteúdo organizado e retornado");
-    return NextResponse.json({ 
-      success: true, 
-      content: { 
-        about: aboutContent 
-      } 
+
+    // Separar aboutContent.socialMedia para ficar compatível com PageEditor
+    const { socialMedia, ...aboutData } = aboutContent;
+
+    return NextResponse.json({
+      success: true,
+      content: {
+        about: aboutData,
+        social: socialMedia
+      }
     });
 
   } catch (error) {
     console.error("❌ API: Erro ao buscar conteúdo da página about:", error);
-    
-    return NextResponse.json({ 
-      success: false, 
+
+    const { socialMedia, ...aboutData } = DEFAULT_ABOUT_CONTENT;
+    return NextResponse.json({
+      success: false,
       error: "Erro interno do servidor",
-      content: { 
-        about: DEFAULT_ABOUT_CONTENT 
-      } 
+      content: {
+        about: aboutData,
+        social: socialMedia
+      }
     }, { status: 500 });
   } finally {
     await prisma.$disconnect();
@@ -188,7 +221,7 @@ export async function POST(request: Request) {
     if (content.social) {
       // Campos gerais da seção social
       const { title, description, networks, ...otherFields } = content.social;
-      
+
       if (title) {
         itemsToSave.push({
           page: "about",
@@ -199,11 +232,11 @@ export async function POST(request: Request) {
           isActive: true
         });
       }
-      
+
       if (description) {
         itemsToSave.push({
           page: "about",
-          section: "social", 
+          section: "social",
           key: "description",
           value: String(description),
           type: "text",
@@ -213,6 +246,17 @@ export async function POST(request: Request) {
 
       // Processar networks se existir
       if (networks && Array.isArray(networks)) {
+        // Salvar array completo de networks como JSON
+        itemsToSave.push({
+          page: "about",
+          section: "social",
+          key: "networks",
+          value: JSON.stringify(networks),
+          type: "json",
+          isActive: true
+        });
+
+        // DEPRECATED: Manter campos individuais para compatibilidade com API GET antiga
         networks.forEach((network: { id: string; enabled: boolean; url?: string; order?: number }) => {
           // Salvar enabled
           itemsToSave.push({
@@ -223,7 +267,7 @@ export async function POST(request: Request) {
             type: "boolean",
             isActive: true
           });
-          
+
           // Salvar url
           if (network.url) {
             itemsToSave.push({
@@ -235,7 +279,7 @@ export async function POST(request: Request) {
               isActive: true
             });
           }
-          
+
           // Salvar order
           if (network.order !== undefined) {
             itemsToSave.push({
@@ -243,7 +287,7 @@ export async function POST(request: Request) {
               section: "social",
               key: `network${network.id}_order`,
               value: String(network.order),
-              type: "number", 
+              type: "number",
               isActive: true
             });
           }

@@ -1,4 +1,4 @@
-import { fetchCmsContent } from "@/lib/cms-fetch";
+import { createPageContentFetcher } from "@/lib/cms-direct";
 import { DEFAULT_ABOUT_CONTENT } from "@/utils/default-content";
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { SiTiktok } from "react-icons/si";
@@ -36,19 +36,82 @@ interface AboutContentData {
   socialMedia: SocialMedia;
 }
 
-// Server Component que busca dados do CMS com cache otimizado
+/**
+ * ✅ MIGRADO: Agora usa Prisma direto ao invés de HTTP fetch
+ * - Funciona durante build (SSG)
+ * - Cache infinito com revalidate: false
+ * - Revalidação instantânea via revalidateTag('about-content')
+ */
 export const AboutContentServer = async () => {
-  const aboutData: AboutContentData = await fetchCmsContent({
-    endpoint: "about",
-    cacheTag: "about-content",
-    fallback: DEFAULT_ABOUT_CONTENT,
-    parser: (data) => {
-      if (data.content?.about) {
-        return data.content.about;
-      }
-      return DEFAULT_ABOUT_CONTENT;
+  const fetcher = createPageContentFetcher<any>("about", "about-content");
+  const rawContent = await fetcher();
+
+  console.log("🔍 AboutContentServer - rawContent recebido:", JSON.stringify(rawContent, null, 2));
+
+  let aboutData: AboutContentData = DEFAULT_ABOUT_CONTENT;
+
+  // Processar dados do banco se existirem
+  if (rawContent && Object.keys(rawContent).length > 0) {
+    console.log("✅ AboutContentServer - Dados encontrados no banco");
+
+    // Merge dados da seção 'about'
+    if (rawContent.about) {
+      console.log("📝 AboutContentServer - Processando seção about:", rawContent.about);
+      aboutData = {
+        ...aboutData,
+        ...rawContent.about
+      };
     }
-  });
+
+    // Processar seção 'social' para montar socialMedia
+    if (rawContent.social) {
+      const socialData = rawContent.social;
+      console.log("🌐 AboutContentServer - Processando seção social:", JSON.stringify(socialData, null, 2));
+
+      // Verificar se networks já existe como array JSON
+      let networks: Network[] = DEFAULT_ABOUT_CONTENT.socialMedia.networks;
+
+      if (socialData.networks && Array.isArray(socialData.networks)) {
+        console.log("✅ AboutContentServer - Usando networks do banco (JSON array)");
+        networks = socialData.networks;
+      } else {
+        console.log("🔧 AboutContentServer - Montando networks a partir de campos individuais");
+        // Montar array networks a partir dos campos individuais do banco
+        networks = DEFAULT_ABOUT_CONTENT.socialMedia.networks.map(defaultNetwork => {
+          const urlKey = `network${defaultNetwork.id}_url`;
+          const enabledKey = `network${defaultNetwork.id}_enabled`;
+          const orderKey = `network${defaultNetwork.id}_order`;
+
+          const hasCustomData = socialData[urlKey] || socialData[enabledKey] || socialData[orderKey];
+
+          if (hasCustomData) {
+            const customNetwork = {
+              ...defaultNetwork,
+              url: socialData[urlKey] || defaultNetwork.url,
+              enabled: socialData[enabledKey] === "true" || socialData[enabledKey] === true,
+              order: socialData[orderKey] ? parseInt(String(socialData[orderKey])) : defaultNetwork.order
+            };
+            console.log(`  ✅ Network ${defaultNetwork.id} customizado:`, customNetwork);
+            return customNetwork;
+          }
+
+          console.log(`  ⚠️ Network ${defaultNetwork.id}: usando padrão`);
+          return defaultNetwork;
+        });
+      }
+
+      aboutData.socialMedia = {
+        ...DEFAULT_ABOUT_CONTENT.socialMedia,
+        title: socialData.title || DEFAULT_ABOUT_CONTENT.socialMedia.title,
+        description: socialData.description || DEFAULT_ABOUT_CONTENT.socialMedia.description,
+        networks: networks
+      };
+
+      console.log("✅ AboutContentServer - socialMedia final:", JSON.stringify(aboutData.socialMedia, null, 2));
+    }
+  } else {
+    console.log("⚠️ AboutContentServer - Usando conteúdo padrão (banco vazio)");
+  }
 
   return (
     <div className="w-full">

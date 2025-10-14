@@ -1,6 +1,6 @@
 // src/app/api/admin/content/home/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { revalidateTag } from "next/cache";
 import { validateAuthHeader } from "@/lib/auth";
 import {
@@ -9,8 +9,6 @@ import {
   DEFAULT_SERVICES_CONTENT,
   DEFAULT_CLINIC_CONTENT
 } from '@/utils/default-content';
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   try {

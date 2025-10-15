@@ -1341,6 +1341,10 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
         } else if (item.section === "about") {
           if (!contentToSave.about) contentToSave.about = {};
           contentToSave.about[item.key] = valueToSave;
+        } else if (item.section === "social") {
+          if (!contentToSave.social) contentToSave.social = {};
+          // @ts-expect-error - Dynamic key assignment for social section fields
+          contentToSave.social[item.key] = valueToSave;
         } else if (item.section === "terapias") {
           if (!contentToSave.terapias) contentToSave.terapias = {};
           if (item.key === "title" || item.key === "description") {
@@ -1399,6 +1403,47 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           (contentToSave[divisoriaKey] as { text?: string; backgroundImage?: string })[item.key as 'text' | 'backgroundImage'] = valueToSave;
         }
       });
+
+      // Special handling for social section: rebuild networks array
+      if (sectionName === "social" && contentToSave.social) {
+        // Get current networks array
+        let currentNetworks = savedContent?.social?.networks || DEFAULT_ABOUT_CONTENT.socialMedia.networks;
+        if (typeof currentNetworks === 'string') {
+          try {
+            currentNetworks = JSON.parse(currentNetworks);
+          } catch {
+            currentNetworks = DEFAULT_ABOUT_CONTENT.socialMedia.networks;
+          }
+        }
+
+        // Clone networks array
+        const updatedNetworks = JSON.parse(JSON.stringify(currentNetworks));
+
+        // Apply individual field changes to networks array
+        Object.keys(contentToSave.social).forEach(key => {
+          const networkMatch = key.match(/network(.+)_(url|enabled|order)/);
+          if (networkMatch) {
+            const networkId = networkMatch[1];
+            const field = networkMatch[2];
+            const value = contentToSave.social![key];
+
+            const networkIndex = updatedNetworks.findIndex((n: NetworkItem) => n.id === networkId);
+            if (networkIndex !== -1) {
+              if (field === 'enabled') {
+                updatedNetworks[networkIndex].enabled = value === 'true' || value === true;
+              } else if (field === 'url') {
+                updatedNetworks[networkIndex].url = value;
+              } else if (field === 'order') {
+                updatedNetworks[networkIndex].order = parseInt(String(value));
+              }
+            }
+          }
+        });
+
+        // Set the complete networks array
+        contentToSave.social.networks = updatedNetworks;
+        console.log('🔧 PageEditor: Rebuilt networks array:', updatedNetworks);
+      }
 
       console.log(`📤 PageEditor: Salvando seção ${sectionName}:`, contentToSave);
 

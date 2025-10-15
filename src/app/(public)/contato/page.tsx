@@ -43,7 +43,7 @@ export default function Contact() {
       <Suspense fallback={<ContactSkeleton />}>
         <ContactSection />
       </Suspense>
-      <Divisor index={5} />
+      <Divisor index={7} />
     </>
   );
 }

@@ -393,6 +393,7 @@ export const DEFAULT_AGENDAMENTO_CONTENT = {
 };
 
 export const DEFAULT_DIVISORIAS_CONTENT = {
+  // Home - 3 divisórias
   divisoria_1: {
     text: "Atendimento Segunda à Sexta das 8:00 às 21:00 - Consultas previamente agendadas para melhor atendimento",
     backgroundImage: "/assets/quotes/mindfulness.jpg"
@@ -405,17 +406,41 @@ export const DEFAULT_DIVISORIAS_CONTENT = {
     text: "Psicoterapia online - modalidade que possibilita atendimento à distância com a mesma qualidade",
     backgroundImage: "/assets/quotes/journey.jpg"
   },
+  // About
   divisoria_4: {
     text: "Ambiente acolhedor e sigiloso para seu bem-estar emocional e privacidade garantida",
     backgroundImage: "/assets/quotes/reflection.jpg"
   },
+  // Terapias
   divisoria_5: {
     text: "Primeira consulta com duração estendida para melhor compreensão do seu caso",
     backgroundImage: "/assets/quotes/rebuild.jpg"
   },
+  // DEPRECATED: divisoria_6 (compartilhada antiga)
   divisoria_6: {
     text: "Acompanhamento contínuo e suporte em momentos de crise emocional",
     backgroundImage: "/assets/quotes/opportunity.jpg"
+  },
+  // NOVAS DIVISÓRIAS ESPECÍFICAS
+  // Avaliações
+  divisoria_avaliacoes: {
+    text: "Avaliações psicológicas fundamentadas em evidências científicas e técnicas validadas",
+    backgroundImage: "/assets/quotes/opportunity.jpg"
+  },
+  // Contato
+  divisoria_contato: {
+    text: "Entre em contato e dê o primeiro passo para transformar sua saúde emocional",
+    backgroundImage: "/assets/quotes/reflection.jpg"
+  },
+  // Agendamento
+  divisoria_agendamento: {
+    text: "Agende sua consulta e comece sua jornada de autoconhecimento e bem-estar",
+    backgroundImage: "/assets/quotes/rebuild.jpg"
+  },
+  // Páginas Genéricas/Personalizadas
+  divisoria_generica: {
+    text: "Cuidar da sua saúde mental é um ato de coragem e amor próprio",
+    backgroundImage: "/assets/quotes/growth.jpg"
   },
   maxCharacters: {
     text: 150

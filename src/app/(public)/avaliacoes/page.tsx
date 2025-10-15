@@ -173,7 +173,7 @@ export default function Assessment() {
       <Suspense fallback={<AvaliacoesSkeleton />}>
         <AvaliacoesContentServer />
       </Suspense>
-      <Divisor index={5} />
+      <Divisor index={6} />
     </section>
   );
 }

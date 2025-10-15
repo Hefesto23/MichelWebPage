@@ -128,18 +128,26 @@ export async function POST(request: Request) {
 
     console.log(`📝 API: Preparando ${itemsToSave.length} itens para salvar`);
 
+    // Identificar quais seções estão sendo alteradas
+    const sectionsBeingUpdated = [...new Set(itemsToSave.map(item => item.section))];
+    console.log(`📝 API: Seções sendo atualizadas:`, sectionsBeingUpdated);
+
     // Iniciar transação para garantir consistência
     await prisma.$transaction(async (tx) => {
-      // Desativar todos os registros existentes desta página
-      await tx.content.updateMany({
-        where: {
-          page: "divisorias",
-          isActive: true
-        },
-        data: {
-          isActive: false
-        }
-      });
+      // Desativar APENAS os registros das seções sendo alteradas
+      if (sectionsBeingUpdated.length > 0) {
+        await tx.content.updateMany({
+          where: {
+            page: "divisorias",
+            section: { in: sectionsBeingUpdated },
+            isActive: true
+          },
+          data: {
+            isActive: false
+          }
+        });
+        console.log(`🗑️ API: Desativados registros das seções:`, sectionsBeingUpdated);
+      }
 
       // Criar ou atualizar registros usando upsert
       for (const item of itemsToSave) {
@@ -160,12 +168,19 @@ export async function POST(request: Request) {
           create: item
         });
       }
+      console.log(`✅ API: Upsert concluído para ${itemsToSave.length} itens`);
     });
 
-    // Revalidar cache da página divisorias
+    // Revalidar cache da página divisorias e de todas as páginas que usam divisórias
     try {
       revalidateTag('divisorias-content');
-      console.log("🔄 API: Cache revalidado com sucesso");
+      // Revalidar todas as páginas que usam divisórias
+      revalidateTag('home-content');        // usa divisoria_1, divisoria_2, divisoria_3
+      revalidateTag('about-content');       // usa divisoria_4
+      revalidateTag('terapias-content');    // usa divisoria_5
+      revalidateTag('avaliacoes-content');  // usa divisoria_6
+      revalidateTag('contact-content');     // usa divisoria_6
+      console.log("🔄 API: Cache de divisórias e páginas relacionadas revalidado com sucesso");
     } catch (revalidateError) {
       console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
       // Não falhar a operação por causa do cache
@@ -214,10 +229,16 @@ export async function DELETE(request: Request) {
       }
     });
 
-    // Revalidar cache da página divisorias
+    // Revalidar cache da página divisorias e de todas as páginas que usam divisórias
     try {
       revalidateTag('divisorias-content');
-      console.log("🔄 API: Cache revalidado com sucesso");
+      // Revalidar todas as páginas que usam divisórias
+      revalidateTag('home-content');        // usa divisoria_1, divisoria_2, divisoria_3
+      revalidateTag('about-content');       // usa divisoria_4
+      revalidateTag('terapias-content');    // usa divisoria_5
+      revalidateTag('avaliacoes-content');  // usa divisoria_6
+      revalidateTag('contact-content');     // usa divisoria_6
+      console.log("🔄 API: Cache de divisórias e páginas relacionadas revalidado com sucesso");
     } catch (revalidateError) {
       console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
       // Não falhar a operação por causa do cache

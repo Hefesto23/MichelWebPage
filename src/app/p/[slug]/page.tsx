@@ -1,6 +1,7 @@
 // src/app/p/[slug]/page.tsx
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { DivisorServer as Divisor } from "@/components/shared/ui/divisor";
 
 interface DynamicPage {
   id: number;
@@ -92,6 +93,7 @@ export default async function DynamicPageView({
           </div>
         </div>
       </section>
+      <Divisor index={9} />
     </div>
   );
 }

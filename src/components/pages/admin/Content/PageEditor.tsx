@@ -1118,10 +1118,13 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
       case "divisorias":
         // Usar conteúdo salvo se existir, senão usar padrão
+        // API retorna: { divisorias: { divisoria_1: {...}, divisoria_5: {...} } }
+        const divisoriasData = savedContent?.divisorias || {};
+
         return [
           {
-            name: "Divisória 1",
-            description: "Primeira divisória - Horários de atendimento",
+            name: "🏠 Home - Após Banner Principal",
+            description: "Aparece na página inicial (Home) após o banner de boas-vindas, antes dos serviços. Ideal para mensagens sobre horários ou disponibilidade.",
             items: [
               {
                 id: 900,
@@ -1129,9 +1132,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_1",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_1?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na primeira divisória...",
+                value: divisoriasData?.divisoria_1?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Atendimento de segunda a sexta, das 8h às 18h...",
               },
               {
                 id: 950,
@@ -1139,15 +1142,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_1",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_1?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.backgroundImage,
+                value: divisoriasData?.divisoria_1?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_1.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
             ],
           },
           {
-            name: "Divisória 2",
-            description: "Segunda divisória - Plantão psicológico",
+            name: "🏠 Home - Após Serviços",
+            description: "Aparece na página inicial (Home) após a seção de serviços, antes do espaço clínico. Ideal para mensagens motivacionais ou diferenciais.",
             items: [
               {
                 id: 901,
@@ -1155,9 +1158,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_2",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_2?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na segunda divisória...",
+                value: divisoriasData?.divisoria_2?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Plantão psicológico disponível para urgências...",
               },
               {
                 id: 951,
@@ -1165,15 +1168,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_2",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_2?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.backgroundImage,
+                value: divisoriasData?.divisoria_2?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_2.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
             ],
           },
           {
-            name: "Divisória 3",
-            description: "Terceira divisória - Psicoterapia online",
+            name: "🏠 Home - Após Espaço Clínico",
+            description: "Aparece na página inicial (Home) após a galeria do espaço clínico, no final da página. Ideal para chamada para ação ou benefícios.",
             items: [
               {
                 id: 902,
@@ -1181,9 +1184,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_3",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_3?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na terceira divisória...",
+                value: divisoriasData?.divisoria_3?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Psicoterapia online com a mesma qualidade do atendimento presencial...",
               },
               {
                 id: 952,
@@ -1191,15 +1194,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_3",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_3?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.backgroundImage,
+                value: divisoriasData?.divisoria_3?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_3.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
             ],
           },
           {
-            name: "Divisória 4",
-            description: "Quarta divisória - Ambiente acolhedor",
+            name: "👤 Sobre - Final da Página",
+            description: "Aparece no final da página Sobre (About), após a biografia e redes sociais. Ideal para mensagem pessoal ou valores profissionais.",
             items: [
               {
                 id: 903,
@@ -1207,9 +1210,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_4",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_4?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na quarta divisória...",
+                value: divisoriasData?.divisoria_4?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Um ambiente acolhedor para sua jornada de autoconhecimento...",
               },
               {
                 id: 953,
@@ -1217,15 +1220,15 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_4",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_4?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.backgroundImage,
+                value: divisoriasData?.divisoria_4?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_4.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
             ],
           },
           {
-            name: "Divisória 5", 
-            description: "Quinta divisória - Primeira consulta",
+            name: "💆 Terapias - Final da Página",
+            description: "Aparece no final da página Terapias, após a lista de modalidades terapêuticas. Ideal para incentivar o primeiro contato.",
             items: [
               {
                 id: 904,
@@ -1233,9 +1236,9 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_5",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_5?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na quinta divisória...",
+                value: divisoriasData?.divisoria_5?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: A primeira consulta é o início de uma grande transformação...",
               },
               {
                 id: 954,
@@ -1243,33 +1246,111 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 section: "divisoria_5",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_5?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.backgroundImage,
+                value: divisoriasData?.divisoria_5?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_5.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
             ],
           },
           {
-            name: "Divisória 6",
-            description: "Sexta divisória - Acompanhamento contínuo",
+            name: "📊 Avaliações - Final da Página",
+            description: "Aparece no final da página Avaliações, após a descrição dos serviços de avaliação psicológica. Ideal para mensagem sobre importância das avaliações.",
             items: [
               {
-                id: 905,
+                id: 906,
                 page: "divisorias",
-                section: "divisoria_6",
+                section: "divisoria_avaliacoes",
                 key: "text",
                 type: "text",
-                value: savedContent?.divisoria_6?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_6.text,
-                label: "Texto da Divisória",
-                placeholder: "Digite o texto que aparecerá na sexta divisória...",
+                value: divisoriasData?.divisoria_avaliacoes?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_avaliacoes.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Avaliações psicológicas oferecem clareza e direcionamento...",
               },
               {
-                id: 955,
+                id: 956,
                 page: "divisorias",
-                section: "divisoria_6",
+                section: "divisoria_avaliacoes",
                 key: "backgroundImage",
                 type: "image",
-                value: savedContent?.divisoria_6?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_6.backgroundImage,
+                value: divisoriasData?.divisoria_avaliacoes?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_avaliacoes.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "📞 Contato - Final da Página",
+            description: "Aparece no final da página Contato, após as informações de contato e mapa. Ideal para mensagem convidativa ou horários.",
+            items: [
+              {
+                id: 907,
+                page: "divisorias",
+                section: "divisoria_contato",
+                key: "text",
+                type: "text",
+                value: divisoriasData?.divisoria_contato?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_contato.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Entre em contato e dê o primeiro passo...",
+              },
+              {
+                id: 957,
+                page: "divisorias",
+                section: "divisoria_contato",
+                key: "backgroundImage",
+                type: "image",
+                value: divisoriasData?.divisoria_contato?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_contato.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "📅 Agendamento - Final da Página",
+            description: "Aparece no final da página Agendamento, após o formulário de agendamento. Ideal para mensagem de confirmação ou próximos passos.",
+            items: [
+              {
+                id: 908,
+                page: "divisorias",
+                section: "divisoria_agendamento",
+                key: "text",
+                type: "text",
+                value: divisoriasData?.divisoria_agendamento?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_agendamento.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Agende sua consulta e inicie sua jornada...",
+              },
+              {
+                id: 958,
+                page: "divisorias",
+                section: "divisoria_agendamento",
+                key: "backgroundImage",
+                type: "image",
+                value: divisoriasData?.divisoria_agendamento?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_agendamento.backgroundImage,
+                label: "Imagem de Fundo",
+                placeholder: "URL da imagem de fundo...",
+              },
+            ],
+          },
+          {
+            name: "🌟 Genérica - Páginas Personalizadas",
+            description: "Divisória para páginas personalizadas/genéricas criadas no futuro. Serve como fallback universal. Ideal para mensagem motivacional geral.",
+            items: [
+              {
+                id: 909,
+                page: "divisorias",
+                section: "divisoria_generica",
+                key: "text",
+                type: "text",
+                value: divisoriasData?.divisoria_generica?.text || DEFAULT_DIVISORIAS_CONTENT.divisoria_generica.text,
+                label: "Texto da Frase (Citação/Mensagem)",
+                placeholder: "Ex: Cuidar da sua saúde mental é um ato de coragem...",
+              },
+              {
+                id: 959,
+                page: "divisorias",
+                section: "divisoria_generica",
+                key: "backgroundImage",
+                type: "image",
+                value: divisoriasData?.divisoria_generica?.backgroundImage || DEFAULT_DIVISORIAS_CONTENT.divisoria_generica.backgroundImage,
                 label: "Imagem de Fundo",
                 placeholder: "URL da imagem de fundo...",
               },
@@ -1447,21 +1528,58 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
       console.log(`📤 PageEditor: Salvando seção ${sectionName}:`, contentToSave);
 
-      // Save to database
-      const response = await fetch(`/api/admin/content/${page}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ content: contentToSave }),
-      });
+      // Special handling for divisorias: separate API call
+      if (sectionName.startsWith("divisoria_")) {
+        console.log(`🔧 PageEditor: Detected divisoria section, using dedicated API`);
 
-      if (!response.ok) {
-        if (handleAuthError(response)) {
-          return;
+        // Build divisorias payload - need to send complete divisoria with ALL fields
+        const divisoriasPayload: any = { divisorias: {} };
+
+        // Get current saved content for this divisoria
+        // savedContent format: { divisorias: { divisoria_1: {...}, divisoria_5: {...} } }
+        const existingDivisoriaData = savedContent?.divisorias?.[sectionName] || {};
+
+        // Merge existing data with changes
+        divisoriasPayload.divisorias[sectionName] = {
+          ...(typeof existingDivisoriaData === 'object' ? existingDivisoriaData : {}),
+          ...(contentToSave[sectionName as keyof SavedContent] || {})
+        };
+
+        console.log(`📤 PageEditor: Salvando divisória completa (${sectionName}):`, divisoriasPayload);
+
+        // Save to divisorias API
+        const response = await fetch(`/api/admin/content/divisorias`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ content: divisoriasPayload }),
+        });
+
+        if (!response.ok) {
+          if (handleAuthError(response)) {
+            return;
+          }
+          throw new Error("Erro ao salvar divisórias");
         }
-        throw new Error("Erro ao salvar conteúdo");
+      } else {
+        // Normal save for non-divisoria sections
+        const response = await fetch(`/api/admin/content/${page}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ content: contentToSave }),
+        });
+
+        if (!response.ok) {
+          if (handleAuthError(response)) {
+            return;
+          }
+          throw new Error("Erro ao salvar conteúdo");
+        }
       }
 
       // Update local state - only for items in this section

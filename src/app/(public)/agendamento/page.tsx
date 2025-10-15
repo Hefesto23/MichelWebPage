@@ -101,7 +101,7 @@ export default function Agendamento() {
           </div>
         </section>
       </Suspense>
-      <Divisor index={5} />
+      <Divisor index={8} />
     </div>
   );
 }

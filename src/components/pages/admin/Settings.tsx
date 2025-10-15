@@ -128,19 +128,11 @@ export const Settings = () => {
             value: settings.clinica?.crp_number || "CRP 06/174807",
           },
           {
-            id: "minimum_age",
-            label: "Idade Mínima para Atendimento",
-            description: "Idade mínima em anos para atendimento",
-            type: "select",
-            value: settings.clinica?.minimum_age?.toString() || "20",
-            options: [
-              { value: "16", label: "16 anos" },
-              { value: "17", label: "17 anos" },
-              { value: "18", label: "18 anos" },
-              { value: "19", label: "19 anos" },
-              { value: "20", label: "20 anos" },
-              { value: "21", label: "21 anos" },
-            ],
+            id: "age_disclaimer",
+            label: "Disclaimer de Idade para Atendimento",
+            description: "Texto sobre faixa etária de atendimento. Aparece no Hero (página inicial) e no Footer (todas as páginas). Use texto livre como: '* Crianças de 5 a 12 e Adultos a partir de 20 anos'",
+            type: "textarea",
+            value: settings.clinica?.age_disclaimer || "* Atendimentos a partir de 20 anos de idade",
           },
           {
             id: "appointment_note",
@@ -436,7 +428,7 @@ export const Settings = () => {
       await saveMultipleSettings("clinica", {
         psychologist_name: "Michel de Camargo",
         crp_number: "CRP 06/174807",
-        minimum_age: 20,
+        age_disclaimer: "* Atendimentos a partir de 20 anos de idade",
         appointment_note: "As consultas necessitam ser previamente agendadas.",
         additional_notes: "",
       });

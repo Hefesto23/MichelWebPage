@@ -24,7 +24,7 @@ export interface PublicClinicSettings {
   // Informações da Clínica
   psychologist_name: string;
   crp_number: string;
-  minimum_age: number;
+  age_disclaimer: string;
   appointment_note: string;
   additional_notes: string;
   // Endereço principal
@@ -85,7 +85,7 @@ export const usePublicSettings = () => {
         // Informações da Clínica
         psychologist_name: "Michel de Camargo",
         crp_number: "CRP 06/174807",
-        minimum_age: 20,
+        age_disclaimer: "* Atendimentos a partir de 20 anos de idade",
         appointment_note: "As consultas necessitam ser previamente agendadas.",
         additional_notes: "",
         // Endereço

@@ -256,8 +256,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           savedContent?.hero?.mainText || DEFAULT_HERO_CONTENT.mainText;
         const heroCtaText =
           savedContent?.hero?.ctaText || DEFAULT_HERO_CONTENT.ctaText;
-        const heroDisclaimer =
-          savedContent?.hero?.disclaimer || DEFAULT_HERO_CONTENT.disclaimer;
         const heroBackgroundImage =
           savedContent?.hero?.backgroundImage ||
           DEFAULT_HERO_CONTENT.backgroundImage;
@@ -345,16 +343,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                 label: "Texto do Call-to-Action",
                 placeholder:
                   "Digite o texto que aparece antes do botão de agendamento...",
-              },
-              {
-                id: 3,
-                page: "home",
-                section: "hero",
-                key: "disclaimer",
-                type: "text",
-                value: heroDisclaimer,
-                label: "Texto do Disclaimer",
-                placeholder: "Digite o texto de aviso que aparece no final...",
               },
               {
                 id: 4,
@@ -1119,7 +1107,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       case "divisorias":
         // Usar conteúdo salvo se existir, senão usar padrão
         // API retorna: { divisorias: { divisoria_1: {...}, divisoria_5: {...} } }
-        const divisoriasData = savedContent?.divisorias || {};
+        const divisoriasData = (savedContent?.divisorias || {}) as Record<string, { text?: string; backgroundImage?: string }>;
 
         return [
           {
@@ -1506,7 +1494,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           if (networkMatch) {
             const networkId = networkMatch[1];
             const field = networkMatch[2];
-            const value = contentToSave.social![key];
+            const value = (contentToSave.social as any)[key];
 
             const networkIndex = updatedNetworks.findIndex((n: NetworkItem) => n.id === networkId);
             if (networkIndex !== -1) {
@@ -2017,9 +2005,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           if (item.key === "ctaText") {
             maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.ctaText;
             fieldName = "CTA Text";
-          } else if (item.key === "disclaimer") {
-            maxLengthForField = DEFAULT_HERO_CONTENT.maxCharacters.disclaimer;
-            fieldName = "Disclaimer";
           }
         } else if (isWelcomeField && item.key === "title") {
           maxLengthForField = DEFAULT_WELCOME_CONTENT.maxCharacters.title;

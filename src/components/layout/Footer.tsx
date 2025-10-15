@@ -21,7 +21,7 @@ export const Footer = () => {
   // Novas configurações dinâmicas
   const psychologistName = settings?.psychologist_name || CLINIC_INFO.PSYCHOLOGIST.NAME;
   const crpNumber = settings?.crp_number || CLINIC_INFO.PSYCHOLOGIST.CRP;
-  const minimumAge = settings?.minimum_age || "20";
+  const ageDisclaimer = settings?.age_disclaimer || "* Atendimentos a partir de 20 anos de idade";
   const appointmentNote = settings?.appointment_note || CLINIC_INFO.HOURS.NOTE;
   const additionalNotes = settings?.additional_notes;
 
@@ -75,7 +75,7 @@ export const Footer = () => {
               </p>
               <p className="text-base font-bold mb-2">Obs: {appointmentNote}</p>
               <p className="text-base font-bold text-gray-600 mt-1 italic">
-                * Atendimentos a partir de {minimumAge} anos de idade
+                {ageDisclaimer}
               </p>
               {additionalNotes && (
                 <p className="text-base font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>

@@ -44,7 +44,7 @@ export async function GET() {
       // Informações da Clínica
       psychologist_name: settingsMap["clinica.psychologist_name"] || CLINIC_INFO.PSYCHOLOGIST.NAME,
       crp_number: settingsMap["clinica.crp_number"] || CLINIC_INFO.PSYCHOLOGIST.CRP,
-      minimum_age: settingsMap["clinica.minimum_age"] || 20,
+      age_disclaimer: settingsMap["clinica.age_disclaimer"] || "* Atendimentos a partir de 20 anos de idade",
       appointment_note: settingsMap["clinica.appointment_note"] || CLINIC_INFO.HOURS.NOTE,
       additional_notes: settingsMap["clinica.additional_notes"] || "",
       // Endereço principal
@@ -70,8 +70,8 @@ export async function GET() {
       data: publicSettings,
     });
 
-    // Adicionar cache headers com tag para revalidation
-    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+    // Cache apenas no servidor, sem cache no navegador (para atualização imediata)
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     response.headers.set('Cache-Tag', 'settings-content');
 
     return response;
@@ -98,7 +98,7 @@ export async function GET() {
       // Informações da Clínica
       psychologist_name: CLINIC_INFO.PSYCHOLOGIST.NAME,
       crp_number: CLINIC_INFO.PSYCHOLOGIST.CRP,
-      minimum_age: 20,
+      age_disclaimer: "* Atendimentos a partir de 20 anos de idade",
       appointment_note: CLINIC_INFO.HOURS.NOTE,
       additional_notes: "",
       // Endereço principal

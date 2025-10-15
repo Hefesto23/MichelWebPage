@@ -1,11 +1,17 @@
 import { Button } from "@/components/shared/ui/button";
 import { getHeroContent } from "@/components/pages/home/hero-content";
+import { createSettingsFetcher } from "@/lib/cms-direct";
 import Link from "next/link";
 import { ScrollButton } from "./ScrollButton";
 
 export const HeroSection = async () => {
   // Buscar conteúdo no servidor com cache otimizado
-  const { mainText, ctaText, disclaimer, backgroundImage } = await getHeroContent();
+  const { mainText, ctaText, backgroundImage } = await getHeroContent();
+
+  // Buscar disclaimer das settings (cache infinito, revalidado on-demand)
+  const settingsFetcher = createSettingsFetcher();
+  const settings = await settingsFetcher();
+  const ageDisclaimer = settings["clinica.age_disclaimer"] || "* Atendimentos a partir de 20 anos de idade";
 
   return (
     <section
@@ -29,7 +35,7 @@ export const HeroSection = async () => {
               <Button className="my-10 hover:opacity-80">Agende sua Consulta!</Button>
             </Link>
 
-            <div className="italic text-lg font-light text-white">{disclaimer}</div>
+            <div className="italic text-lg font-light text-white">{ageDisclaimer}</div>
           </div>
         </div>
         <div className="hero-cta">

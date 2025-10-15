@@ -4,7 +4,6 @@ import { createCachedContentFetcher } from "@/lib/cms-direct";
 export interface HeroContent {
   mainText: string;
   ctaText: string;
-  disclaimer: string;
   backgroundImage: string;
 }
 
@@ -27,7 +26,6 @@ export async function getHeroContent(): Promise<HeroContent> {
   return {
     mainText: content.mainText || DEFAULT_HERO_CONTENT.mainText,
     ctaText: content.ctaText || DEFAULT_HERO_CONTENT.ctaText,
-    disclaimer: content.disclaimer || DEFAULT_HERO_CONTENT.disclaimer,
     backgroundImage: content.backgroundImage || DEFAULT_HERO_CONTENT.backgroundImage,
   };
 }

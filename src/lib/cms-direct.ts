@@ -180,3 +180,53 @@ export function createPageContentFetcher<T>(page: string, cacheTag: string) {
     }
   );
 }
+
+/**
+ * Busca configurações (settings) do banco com cache infinito
+ *
+ * @returns Settings com cache até revalidateTag('settings-content')
+ */
+export async function fetchSettingsFromDatabase(): Promise<Record<string, any>> {
+  try {
+    console.log("🔄 CMS Direct: Buscando settings do banco...");
+
+    const settings = await prisma.settings.findMany();
+
+    // Converter para formato organizado
+    const settingsMap: Record<string, any> = {};
+
+    settings.forEach((setting: any) => {
+      try {
+        settingsMap[setting.key] = JSON.parse(setting.value);
+      } catch {
+        settingsMap[setting.key] = setting.value;
+      }
+    });
+
+    console.log(`✅ CMS Direct: ${Object.keys(settingsMap).length} settings encontradas`);
+    return settingsMap;
+
+  } catch (error) {
+    console.error("❌ CMS Direct: Erro ao buscar settings:", error);
+    return {};
+  }
+}
+
+/**
+ * Cria função cacheada para buscar settings
+ *
+ * @returns Função que retorna settings com cache infinito
+ */
+export function createSettingsFetcher() {
+  return unstable_cache(
+    async (): Promise<Record<string, any>> => {
+      const settings = await fetchSettingsFromDatabase();
+      return settings;
+    },
+    ['settings-cache'],
+    {
+      tags: ['settings-content'],
+      revalidate: false // Cache infinito até revalidateTag
+    }
+  );
+}

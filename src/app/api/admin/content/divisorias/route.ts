@@ -129,7 +129,7 @@ export async function POST(request: Request) {
     console.log(`📝 API: Preparando ${itemsToSave.length} itens para salvar`);
 
     // Identificar quais seções estão sendo alteradas
-    const sectionsBeingUpdated = [...new Set(itemsToSave.map(item => item.section))];
+    const sectionsBeingUpdated = Array.from(new Set(itemsToSave.map(item => item.section)));
     console.log(`📝 API: Seções sendo atualizadas:`, sectionsBeingUpdated);
 
     // Iniciar transação para garantir consistência

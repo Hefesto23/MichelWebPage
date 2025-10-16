@@ -121,7 +121,7 @@ export function createCachedContentFetcher<T>(
     [cacheTag], // Cache key
     {
       tags: [cacheTag], // Tag para revalidação
-      revalidate: false // Cache infinito até revalidateTag ser chamado
+      revalidate: 3600 // ISR: regenera a cada 1 hora (revalidateTag ainda tem prioridade)
     }
   );
 }
@@ -176,7 +176,7 @@ export function createPageContentFetcher<T>(page: string, cacheTag: string) {
     [cacheTag],
     {
       tags: [cacheTag],
-      revalidate: false
+      revalidate: 3600 // ISR: regenera a cada 1 hora (revalidateTag ainda tem prioridade)
     }
   );
 }
@@ -226,7 +226,7 @@ export function createSettingsFetcher() {
     ['settings-cache'],
     {
       tags: ['settings-content'],
-      revalidate: false // Cache infinito até revalidateTag
+      revalidate: 3600 // ISR: regenera a cada 1 hora (revalidateTag ainda tem prioridade)
     }
   );
 }

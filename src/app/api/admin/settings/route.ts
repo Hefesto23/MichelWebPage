@@ -199,3 +199,161 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+
+// DELETE - Restaurar configurações padrão (seção específica ou todas)
+export async function DELETE(request: NextRequest) {
+  try {
+    console.log("📡 API: DELETE request received for admin settings");
+
+    const authHeader = request.headers.get("authorization");
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
+    console.log("✅ API: Autenticação válida");
+
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
+
+    // Configurações padrão
+    const defaultSettings = {
+      agendamento: {
+        working_days: {
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: false,
+          saturday: false,
+        },
+        start_time: "08:00",
+        end_time: "21:00",
+        session_duration: 50,
+        first_session_duration: 60,
+        advance_days: 60,
+        email_notifications: true,
+        whatsapp_notifications: true,
+      },
+      geral: {
+        site_title: "Michel de Camargo - Psicólogo Clínico",
+        phone_number: "(15) 99764-6421",
+        contact_email: "michelcamargo.psi@gmail.com",
+      },
+      clinica: {
+        psychologist_name: "Michel de Camargo",
+        crp_number: "CRP 06/174807",
+        age_disclaimer: "* Atendimentos a partir de 20 anos de idade",
+        appointment_note: "As consultas necessitam ser previamente agendadas.",
+        additional_notes: "",
+      },
+      endereco: {
+        street: "Rua Antônio Ferreira, 171",
+        neighborhood: "Parque Campolim",
+        city: "Sorocaba",
+        state: "SP",
+        zip_code: "18047-636",
+        latitude: "-23.493335284719095",
+        longitude: "-47.47244788549275",
+        street2: "",
+        neighborhood2: "",
+        city2: "",
+        state2: "",
+        zip_code2: "",
+      },
+      notificacoes: {
+        email_notifications: true,
+        whatsapp_notifications: false,
+      },
+    };
+
+    if (section) {
+      console.log(`🔄 API: Restaurando seção "${section}" para o padrão...`);
+
+      // Verificar se a seção existe nas configurações padrão
+      if (!defaultSettings[section as keyof typeof defaultSettings]) {
+        return NextResponse.json(
+          { error: `Seção "${section}" não encontrada` },
+          { status: 400 }
+        );
+      }
+
+      // Deletar todas as configurações da seção
+      await prisma.settings.deleteMany({
+        where: { section }
+      });
+
+      // Recriar com valores padrão
+      const sectionDefaults = defaultSettings[section as keyof typeof defaultSettings];
+      for (const [key, value] of Object.entries(sectionDefaults)) {
+        await prisma.settings.create({
+          data: {
+            key: `${section}.${key}`,
+            value: JSON.stringify(value),
+            section,
+          },
+        });
+      }
+
+      console.log(`✅ API: Seção "${section}" restaurada com sucesso`);
+
+      // Revalidar cache
+      try {
+        revalidateTag('settings-content');
+        console.log("🔄 API: Cache revalidado com sucesso");
+      } catch (revalidateError) {
+        console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Seção "${section}" restaurada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Restaurando TODAS as configurações para o padrão...");
+
+      // Deletar todas as configurações
+      await prisma.settings.deleteMany({});
+
+      // Recriar todas com valores padrão
+      for (const [sectionName, sectionSettings] of Object.entries(defaultSettings)) {
+        for (const [key, value] of Object.entries(sectionSettings)) {
+          await prisma.settings.create({
+            data: {
+              key: `${sectionName}.${key}`,
+              value: JSON.stringify(value),
+              section: sectionName,
+            },
+          });
+        }
+      }
+
+      console.log("✅ API: Todas as configurações restauradas com sucesso");
+
+      // Revalidar cache
+      try {
+        revalidateTag('settings-content');
+        console.log("🔄 API: Cache revalidado com sucesso");
+      } catch (revalidateError) {
+        console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "Todas as configurações restauradas com sucesso"
+      });
+    }
+  } catch (error) {
+    console.error("Erro ao restaurar configurações:", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor" },
+      { status: 500 }
+    );
+  }
+}

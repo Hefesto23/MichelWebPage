@@ -203,29 +203,58 @@ export async function DELETE(request: Request) {
       );
     }
 
-    console.log("🔄 API: Resetando conteúdo da página Home...");
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
 
-    // Deletar todos os registros desta página (hard delete)
-    await prisma.content.deleteMany({
-      where: { page: "home" }
-    });
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página Home...`);
 
-    // Revalidar cache das seções da home
-    try {
-      revalidateTag('hero-content');
-      revalidateTag('welcome-content');
-      revalidateTag('services-content');
-      revalidateTag('clinic-content');
-      console.log("🔄 API: Cache revalidado com sucesso");
-    } catch (revalidateError) {
-      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
-      // Não falhar a operação por causa do cache
+      // Deletar apenas a seção específica
+      await prisma.content.deleteMany({
+        where: {
+          page: "home",
+          section: section
+        }
+      });
+
+      // Revalidar cache da seção específica
+      try {
+        revalidateTag(`${section}-content`);
+        console.log(`🔄 API: Cache da seção "${section}" revalidado com sucesso`);
+      } catch (revalidateError) {
+        console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+      }
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+      return NextResponse.json({
+        message: `Seção "${section}" resetada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Resetando TODA a página Home...");
+
+      // Deletar todos os registros desta página (hard delete)
+      await prisma.content.deleteMany({
+        where: { page: "home" }
+      });
+
+      // Revalidar cache de todas as seções da home
+      try {
+        revalidateTag('hero-content');
+        revalidateTag('welcome-content');
+        revalidateTag('services-content');
+        revalidateTag('clinic-content');
+        console.log("🔄 API: Cache revalidado com sucesso");
+      } catch (revalidateError) {
+        console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+        // Não falhar a operação por causa do cache
+      }
+
+      console.log("✅ API: Conteúdo resetado com sucesso");
+      return NextResponse.json({
+        message: "Conteúdo resetado com sucesso"
+      });
     }
-
-    console.log("✅ API: Conteúdo resetado com sucesso");
-    return NextResponse.json({
-      message: "Conteúdo resetado com sucesso"
-    });
 
   } catch (error) {
     console.error("❌ API: Erro ao resetar conteúdo:", error);

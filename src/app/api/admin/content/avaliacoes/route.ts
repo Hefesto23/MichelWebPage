@@ -183,10 +183,36 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Deletar todos os registros desta página (hard delete)
-    await prisma.content.deleteMany({
-      where: { page: "avaliacoes" }
-    });
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
+
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página Avaliações...`);
+
+      // Deletar apenas a seção específica
+      await prisma.content.deleteMany({
+        where: {
+          page: "avaliacoes",
+          section: section
+        }
+      });
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+      return NextResponse.json({
+        success: true,
+        message: `Seção "${section}" resetada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Resetando TODA a página Avaliações...");
+
+      // Deletar todos os registros desta página (hard delete)
+      await prisma.content.deleteMany({
+        where: { page: "avaliacoes" }
+      });
+
+      console.log("✅ API: Página Avaliações resetada com sucesso");
+    }
 
     // Revalidar cache da página avaliacoes
     try {

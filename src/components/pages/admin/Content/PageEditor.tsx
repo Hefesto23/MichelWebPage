@@ -3,6 +3,7 @@
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
 import { ImageSelector } from "@/components/shared/media";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { handleAuthError } from "@/lib/auth";
 import {
   DEFAULT_ABOUT_CONTENT,
@@ -187,6 +188,8 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
   const [editingCards, setEditingCards] = useState<'services' | 'terapias' | 'avaliacoes' | null>(null);
   const [cardsData, setCardsData] = useState<CardData[]>([]);
   const [savedContent, setSavedContent] = useState<any>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [sectionToRestore, setSectionToRestore] = useState<string | null>(null);
 
   const loadPageContent = useCallback(async () => {
     try {
@@ -1054,7 +1057,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               {
                 id: 800,
                 page: "agendamento",
-                section: "header",
+                section: "agendamento",
                 key: "title",
                 type: "title",
                 value: agendamentoTitle,
@@ -1064,7 +1067,7 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
               {
                 id: 801,
                 page: "agendamento",
-                section: "header",
+                section: "agendamento",
                 key: "description",
                 type: "text",
                 value: agendamentoDescription,
@@ -1077,27 +1080,29 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
             name: "Cards Informativos",
             description: "Configure os cards informativos do agendamento",
             items: [
-              // Cards individuais
+              // Cards individuais - todos na mesma seção "agendamento"
               ...agendamentoCards.map((card: AgendamentoCardItem, index: number) => [
                 {
                   id: 802 + (index * 3), // 802, 805, 808
                   page: "agendamento",
-                  section: `card_${card.id}`,
-                  key: "title",
+                  section: "agendamento", // Mudado de card_${card.id} para agendamento
+                  key: `card_${card.id}_title`,
                   type: "text" as const,
                   value: card.title,
                   label: `Card ${card.id} - Título`,
                   placeholder: `Título do card ${card.id}...`,
+                  metadata: { cardId: card.id }, // Metadata para identificar o card
                 },
                 {
                   id: 803 + (index * 3), // 803, 806, 809
                   page: "agendamento",
-                  section: `card_${card.id}`,
-                  key: "content",
+                  section: "agendamento", // Mudado de card_${card.id} para agendamento
+                  key: `card_${card.id}_content`,
                   type: "text" as const,
                   value: card.content,
                   label: `Card ${card.id} - Conteúdo`,
                   placeholder: `Conteúdo do card ${card.id}...`,
+                  metadata: { cardId: card.id }, // Metadata para identificar o card
                 },
               ]).flat(),
             ],
@@ -1464,6 +1469,34 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           if (!contentToSave.contact.page) contentToSave.contact.page = { ...DEFAULT_CONTACT_CONTENT.page };
           // @ts-expect-error - Complex contact type handling
           contentToSave.contact.page[item.key as keyof typeof DEFAULT_CONTACT_CONTENT.page] = valueToSave as unknown;
+        } else if (item.section === "agendamento" && item.page === "agendamento") {
+          if (!contentToSave.agendamento) contentToSave.agendamento = {};
+
+          // Handle title and description
+          if (item.key === "title" || item.key === "description") {
+            contentToSave.agendamento[item.key] = valueToSave;
+          }
+          // Handle card fields (card_1_title, card_1_content, etc)
+          else if (item.key.startsWith("card_")) {
+            if (!contentToSave.agendamento.infoCards) {
+              contentToSave.agendamento.infoCards = savedContent?.agendamento?.infoCards || DEFAULT_AGENDAMENTO_CONTENT.infoCards;
+            }
+
+            // Extract card ID and field from key (card_1_title -> cardId: 1, field: title)
+            const match = item.key.match(/card_(\d+)_(title|content)/);
+            if (match) {
+              const cardId = parseInt(match[1]);
+              const field = match[2] as 'title' | 'content';
+
+              if (contentToSave.agendamento.infoCards) {
+                const cardIndex = contentToSave.agendamento.infoCards.findIndex((c: AgendamentoCardItem) => c.id === cardId);
+
+                if (cardIndex !== -1) {
+                  contentToSave.agendamento.infoCards[cardIndex][field] = valueToSave;
+                }
+              }
+            }
+          }
         } else if (item.section.startsWith("divisoria_")) {
           const divisoriaKey = item.section as keyof SavedContent;
           if (!contentToSave[divisoriaKey]) {
@@ -1891,21 +1924,24 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
     }
   };
 
-  const resetToDefaults = async () => {
-    if (
-      !confirm(
-        "Tem certeza que deseja restaurar o conteúdo para os valores padrão? Esta ação não pode ser desfeita."
-      )
-    ) {
-      return;
-    }
+  const handleRestoreClick = (section?: string) => {
+    setSectionToRestore(section || null);
+    setConfirmDialogOpen(true);
+  };
 
+  const resetToDefaults = async () => {
     setResetting(true);
     setError(null);
+    setConfirmDialogOpen(false);
 
     try {
+      // Montar URL com ou sem section query param
+      const url = sectionToRestore
+        ? `/api/admin/content/${page}?section=${sectionToRestore}`
+        : `/api/admin/content/${page}`;
+
       // Chamar endpoint DELETE para resetar
-      const response = await fetch(`/api/admin/content/${page}`, {
+      const response = await fetch(url, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -2344,12 +2380,12 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
 
 
           <button
-            onClick={resetToDefaults}
+            onClick={() => handleRestoreClick()}
             disabled={resetting || saving}
             className="inline-flex items-center space-x-2 px-4 py-2 border border-[var(--destructive)] text-[var(--destructive)] rounded-md hover:bg-white/10 hover:font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>{resetting ? "Restaurando..." : "Restaurar Padrão"}</span>
+            <span>{resetting ? "Restaurando..." : "Restaurar Toda Página"}</span>
           </button>
         </div>
       </div>
@@ -2404,6 +2440,17 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                       )}
                     </div>
                     <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleRestoreClick(sectionName)}
+                        disabled={resetting || saving}
+                        className="flex items-center gap-2 px-3 py-2 border border-orange-500 dark:border-orange-400
+                                   text-orange-600 dark:text-orange-400 rounded-md hover:bg-orange-50
+                                   dark:hover:bg-orange-900/20 transition-colors text-sm disabled:opacity-50
+                                   disabled:cursor-not-allowed"
+                        title="Restaurar esta seção ao padrão"
+                      >
+                        <RotateCcw size={16} />
+                      </button>
                       <button
                         onClick={() => openCardsManager(cardsType, currentCards)}
                         className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
@@ -2465,6 +2512,17 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <button
+                        onClick={() => handleRestoreClick(sectionName)}
+                        disabled={resetting || saving}
+                        className="flex items-center gap-2 px-3 py-2 border border-orange-500 dark:border-orange-400
+                                   text-orange-600 dark:text-orange-400 rounded-md hover:bg-orange-50
+                                   dark:hover:bg-orange-900/20 transition-colors text-sm disabled:opacity-50
+                                   disabled:cursor-not-allowed"
+                        title="Restaurar esta seção ao padrão"
+                      >
+                        <RotateCcw size={16} />
+                      </button>
+                      <button
                         onClick={() => setEditingClinicImages(true)}
                         className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground
                                    rounded-md hover:bg-primary/90 transition-colors text-sm"
@@ -2518,18 +2576,31 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
                     </span>
                   )}
                 </div>
-                <button
-                  onClick={() => saveSectionChanges(sectionName)}
-                  disabled={saving || !sectionHasChanges}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm ${
-                    sectionHasChanges
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  <Save size={16} />
-                  <span>{sectionHasChanges ? 'Salvar Seção' : 'Sem alterações'}</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleRestoreClick(sectionName)}
+                    disabled={resetting || saving}
+                    className="flex items-center gap-2 px-3 py-2 border border-orange-500 dark:border-orange-400
+                               text-orange-600 dark:text-orange-400 rounded-md hover:bg-orange-50
+                               dark:hover:bg-orange-900/20 transition-colors text-sm disabled:opacity-50
+                               disabled:cursor-not-allowed"
+                    title="Restaurar esta seção ao padrão"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                  <button
+                    onClick={() => saveSectionChanges(sectionName)}
+                    disabled={saving || !sectionHasChanges}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm ${
+                      sectionHasChanges
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Save size={16} />
+                    <span>{sectionHasChanges ? 'Salvar Seção' : 'Sem alterações'}</span>
+                  </button>
+                </div>
               </div>
             }>
               <p className="text-muted-foreground mb-6">{section.description}</p>
@@ -2658,6 +2729,30 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
           </div>
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        onClose={() => {
+          setConfirmDialogOpen(false);
+          setSectionToRestore(null);
+        }}
+        onConfirm={resetToDefaults}
+        title={
+          sectionToRestore
+            ? "Restaurar seção ao padrão?"
+            : "Restaurar página inteira ao padrão?"
+        }
+        description={
+          sectionToRestore
+            ? `Tem certeza que deseja restaurar a seção "${sectionToRestore}" para os valores padrão? Todo o conteúdo customizado desta seção será perdido.`
+            : "Tem certeza que deseja restaurar TODA a página para os valores padrão? Todo o conteúdo customizado da página será perdido. Esta ação não pode ser desfeita."
+        }
+        confirmText="Sim, restaurar"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={resetting}
+      />
     </div>
   );
 };

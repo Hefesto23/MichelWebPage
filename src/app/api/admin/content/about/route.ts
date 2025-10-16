@@ -384,18 +384,46 @@ export async function DELETE(request: Request) {
       );
     }
 
-    console.log("🔄 API: Resetando conteúdo da página About...");
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
 
-    // Desativar todos os registros desta página
-    await prisma.content.updateMany({
-      where: {
-        page: "about",
-        isActive: true
-      },
-      data: {
-        isActive: false
-      }
-    });
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página About...`);
+
+      // Desativar apenas a seção específica
+      await prisma.content.updateMany({
+        where: {
+          page: "about",
+          section: section,
+          isActive: true
+        },
+        data: {
+          isActive: false
+        }
+      });
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+      return NextResponse.json({
+        success: true,
+        message: `Seção "${section}" resetada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Resetando TODA a página About...");
+
+      // Desativar todos os registros desta página
+      await prisma.content.updateMany({
+        where: {
+          page: "about",
+          isActive: true
+        },
+        data: {
+          isActive: false
+        }
+      });
+
+      console.log("✅ API: Página About resetada com sucesso");
+    }
 
     // Revalidar cache da página about
     try {

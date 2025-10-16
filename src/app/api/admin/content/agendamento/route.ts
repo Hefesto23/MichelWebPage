@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { validateAuthHeader } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -41,20 +43,29 @@ export async function GET() {
 
     // Processar dados do banco para o formato esperado
     const contentMap: Record<string, Record<string, unknown>> = { agendamento: {} };
-    const infoCards: unknown[] = [];
+    const cardsData: Record<number, { id: number; title?: string; content?: string; order: number }> = {};
 
     content.forEach((item: { section: string; key: string; value: string }) => {
       if (item.section === "agendamento") {
-        contentMap.agendamento[item.key] = item.value;
-      } else if (item.section.startsWith("card_")) {
-        try {
-          const cardData = JSON.parse(item.value);
-          infoCards.push(cardData);
-        } catch (e) {
-          console.error('Error parsing info card data:', e);
+        // Check if it's a card field (card_1_title, card_1_content, etc)
+        const cardMatch = item.key.match(/card_(\d+)_(title|content)/);
+        if (cardMatch) {
+          const cardId = parseInt(cardMatch[1]);
+          const field = cardMatch[2] as 'title' | 'content';
+
+          if (!cardsData[cardId]) {
+            cardsData[cardId] = { id: cardId, order: cardId };
+          }
+          cardsData[cardId][field] = item.value;
+        } else {
+          // Regular fields (title, description)
+          contentMap.agendamento[item.key] = item.value;
         }
       }
     });
+
+    // Convert cardsData object to array
+    const infoCards = Object.values(cardsData).sort((a, b) => a.order - b.order);
 
     if (infoCards.length > 0) {
       contentMap.agendamento.infoCards = infoCards;
@@ -73,18 +84,33 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log("📡 API: POST request received for agendamento content");
+
+    const authHeader = request.headers.get("authorization");
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
+    console.log("✅ API: Autenticação válida");
+
     const data = await request.json();
     console.log("📥 Dados recebidos na API agendamento:", JSON.stringify(data, null, 2));
-    
+
     await prisma.content.deleteMany({
       where: { page: "agendamento" }
     });
 
     const contentEntries = [];
-    
+
     // Verificar se os dados estão vindo via PageEditor (structure: data.content.agendamento)
     const agendamentoData = data.content?.agendamento || data.agendamento || data;
-    
+
     if (agendamentoData.title) {
       contentEntries.push({
         page: "agendamento",
@@ -94,27 +120,35 @@ export async function POST(request: Request) {
         value: agendamentoData.title
       });
     }
-    
+
     if (agendamentoData.description) {
       contentEntries.push({
         page: "agendamento",
-        section: "agendamento", 
+        section: "agendamento",
         key: "description",
         type: "text",
         value: agendamentoData.description
       });
     }
 
-    // Processar info cards
+    // Processar info cards - agora salvando individualmente como fields
     const cards = agendamentoData.infoCards;
     if (cards && Array.isArray(cards)) {
-      cards.forEach((card: unknown, index: number) => {
+      cards.forEach((card: any) => {
+        // Salvar título e conteúdo de cada card como campos separados
         contentEntries.push({
           page: "agendamento",
-          section: `card_${index + 1}`,
-          key: "data",
-          type: "json",
-          value: JSON.stringify(card)
+          section: "agendamento",
+          key: `card_${card.id}_title`,
+          type: "text",
+          value: card.title
+        });
+        contentEntries.push({
+          page: "agendamento",
+          section: "agendamento",
+          key: `card_${card.id}_content`,
+          type: "text",
+          value: card.content
         });
       });
     }
@@ -123,6 +157,14 @@ export async function POST(request: Request) {
       await prisma.content.createMany({
         data: contentEntries
       });
+    }
+
+    // Revalidar cache
+    try {
+      revalidateTag('agendamento-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
     }
 
     console.log("💾 Dados salvos no banco:", contentEntries);
@@ -136,11 +178,59 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
-    await prisma.content.deleteMany({
-      where: { page: "agendamento" }
-    });
+    console.log("📡 API: DELETE request received for agendamento content");
+
+    const authHeader = request.headers.get("authorization");
+    const payload = validateAuthHeader(authHeader);
+
+    if (!payload) {
+      console.log("❌ API: Token inválido ou ausente");
+      return NextResponse.json(
+        { error: "Token inválido" },
+        { status: 401 }
+      );
+    }
+
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
+
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página Agendamento...`);
+
+      // Deletar apenas a seção específica
+      await prisma.content.deleteMany({
+        where: {
+          page: "agendamento",
+          section: section
+        }
+      });
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+      return NextResponse.json({
+        success: true,
+        message: `Seção "${section}" resetada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Resetando TODA a página Agendamento...");
+
+      // Deletar todos os registros desta página
+      await prisma.content.deleteMany({
+        where: { page: "agendamento" }
+      });
+
+      console.log("✅ API: Página Agendamento resetada com sucesso");
+    }
+
+    // Revalidar cache
+    try {
+      revalidateTag('agendamento-content');
+      console.log("🔄 API: Cache revalidado com sucesso");
+    } catch (revalidateError) {
+      console.warn("⚠️ API: Erro ao revalidar cache:", revalidateError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

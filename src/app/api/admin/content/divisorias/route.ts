@@ -216,18 +216,42 @@ export async function DELETE(request: Request) {
       );
     }
 
-    console.log("🔄 API: Resetando conteúdo da página Divisórias...");
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
 
-    // Desativar todos os registros desta página
-    await prisma.content.updateMany({
-      where: {
-        page: "divisorias",
-        isActive: true
-      },
-      data: {
-        isActive: false
-      }
-    });
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página Divisórias...`);
+
+      // Desativar apenas a seção específica
+      await prisma.content.updateMany({
+        where: {
+          page: "divisorias",
+          section: section,
+          isActive: true
+        },
+        data: {
+          isActive: false
+        }
+      });
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+    } else {
+      console.log("🔄 API: Resetando TODA a página Divisórias...");
+
+      // Desativar todos os registros desta página
+      await prisma.content.updateMany({
+        where: {
+          page: "divisorias",
+          isActive: true
+        },
+        data: {
+          isActive: false
+        }
+      });
+
+      console.log("✅ API: Página Divisórias resetada com sucesso");
+    }
 
     // Revalidar cache da página divisorias e de todas as páginas que usam divisórias
     try {

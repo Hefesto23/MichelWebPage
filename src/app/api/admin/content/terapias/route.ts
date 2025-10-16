@@ -205,10 +205,36 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Deletar todos os registros desta página (hard delete)
-    await prisma.content.deleteMany({
-      where: { page: "terapias" }
-    });
+    // Verificar se tem query param de seção específica
+    const { searchParams } = new URL(request.url);
+    const section = searchParams.get("section");
+
+    if (section) {
+      console.log(`🔄 API: Resetando seção "${section}" da página Terapias...`);
+
+      // Deletar apenas a seção específica
+      await prisma.content.deleteMany({
+        where: {
+          page: "terapias",
+          section: section
+        }
+      });
+
+      console.log(`✅ API: Seção "${section}" resetada com sucesso`);
+      return NextResponse.json({
+        success: true,
+        message: `Seção "${section}" resetada com sucesso`
+      });
+    } else {
+      console.log("🔄 API: Resetando TODA a página Terapias...");
+
+      // Deletar todos os registros desta página (hard delete)
+      await prisma.content.deleteMany({
+        where: { page: "terapias" }
+      });
+
+      console.log("✅ API: Página Terapias resetada com sucesso");
+    }
 
     // Revalidar cache da página terapias
     try {

@@ -3,6 +3,7 @@
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
 import { WeekDaySelector } from "@/components/shared/ui/WeekDaySelector";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { useSettings, WorkingDays } from "@/hooks/useSettings";
 import {
   AlertTriangle,
@@ -14,6 +15,7 @@ import {
   X,
   MapPin,
   User,
+  RotateCcw,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -50,6 +52,9 @@ export const Settings = () => {
   const [localChanges, setLocalChanges] = useState<Record<string, any>>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [sectionToRestore, setSectionToRestore] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   const {
     settings,
@@ -395,69 +400,59 @@ export const Settings = () => {
     // Settings will be refreshed automatically via useEffect
   };
 
+  const handleRestoreClick = (section?: string) => {
+    setSectionToRestore(section || null);
+    setConfirmDialogOpen(true);
+  };
+
   const restoreDefaults = async () => {
+    setResetting(true);
     setError(null);
     setSuccess(null);
+    setConfirmDialogOpen(false);
 
     try {
-      // Configurações padrão
-      const defaultSettings = {
-        working_days: {
-          monday: true,
-          tuesday: true,
-          wednesday: true,
-          thursday: true,
-          friday: false,
-          saturday: false,
-        },
-        start_time: "08:00",
-        end_time: "21:00",
-        session_duration: 50,
-        first_session_duration: 60,
-        advance_days: 60,
-        email_notifications: true,
-        whatsapp_notifications: true,
-      };
+      // Montar URL com ou sem section query param
+      const url = sectionToRestore
+        ? `/api/admin/settings?section=${sectionToRestore}`
+        : `/api/admin/settings`;
 
-      await saveMultipleSettings("agendamento", defaultSettings);
-      await saveMultipleSettings("geral", {
-        site_title: "Michel de Camargo - Psicólogo Clínico",
-        phone_number: "(15) 99764-6421",
-        contact_email: "michelcamargo.psi@gmail.com",
+      // Chamar endpoint DELETE para resetar
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      await saveMultipleSettings("clinica", {
-        psychologist_name: "Michel de Camargo",
-        crp_number: "CRP 06/174807",
-        age_disclaimer: "* Atendimentos a partir de 20 anos de idade",
-        appointment_note: "As consultas necessitam ser previamente agendadas.",
-        additional_notes: "",
-      });
-      await saveMultipleSettings("endereco", {
-        street: "Rua Antônio Ferreira, 171",
-        neighborhood: "Parque Campolim",
-        city: "Sorocaba",
-        state: "SP",
-        zip_code: "18047-636",
-        latitude: "-23.493335284719095",
-        longitude: "-47.47244788549275",
-        // Segundo endereço (vazio por padrão)
-        street2: "",
-        neighborhood2: "",
-        city2: "",
-        state2: "",
-        zip_code2: "",
-      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao restaurar configurações");
+      }
 
       setLocalChanges({});
-      setSuccess("Configurações restauradas para o padrão!");
+
+      const successMessage = sectionToRestore
+        ? `Seção "${sectionToRestore}" restaurada com sucesso!`
+        : "Todas as configurações restauradas com sucesso!";
+
+      setSuccess(successMessage);
 
       // Limpar mensagem de sucesso após 3 segundos
       setTimeout(() => setSuccess(null), 3000);
 
-      // Settings will be refreshed automatically via useEffect
+      // Recarregar a página para refletir as mudanças
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error) {
       console.error("Erro ao restaurar configurações:", error);
-      setError("Erro ao restaurar configurações. Tente novamente.");
+      setError(error instanceof Error ? error.message : "Erro ao restaurar configurações. Tente novamente.");
+    } finally {
+      setResetting(false);
+      setSectionToRestore(null);
     }
   };
 
@@ -640,7 +635,25 @@ export const Settings = () => {
         {/* Settings Content */}
         <div className="md:col-span-3">
           {activeSettingsSection ? (
-            <AdminCard title={activeSettingsSection.name}>
+            <AdminCard
+              title={
+                <div className="flex items-center justify-between w-full">
+                  <span>{activeSettingsSection.name}</span>
+                  <button
+                    onClick={() => handleRestoreClick(activeSection)}
+                    disabled={resetting}
+                    className="flex items-center gap-2 px-3 py-2 border border-orange-500 dark:border-orange-400
+                               text-orange-600 dark:text-orange-400 rounded-md hover:bg-orange-50
+                               dark:hover:bg-orange-900/20 transition-colors text-sm disabled:opacity-50
+                               disabled:cursor-not-allowed"
+                    title="Restaurar esta seção ao padrão"
+                  >
+                    <RotateCcw size={16} />
+                    <span>Restaurar Seção</span>
+                  </button>
+                </div>
+              }
+            >
               <div className="space-y-8">
                 {activeSettingsSection.settings.map((setting) => (
                   <div key={setting.id} className="space-y-2">
@@ -668,11 +681,12 @@ export const Settings = () => {
                 <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex space-x-2">
                     <button
-                      onClick={restoreDefaults}
-                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => handleRestoreClick()}
+                      disabled={resetting}
+                      className="inline-flex items-center space-x-2 px-4 py-2 border border-[var(--destructive)] text-[var(--destructive)] rounded-md hover:bg-white/10 hover:font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      <span>Restaurar Padrão</span>
+                      <span>{resetting ? "Restaurando..." : "Restaurar Todas"}</span>
                     </button>
                   </div>
 
@@ -686,7 +700,7 @@ export const Settings = () => {
                         <span>Cancelar</span>
                       </button>
                     )}
-                    
+
                     <button
                       onClick={saveSettings}
                       disabled={Object.keys(localChanges).length === 0}
@@ -725,6 +739,32 @@ export const Settings = () => {
           </p>
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        onClose={() => {
+          setConfirmDialogOpen(false);
+          setSectionToRestore(null);
+        }}
+        onConfirm={restoreDefaults}
+        title={
+          sectionToRestore
+            ? "Restaurar seção ao padrão?"
+            : "Restaurar todas as configurações ao padrão?"
+        }
+        description={
+          sectionToRestore
+            ? `Tem certeza que deseja restaurar a seção "${
+                settingSections.find(s => s.id === sectionToRestore)?.name || sectionToRestore
+              }" para os valores padrão? Todas as configurações customizadas desta seção serão perdidas.`
+            : "Tem certeza que deseja restaurar TODAS as configurações para os valores padrão? Todas as configurações customizadas serão perdidas. Esta ação não pode ser desfeita."
+        }
+        confirmText="Sim, restaurar"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={resetting}
+      />
     </div>
   );
 };

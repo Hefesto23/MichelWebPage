@@ -230,3 +230,99 @@ export function createSettingsFetcher() {
     }
   );
 }
+
+/**
+ * Busca conteúdo da página de Agendamento com cache
+ * Usado em Server Components para renderização otimizada
+ *
+ * @returns Conteúdo de agendamento (título, descrição, cards)
+ */
+export async function getAgendamentoContent() {
+  const fetcher = unstable_cache(
+    async () => {
+      console.log("🔄 CMS Direct: Buscando agendamento do banco...");
+
+      const content = await prisma.content.findMany({
+        where: {
+          page: "agendamento",
+          isActive: true,
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      console.log(`📥 CMS Direct: ${content.length} itens encontrados`);
+
+      // Processar dados do banco para o formato esperado
+      const contentMap: any = { agendamento: {} };
+      const cardsData: Record<number, { id: number; title?: string; content?: string; order: number }> = {};
+
+      content.forEach((item: { section: string; key: string; value: string }) => {
+        if (item.section === "agendamento") {
+          // Check if it's a card field (card_1_title, card_1_content, etc)
+          const cardMatch = item.key.match(/card_(\d+)_(title|content)/);
+          if (cardMatch) {
+            const cardId = parseInt(cardMatch[1]);
+            const field = cardMatch[2] as "title" | "content";
+
+            if (!cardsData[cardId]) {
+              cardsData[cardId] = { id: cardId, order: cardId };
+            }
+            cardsData[cardId][field] = item.value;
+          } else {
+            // Regular fields (title, description)
+            contentMap.agendamento[item.key] = item.value;
+          }
+        }
+      });
+
+      // Convert cardsData object to array
+      let infoCards = Object.values(cardsData).sort((a, b) => a.order - b.order);
+
+      // ✅ FALLBACK: Se não houver cards no banco, usar cards padrão
+      if (infoCards.length === 0) {
+        console.log("⚠️  CMS Direct: Nenhum card encontrado no banco, usando conteúdo padrão");
+        infoCards = [
+          {
+            id: 1,
+            title: "Preparando-se para sua consulta",
+            content: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
+            order: 1
+          },
+          {
+            id: 2,
+            title: "Política de Cancelamento",
+            content: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
+            order: 2
+          },
+          {
+            id: 3,
+            title: "Consulta Online",
+            content: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
+            order: 3
+          }
+        ];
+      }
+
+      const result = {
+        title: contentMap.agendamento.title || "Agendamento de Consultas",
+        description: contentMap.agendamento.description || "Agende sua consulta de forma rápida e segura.",
+        infoCards: infoCards.map((card) => ({
+          id: card.id,
+          title: card.title || "",
+          content: card.content || "",
+          order: card.order,
+        })),
+      };
+
+      console.log(`✅ CMS Direct: Conteúdo de agendamento processado (${result.infoCards.length} cards)`);
+      return result;
+    },
+    ["agendamento-content-cache"],
+    {
+      tags: ["agendamento-content"],
+      revalidate: 3600, // ISR: regenera a cada 1 hora
+    }
+  );
+
+  return fetcher();
+}

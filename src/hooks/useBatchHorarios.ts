@@ -5,6 +5,7 @@ interface UseBatchHorariosResult {
   horarios: Record<string, string[]>;
   loading: boolean;
   loadingMore: boolean;
+  ready: boolean; // ✅ NOVO: Calendário pode renderizar após quick batch
   error: string | null;
   progress: number;
   refetch: () => Promise<void>;
@@ -32,6 +33,7 @@ export const useBatchHorarios = (
   const [horarios, setHorarios] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [ready, setReady] = useState(false); // ✅ NOVO: Estado de prontidão
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [dateRanges, setDateRanges] = useState<Set<string>>(new Set());
@@ -128,22 +130,38 @@ export const useBatchHorarios = (
     }
   }, [dateRanges, updateProgress]);
 
-  // Fetch inicial (apenas initialDays)
+  // Fetch inicial com estratégia de 7 dias + background loading
   useEffect(() => {
     const fetchInitial = async () => {
       try {
         setLoading(true);
-        updateProgress(20);
+        updateProgress(10);
 
-        const endDate = addDays(initialStartDate, initialDays);
+        // ⚡ QUICK BATCH: Carregar 7 dias PRIMEIRO (libera calendário)
+        const quickEndDate = addDays(initialStartDate, 7);
+        console.log(`⚡ Quick batch: Primeiros 7 dias...`);
 
-        console.log(`🚀 Carregamento inicial: ${initialDays} dias`);
+        await loadMoreDates(initialStartDate, quickEndDate);
 
-        await loadMoreDates(initialStartDate, endDate);
+        // ✅ LIBERAR CALENDÁRIO AGORA
+        setReady(true);
+        updateProgress(35);
+        console.log(`✅ Calendário pronto! Carregando restante em background...`);
+
+        // 🔄 BACKGROUND LOADING: Carregar restante sem bloquear
+        if (initialDays > 7) {
+          const fullEndDate = addDays(initialStartDate, initialDays);
+          console.log(`🔄 Background: Carregando ${initialDays - 7} dias restantes...`);
+
+          await loadMoreDates(addDays(initialStartDate, 8), fullEndDate);
+          console.log(`✅ Batch completo: ${initialDays} dias carregados`);
+        }
 
         updateProgress(100);
       } catch (err) {
         console.error('Erro no carregamento inicial:', err);
+        // Se falhar, ainda deixar ready=true para não bloquear calendário
+        setReady(true);
       } finally {
         setLoading(false);
       }
@@ -205,6 +223,7 @@ export const useBatchHorarios = (
     horarios,
     loading,
     loadingMore,
+    ready, // ✅ NOVO: Estado de prontidão do calendário
     error,
     progress,
     refetch,

@@ -61,6 +61,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   // 🚀 OTIMIZAÇÃO: Batch prefetch incremental (30 dias iniciais)
   const {
     loading: batchLoading,
+    ready, // ✅ Estado de prontidão: calendário libera após 7 dias
     loadingMore,
     error: batchError,
     progress,
@@ -335,7 +336,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
               selected={date}
               onSelect={handleDateChange}
               onMonthChange={setCurrentMonth}
-              disabled={batchLoading || isDiaDesabilitado}
+              disabled={!ready || isDiaDesabilitado}
               startMonth={hoje}
               endMonth={fimPeriodo}
               timeZone="America/Sao_Paulo"
@@ -405,8 +406,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
             />
           </div>
 
-          {/* Overlay de loading inicial */}
-          {batchLoading && (
+          {/* Overlay de loading inicial - só mostra se calendário não estiver pronto */}
+          {!ready && (
             <div className="absolute inset-0 bg-background/95 backdrop-blur-sm rounded-[0.5rem] flex items-center justify-center z-10 animate-in fade-in duration-300">
               <div className="bg-card border-2 border-primary/20 rounded-xl p-8 shadow-2xl max-w-sm mx-4 text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
@@ -420,8 +421,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                   Preparando calendário
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Carregando horários disponíveis para os próximos{' '}
-                  <span className="font-bold text-foreground">30 dias</span>
+                  Carregando horários disponíveis para a próxima{' '}
+                  <span className="font-bold text-foreground">semana</span>
                 </p>
 
                 {/* Barra de progresso */}
@@ -436,7 +437,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           )}
 
           {/* Toast discreto para loading incremental (canto superior direito) */}
-          {loadingMore && !batchLoading && (
+          {loadingMore && ready && (
             <div className="absolute top-2 right-2 z-20 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-xl px-4 py-2.5 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="relative">
                 <svg className="animate-spin h-4 w-4 text-primary" viewBox="0 0 24 24">
@@ -452,7 +453,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
         </div>
 
         {/* Badge de status e período carregado */}
-        {!batchLoading && loadedRange.minDate && loadedRange.maxDate && (
+        {ready && loadedRange.minDate && loadedRange.maxDate && (
           <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-4 py-2">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -489,7 +490,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
         )}
 
         {/* Banner de erro se houver */}
-        {batchError && !batchLoading && (
+        {batchError && ready && (
           <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl">
             <div className="flex items-start gap-3">
               <svg className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

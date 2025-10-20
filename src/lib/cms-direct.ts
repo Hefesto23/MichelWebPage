@@ -1,6 +1,7 @@
 // src/lib/cms-direct.ts
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_AGENDAMENTO_CONTENT } from "@/utils/default-content";
 
 /**
  * ✅ SOLUÇÃO CORRETA: Acesso direto ao Prisma em Server Components
@@ -278,29 +279,10 @@ export async function getAgendamentoContent() {
       // Convert cardsData object to array
       let infoCards = Object.values(cardsData).sort((a, b) => a.order - b.order);
 
-      // ✅ FALLBACK: Se não houver cards no banco, usar cards padrão
+      // ✅ FALLBACK: Se não houver cards no banco, usar cards padrão de default-content.ts
       if (infoCards.length === 0) {
         console.log("⚠️  CMS Direct: Nenhum card encontrado no banco, usando conteúdo padrão");
-        infoCards = [
-          {
-            id: 1,
-            title: "Preparando-se para sua consulta",
-            content: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
-            order: 1
-          },
-          {
-            id: 2,
-            title: "Política de Cancelamento",
-            content: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
-            order: 2
-          },
-          {
-            id: 3,
-            title: "Consulta Online",
-            content: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
-            order: 3
-          }
-        ];
+        infoCards = DEFAULT_AGENDAMENTO_CONTENT.infoCards;
       }
 
       const result = {

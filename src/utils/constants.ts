@@ -93,6 +93,27 @@ export const APPOINTMENT = {
 // ============================================
 // 🏢 INFORMAÇÕES DO CONSULTÓRIO
 // ============================================
+/**
+ * ⚠️ DUPLICAÇÃO INTENCIONAL:
+ * Este CLINIC_INFO serve como fallback de configurações do sistema
+ * (usado quando settings não estão disponíveis ou como valores padrão).
+ *
+ * Há duplicação com DEFAULT_CONTACT_CONTENT em default-content.ts,
+ * que serve como fallback do CMS (editável via admin).
+ *
+ * PROPÓSITO:
+ * - constants.ts/CLINIC_INFO: Configurações fixas do sistema
+ * - default-content.ts/DEFAULT_CONTACT_CONTENT: Conteúdo CMS editável
+ *
+ * USADO EM (6 arquivos):
+ * - src/app/api/public/settings/route.ts (fallback de settings)
+ * - src/components/layout/Footer.tsx (fallback dinâmico)
+ * - src/components/pages/contact/ContactInfo.tsx
+ * - src/components/pages/contact/ContactHours.tsx
+ * - src/components/pages/contact/ContactMap.tsx
+ * - src/utils/formatters.ts
+ * - src/utils/validators.ts
+ */
 export const CLINIC_INFO = {
   NAME: "Consultório de Psicologia Michel de Camargo",
 
@@ -254,301 +275,8 @@ export const MEDIA = {
 } as const;
 
 // ============================================
-// 🏠 CONTEÚDO DAS PÁGINAS
+// 🔧 TYPE HELPERS
 // ============================================
-export const PAGE_CONTENT = {
-  HOME: {
-    HERO: {
-      TEXT: "Já pensou em como seria ter uma vida mais tranquila e leve, com menos ansiedade? Lidar com isso pode ser difícil, mas você não precisa enfrentar tudo sozinho. Como psicólogo, estou aqui para te ouvir, acolher e ajudar a encontrar caminhos que tragam mais calma e equilíbrio ao seu dia a dia. Cada passo nessa jornada é importante, e eu estarei ao seu lado para apoiar você em cada um deles!",
-      CTA: "Agende sua consulta e comece a reescrever sua história hoje mesmo:",
-      BUTTON: "Agende sua Consulta!",
-      DISCLAIMER: "*Atendimentos a partir de 20 anos de idade",
-    },
-
-    WELCOME: {
-      TITLE: "Seja Bem-Vindo!",
-      SUBTITLE:
-        "Sentir-se sobrecarregado, ansioso ou constantemente em alerta pode parecer um fardo solitário, mas saiba que você não está sozinho.",
-      CTA: "Dê o primeiro passo e agende uma consulta.",
-    },
-
-    SERVICES: {
-      TITLE: "Primeiros Passos",
-      SUBTITLE: "Navegue pelos serviços e descubra como posso ajudar você...",
-    },
-
-    CLINIC: {
-      TITLE: "Nosso Espaço",
-      SUBTITLE:
-        "Explore o ambiente projetado para proporcionar conforto, privacidade e bem-estar emocional.",
-    },
-  },
-
-  ABOUT: {
-    TITLE: "Sobre mim",
-    SUBTITLE: "Psicólogo Clínico",
-  },
-
-  SERVICES: {
-    TITLE: "Modalidades de Atendimentos",
-    SUBTITLE:
-      "Os atendimentos são realizados dentro da visão teórica da Análise do Comportamento, buscando compreender e transformar comportamentos para uma melhor qualidade de vida.",
-  },
-
-  EVALUATIONS: {
-    TITLE: "Testes Psicológicos",
-    SUBTITLE:
-      "Instrumentos técnicos e científicos que auxiliam na compreensão de aspectos específicos da saúde mental e cognitiva. Cada teste oferece insights importantes sobre diferentes dimensões psicológicas.",
-  },
-
-  APPOINTMENT: {
-    TITLE: "Agendamento de Consultas",
-    TABS: {
-      SEARCH: "Buscar Agendamento",
-      NEW: "Novo Agendamento",
-    },
-    STEPS: {
-      DATE_TIME: "Data e Horário",
-      CONTACT: "Informações de Contato",
-      CONFIRMATION: "Confirmação",
-    },
-    INFO_CARDS: {
-      PREPARATION: {
-        TITLE: "Preparando-se para sua consulta",
-        TEXT: "Para a primeira consulta, recomendo chegar 10 minutos antes do horário marcado. Traga suas dúvidas e expectativas para conversarmos.",
-      },
-      CANCELLATION: {
-        TITLE: "Política de Cancelamento",
-        TEXT: "Cancelamentos devem ser feitos com pelo menos 24 horas de antecedência. Caso contrário, a sessão será cobrada integralmente.",
-      },
-      ONLINE: {
-        TITLE: "Consulta Online",
-        TEXT: "Para consultas online, utilize um local tranquilo e privado. Verifique sua conexão com a internet antes da sessão.",
-      },
-    },
-  },
-
-  CONTACT: {
-    TITLE: "Contato",
-  },
-
-  DIVISORIAS: {
-    TITLE: "Divisórias",
-    SUBTITLE: "Frases de impacto e informações úteis exibidas entre as seções das páginas",
-    SECTIONS: {
-      DIVISORIA_1: {
-        TITLE: "Divisória 1",
-        DESCRIPTION: "Primeira divisória - Horários de atendimento",
-        DEFAULT_TEXT: "Atendimento Segunda à Sexta das 8:00 às 21:00 - Consultas previamente agendadas para melhor atendimento",
-        BACKGROUND_IMAGE: "/assets/quotes/mindfulness.jpg"
-      },
-      DIVISORIA_2: {
-        TITLE: "Divisória 2", 
-        DESCRIPTION: "Segunda divisória - Plantão psicológico",
-        DEFAULT_TEXT: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato",
-        BACKGROUND_IMAGE: "/assets/quotes/growth.jpg"
-      },
-      DIVISORIA_3: {
-        TITLE: "Divisória 3",
-        DESCRIPTION: "Terceira divisória - Psicoterapia online",
-        DEFAULT_TEXT: "Psicoterapia online - modalidade que possibilita atendimento à distância com a mesma qualidade",
-        BACKGROUND_IMAGE: "/assets/quotes/journey.jpg"
-      },
-      DIVISORIA_4: {
-        TITLE: "Divisória 4",
-        DESCRIPTION: "Quarta divisória - Ambiente acolhedor",
-        DEFAULT_TEXT: "Ambiente acolhedor e sigiloso para seu bem-estar emocional e privacidade garantida",
-        BACKGROUND_IMAGE: "/assets/quotes/reflection.jpg"
-      },
-      DIVISORIA_5: {
-        TITLE: "Divisória 5",
-        DESCRIPTION: "Quinta divisória - Primeira consulta",
-        DEFAULT_TEXT: "Primeira consulta com duração estendida para melhor compreensão do seu caso",
-        BACKGROUND_IMAGE: "/assets/quotes/rebuild.jpg"
-      },
-      DIVISORIA_6: {
-        TITLE: "Divisória 6", 
-        DESCRIPTION: "Sexta divisória - Acompanhamento contínuo",
-        DEFAULT_TEXT: "Acompanhamento contínuo e suporte em momentos de crise emocional",
-        BACKGROUND_IMAGE: "/assets/quotes/opportunity.jpg"
-      },
-    }
-  },
-} as const;
-
-// ============================================
-// 📊 CONFIGURAÇÕES ADMIN
-// ============================================
-export const ADMIN = {
-  SETTINGS: {
-    SECTIONS: ["geral", "email", "agendamento", "notificacoes", "senha"],
-    DEFAULT_SESSION_TIMES: ["30", "45", "50", "60", "90"],
-    ADVANCE_DAYS_OPTIONS: ["30", "45", "60", "90"],
-    EMAIL_TEMPLATES: ["default", "minimal", "professional"],
-  },
-
-  STATS: {
-    REFRESH_INTERVAL: 60000, // 1 minuto
-    ITEMS_PER_PAGE: 10,
-    DEFAULT_DATE_RANGE: "30d",
-    DATE_RANGES: [
-      { value: "7d", label: "Últimos 7 dias" },
-      { value: "30d", label: "Últimos 30 dias" },
-      { value: "90d", label: "Últimos 90 dias" },
-      { value: "all", label: "Todo o período" },
-    ],
-  },
-
-  MOCK_DATA: {
-    ENABLED: process.env.NODE_ENV === "development",
-    DELAY: 1000, // ms
-  },
-
-  TABLE_CONFIG: {
-    DEFAULT_PAGE_SIZE: 10,
-    PAGE_SIZE_OPTIONS: [5, 10, 20, 50],
-  },
-} as const;
-
-// ============================================
-// 🎯 DIVISOR/QUOTES
-// ============================================
-export const QUOTES = [
-  {
-    info: `${CLINIC_INFO.HOURS.WEEKDAYS} das ${CLINIC_INFO.HOURS.START} as ${CLINIC_INFO.HOURS.END}`,
-    info2: `Obs: ${CLINIC_INFO.HOURS.NOTE}`,
-    info3: "",
-    detail: CLINIC_INFO.HOURS.AGE_RESTRICTION,
-    backgroundImage: "/assets/quotes/mindfulness.jpg",
-  },
-  {
-    info: "Plantão psicológico - serviço de atendimento pontual de suporte emocional imediato.",
-    info2:
-      "Psicoterapia online - uma modalidade de terapia que possibilita atendimento à distância, incluindo pacientes em diferentes países.",
-    detail: "Veja mais em terapias...",
-    backgroundImage: "/assets/quotes/growth.jpg",
-  },
-  {
-    info: "A mudança é um processo, não um evento.",
-    info2: "",
-    info3: "",
-    detail: "Albert Ellis",
-    backgroundImage: "/assets/quotes/journey.jpg",
-  },
-  {
-    info: "O comportamento é mantido por suas consequências.",
-    info2: "",
-    info3: "",
-    detail: "B.F. Skinner",
-    backgroundImage: "/assets/quotes/reflection.jpg",
-  },
-  {
-    info: "A terapia é uma oportunidade de reconstruir a forma como vivenciamos o mundo.",
-    info2: "",
-    info3: "",
-    detail: "Donald Meichenbaum",
-    backgroundImage: "/assets/quotes/rebuild.jpg",
-  },
-  {
-    info: "Toda resposta aprendida é uma oportunidade de mudança.",
-    info2: "",
-    info3: "",
-    detail: "Joseph Wolpe",
-    backgroundImage: "/assets/quotes/opportunity.jpg",
-  },
-] as const;
-
-// ============================================
-// 🔧 CONFIGURAÇÕES TÉCNICAS
-// ============================================
-export const CONFIG = {
-  API: {
-    BASE_URL: process.env.NEXT_PUBLIC_API_URL || "",
-    TIMEOUT: 30000, // 30s
-  },
-
-  AUTH: {
-    TOKEN_KEY: "token",
-    REFRESH_TOKEN_KEY: "refreshToken",
-    USER_KEY: "user",
-  },
-
-  STORAGE: {
-    THEME_KEY: "theme",
-    LANGUAGE_KEY: "language",
-  },
-
-  SEO: {
-    DEFAULT_TITLE: `${CLINIC_INFO.PSYCHOLOGIST.NAME} - ${CLINIC_INFO.PSYCHOLOGIST.TITLE}`,
-    DEFAULT_DESCRIPTION: `${
-      CLINIC_INFO.PSYCHOLOGIST.TITLE
-    } especializado em ${CLINIC_INFO.PSYCHOLOGIST.SPECIALTIES.join(
-      ", "
-    )}. Atendimento presencial e online em Sorocaba.`,
-    DEFAULT_KEYWORDS: [
-      ...CLINIC_INFO.PSYCHOLOGIST.SPECIALTIES,
-      "psicólogo",
-      "terapia",
-      "Sorocaba",
-      "consulta online",
-      "saúde mental",
-    ],
-  },
-
-  DATES: {
-    DEFAULT_LOCALE: "pt-BR",
-    DEFAULT_TIMEZONE: CLINIC_INFO.HOURS.TIMEZONE,
-  },
-} as const;
-
-// ============================================
-// 🎨 TEMAS E CORES
-// ============================================
-export const THEME = {
-  COLORS: {
-    PRIMARY: "#ffbf9e",
-    SECONDARY: "#c4d6ed",
-    FOREGROUND: "#2e5597",
-    BACKGROUND: "#ffffff",
-    DARK: {
-      PRIMARY: "#ffbf9e",
-      SECONDARY: "#2a2a2a",
-      FOREGROUND: "#fafafa",
-      BACKGROUND: "#001046",
-    },
-  },
-
-  BREAKPOINTS: {
-    SM: 640,
-    MD: 768,
-    LG: 1024,
-    XL: 1280,
-    "2XL": 1536,
-  },
-
-  ANIMATIONS: {
-    DURATION: {
-      FAST: 200,
-      NORMAL: 300,
-      SLOW: 500,
-    },
-  },
-} as const;
-
-// ============================================
-// 📱 REDES SOCIAIS E LINKS EXTERNOS
-// ============================================
-export const EXTERNAL_LINKS = {
-  WHATSAPP: `https://wa.me/${CLINIC_INFO.CONTACT.WHATSAPP}`,
-  EMAIL: `mailto:${CLINIC_INFO.CONTACT.EMAIL}`,
-  GOOGLE_MAPS: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${CLINIC_INFO.ADDRESS.STREET}, ${CLINIC_INFO.ADDRESS.NEIGHBORHOOD}, ${CLINIC_INFO.ADDRESS.CITY} - ${CLINIC_INFO.ADDRESS.STATE}`
-  )}`,
-  TEST_BAI:
-    "https://kiai.med.br/test/teste-online-de-ansiedade-escala-de-beck-bai/",
-} as const;
-
-// Type helpers
 export type AppointmentStatus = keyof typeof APPOINTMENT.STATUS;
 export type AppointmentModality = keyof typeof APPOINTMENT.MODALITY;
 export type MediaCategory = keyof typeof MEDIA.CATEGORIES;

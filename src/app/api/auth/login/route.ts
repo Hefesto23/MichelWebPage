@@ -69,9 +69,6 @@ export async function POST(req: Request) {
       path: "/",
     };
 
-    console.log("API Login - Definindo cookie com opções:", cookieOptions);
-    console.log("API Login - NODE_ENV:", process.env.NODE_ENV);
-    
     // Define cookie httpOnly para maior segurança
     response.cookies.set("token", token, cookieOptions);
 

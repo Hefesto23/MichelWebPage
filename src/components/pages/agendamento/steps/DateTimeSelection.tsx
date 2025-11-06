@@ -97,7 +97,6 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
       settings?.street
     ) {
       const primeiroEndereco = `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`;
-      console.log('🏠 Auto-selecionando primeiro local:', primeiroEndereco);
       updateFormData({ endereco: primeiroEndereco });
     }
   }, [formData.modalidade, formData.endereco, settings, updateFormData]);
@@ -125,9 +124,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
 
     const dataFormatada = format(selectedDate, "yyyy-MM-dd");
 
-    console.log("⚡ Data selecionada:", dataFormatada);
-
-    // ✅ Atualizar UI IMEDIATAMENTE
+    // Atualizar UI IMEDIATAMENTE
     setDate(selectedDate);
     updateFormData({
       dataSelecionada: dataFormatada,

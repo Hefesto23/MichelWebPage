@@ -1,12 +1,12 @@
 // src/lib/email-gmail.ts - Sistema de email com Gmail SMTP
 
-import nodemailer from 'nodemailer';
-import { 
-  createConfirmationTemplate, 
-  createClinicNotificationTemplate,
+import nodemailer from "nodemailer";
+import {
   createCancellationTemplate,
-  createClinicCancellationTemplate 
-} from './email-templates';
+  createClinicCancellationTemplate,
+  createClinicNotificationTemplate,
+  createConfirmationTemplate,
+} from "./email-templates";
 
 // Interface para dados do email
 interface EmailData {
@@ -23,8 +23,8 @@ interface EmailData {
 // Configurar transporter do Gmail SMTP
 const createTransporter = () => {
   const config = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
     secure: false, // true para 465, false para outras portas
     auth: {
       user: process.env.GMAIL_USER,
@@ -35,10 +35,10 @@ const createTransporter = () => {
     },
   };
 
-  console.log('📧 Configurando Gmail SMTP:', {
+  console.log("📧 Configurando Gmail SMTP:", {
     host: config.host,
     port: config.port,
-    user: config.auth.user?.substring(0, 5) + '***',
+    user: config.auth.user?.substring(0, 5) + "***",
     hasPassword: !!config.auth.pass,
   });
 
@@ -52,7 +52,7 @@ const formatarData = (dataString: string): string => {
     return data.toLocaleDateString("pt-BR", {
       weekday: "long",
       day: "numeric",
-      month: "long", 
+      month: "long",
       year: "numeric",
     });
   } catch (error) {
@@ -65,19 +65,13 @@ const formatarData = (dataString: string): string => {
  * Envia email de confirmação de agendamento para usuário e clínica
  */
 export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boolean> {
-  const emailStartTime = Date.now();
-  console.log('📧 Iniciando processamento de emails em background...');
-  
   const dataFormatada = formatarData(dados.data);
-  const clinicEmail = process.env.CLINIC_EMAIL || 'raszlster@gmail.com';
-  const clinicName = process.env.CLINIC_NAME || 'Michel de Camargo - Psicólogo';
+  const clinicEmail = process.env.CLINIC_EMAIL || "florirsentidos@gmail.com";
+  const clinicName = process.env.CLINIC_NAME || "Michel de Camargo - Psicólogo";
 
   try {
     // Verificar configuração
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.log("🧪 MODO DE DESENVOLVIMENTO - Simulando envio de emails");
-      console.log(`📧 Para usuário: ${dados.to}, Para clínica: ${clinicEmail}`);
-      console.log(`📄 ${dados.nome} - ${dataFormatada} às ${dados.horario}`);
       return true;
     }
 
@@ -86,36 +80,38 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
     // 🚀 PREPARAR TEMPLATES EM PARALELO
     const [htmlUsuario, htmlClinica] = await Promise.all([
       // Template usuário
-      Promise.resolve(createConfirmationTemplate({
-        nome: dados.nome,
-        data: dataFormatada,
-        horario: dados.horario,
-        modalidade: dados.modalidade,
-        codigo: dados.codigo,
-        endereco: dados.endereco, // ✅ ADICIONADO
-      })),
+      Promise.resolve(
+        createConfirmationTemplate({
+          nome: dados.nome,
+          data: dataFormatada,
+          horario: dados.horario,
+          modalidade: dados.modalidade,
+          codigo: dados.codigo,
+          endereco: dados.endereco, // ✅ ADICIONADO
+        }),
+      ),
       // Template clínica
-      Promise.resolve(createClinicNotificationTemplate({
-        nome: dados.nome,
-        email: dados.to,
-        telefone: dados.telefone,
-        data: dataFormatada,
-        horario: dados.horario,
-        modalidade: dados.modalidade,
-        codigo: dados.codigo,
-        endereco: dados.endereco, // ✅ ADICIONADO
-      }))
+      Promise.resolve(
+        createClinicNotificationTemplate({
+          nome: dados.nome,
+          email: dados.to,
+          telefone: dados.telefone,
+          data: dataFormatada,
+          horario: dados.horario,
+          modalidade: dados.modalidade,
+          codigo: dados.codigo,
+          endereco: dados.endereco, // ✅ ADICIONADO
+        }),
+      ),
     ]);
 
     // 🚀 ENVIAR EMAILS EM PARALELO (não sequencial)
-    console.log('⚡ Enviando emails em paralelo...');
-    
     const [resultUsuario, resultClinica] = await Promise.allSettled([
       // Email para usuário
       transporter.sendMail({
         from: `"${clinicName}" <${clinicEmail}>`,
         to: dados.to,
-        subject: 'Confirmação de Agendamento de Consulta',
+        subject: "Confirmação de Agendamento de Consulta",
         html: htmlUsuario,
       }),
       // Email para clínica
@@ -124,32 +120,16 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
         to: clinicEmail,
         subject: `[CLÍNICA] Novo Agendamento: ${dados.nome} - ${dataFormatada}`,
         html: htmlClinica,
-      })
+      }),
     ]);
 
     // Análise dos resultados
-    const usuarioOk = resultUsuario.status === 'fulfilled';
-    const clinicaOk = resultClinica.status === 'fulfilled';
-    
-    const emailTime = Date.now() - emailStartTime;
-    console.log(`📧 Emails processados em ${emailTime}ms:`);
-    console.log(`  👤 Usuário: ${usuarioOk ? '✅ Sucesso' : '❌ Falha'}`);
-    console.log(`  🏥 Clínica: ${clinicaOk ? '✅ Sucesso' : '❌ Falha'}`);
-    
-    // Log de erros específicos
-    if (!usuarioOk) {
-      console.error('❌ Erro email usuário:', (resultUsuario as PromiseRejectedResult).reason);
-    }
-    if (!clinicaOk) {
-      console.error('❌ Erro email clínica:', (resultClinica as PromiseRejectedResult).reason);
-    }
+    const usuarioOk = resultUsuario.status === "fulfilled";
+    const clinicaOk = resultClinica.status === "fulfilled";
 
     // Sucesso se pelo menos um email foi enviado
     return usuarioOk || clinicaOk;
-
-  } catch (error) {
-    const emailTime = Date.now() - emailStartTime;
-    console.error(`❌ Erro geral nos emails após ${emailTime}ms:`, error);
+  } catch {
     return false;
   }
 }
@@ -159,15 +139,11 @@ export async function enviarEmailConfirmacaoGmail(dados: EmailData): Promise<boo
  */
 export async function enviarEmailCancelamentoGmail(dados: EmailData): Promise<boolean> {
   const dataFormatada = formatarData(dados.data);
-  const clinicEmail = process.env.CLINIC_EMAIL || 'raszlster@gmail.com';
-  const clinicName = process.env.CLINIC_NAME || 'Michel de Camargo - Psicólogo';
+  const clinicEmail = process.env.CLINIC_EMAIL || "florirsentidos@gmail.com";
+  const clinicName = process.env.CLINIC_NAME || "Michel de Camargo - Psicólogo";
 
   try {
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.log("\n🧪 === MODO DE DESENVOLVIMENTO - CANCELAMENTO Gmail SMTP ===");
-      console.log("📧 Para usuário:", dados.to);
-      console.log("📧 Para clínica:", clinicEmail);
-      console.log("📋 Assunto: Cancelamento de Consulta");
       return true;
     }
 
@@ -191,16 +167,13 @@ export async function enviarEmailCancelamentoGmail(dados: EmailData): Promise<bo
       endereco: dados.endereco, // ✅ ADICIONADO
     });
 
-    console.log('\n📧 Enviando emails de cancelamento...');
-    
     // Enviar email para o usuário
     await transporter.sendMail({
       from: `"${clinicName}" <${clinicEmail}>`,
       to: dados.to,
-      subject: 'Confirmação de Cancelamento de Consulta',
+      subject: "Confirmação de Cancelamento de Consulta",
       html: htmlUsuario,
     });
-    console.log('✅ Email de cancelamento enviado para usuário!');
 
     // Enviar cópia para a clínica
     await transporter.sendMail({
@@ -209,12 +182,9 @@ export async function enviarEmailCancelamentoGmail(dados: EmailData): Promise<bo
       subject: `[CLÍNICA] Cancelamento: ${dados.nome} - ${dataFormatada}`,
       html: htmlClinica,
     });
-    console.log('✅ Email de cancelamento enviado para clínica!');
 
     return true;
-
-  } catch (error) {
-    console.error('❌ Erro ao enviar emails de cancelamento via Gmail SMTP:', error);
+  } catch {
     return false;
   }
 }

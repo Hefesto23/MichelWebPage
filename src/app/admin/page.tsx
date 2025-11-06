@@ -25,10 +25,9 @@ export default function AdminRedirect() {
               router.replace("/admin/dashboard");
               return;
             }
-          } catch (error) {
+          } catch {
             // Token inválido, remover e continuar para login
             localStorage.removeItem("token");
-            console.warn("Token inválido removido:", error);
           }
         }
         

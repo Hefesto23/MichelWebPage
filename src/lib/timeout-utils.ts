@@ -43,7 +43,6 @@ export async function withRetry<T>(
       );
       
       if (attempt > 0) {
-        console.log(`✅ Operação sucedeu na tentativa ${attempt + 1}`);
       }
       
       return result;

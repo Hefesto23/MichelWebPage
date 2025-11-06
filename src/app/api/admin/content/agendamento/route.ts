@@ -90,7 +90,6 @@ export async function POST(request: Request) {
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }
@@ -186,7 +185,6 @@ export async function DELETE(request: Request) {
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }

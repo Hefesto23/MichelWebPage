@@ -60,27 +60,17 @@ export function middleware(request: NextRequest) {
     const headerToken = request.headers.get("authorization")?.replace("Bearer ", "");
     const token = cookieToken || headerToken;
 
-    console.log("Middleware - Rota admin:", pathname);
-    console.log("Middleware - Cookie token:", cookieToken ? "existe" : "não existe");
-    console.log("Middleware - Header token:", headerToken ? "existe" : "não existe");
-    console.log("Middleware - Token final:", token ? "existe" : "não existe");
-
     if (!token) {
-      console.log("Middleware - Sem token, redirecionando para login");
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
     const isValidToken = verifyJWT(token);
-    console.log("Middleware - Token válido:", isValidToken);
 
     if (!isValidToken) {
-      console.log("Middleware - Token inválido, redirecionando para login");
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
-
-    console.log("Middleware - Token válido, permitindo acesso");
   }
 
   // Para APIs admin

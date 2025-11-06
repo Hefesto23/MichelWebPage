@@ -1,7 +1,7 @@
 // src/components/shared/media/ImageUploader.tsx
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadButton } from 'next-cloudinary';
@@ -32,6 +32,28 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState<UploadedImage[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
+  const [cloudinaryFolder, setCloudinaryFolder] = useState<string | null>(null);
+  const [isLoadingFolder, setIsLoadingFolder] = useState(true);
+
+  // Buscar folder correto do ambiente ao montar o componente
+  useEffect(() => {
+    const fetchCloudinaryConfig = async () => {
+      try {
+        const response = await fetch('/api/config/cloudinary');
+        const data = await response.json();
+        const folder = data.folder || 'michel-psi/dev';
+
+        setCloudinaryFolder(folder);
+        setIsLoadingFolder(false);
+      } catch {
+        // Fallback para dev se falhar
+        setCloudinaryFolder('michel-psi/dev');
+        setIsLoadingFolder(false);
+      }
+    };
+
+    fetchCloudinaryConfig();
+  }, []);
   
   // Função para salvar dados no banco após upload do Cloudinary
   const saveUploadToDatabase = async (cloudinaryResult: any) => {
@@ -66,25 +88,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   // Callback para quando o upload do Cloudinary for bem-sucedido
-  const handleUploadSuccess = useCallback(async (result: any, widget?: any) => {
-    console.log('🔍 Upload Cloudinary Success:', {
-      result: result,
-      info: result?.info,
-      widget: widget
-    });
-
+  const handleUploadSuccess = useCallback(async (result: any) => {
     setIsUploading(true);
     setErrors([]);
 
     try {
-      console.log('✅ Upload Cloudinary bem-sucedido:', result.info);
-      console.log('📄 Formato do arquivo:', result.info.format);
-      console.log('📏 Tamanho:', result.info.bytes, 'bytes');
-      console.log('🔗 URL:', result.info.secure_url);
-      
       // Salvar no banco de dados
       const savedUpload = await saveUploadToDatabase(result.info);
-      
+
       const uploadedImage: UploadedImage = {
         id: savedUpload.id,
         filename: result.info.public_id.split('/').pop() + '.' + result.info.format,
@@ -99,42 +110,54 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       };
 
       setUploadResults([uploadedImage]);
-      
+
       if (onUploadSuccess) {
-        console.log('📮 Chamando onUploadSuccess imediatamente após upload');
         onUploadSuccess([uploadedImage]);
       }
 
-      // NÃO fechar widget automaticamente - deixar usuário clicar em Done
-      // widget.close();
-      
     } catch (error) {
-      console.error('Erro após upload:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao processar upload';
       setErrors([errorMessage]);
-      
+
       if (onUploadError) {
         onUploadError(errorMessage);
       }
     } finally {
       setIsUploading(false);
-      // Removido o setTimeout - agora limpamos quando o widget fecha
     }
   }, [onUploadSuccess, onUploadError]);
 
   // Callback para erros no upload
   const handleUploadError = useCallback((error: any) => {
-    console.error('❌ Erro no upload Cloudinary:', error);
     const errorMessage = error?.message || 'Erro no upload';
     setErrors([errorMessage]);
-    
+
     if (onUploadError) {
       onUploadError(errorMessage);
     }
-    
+
     setIsUploading(false);
   }, [onUploadError]);
   
+  // Não renderizar o uploader até que o folder seja carregado
+  if (isLoadingFolder || !cloudinaryFolder) {
+    return (
+      <div className={`w-full space-y-4 ${className}`}>
+        <div className="relative border-2 border-dashed rounded-lg p-8 text-center border-gray-300 dark:border-gray-600">
+          <div className="flex flex-col items-center space-y-4">
+            <Upload className="w-10 h-10 text-gray-400 animate-pulse" />
+            <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+              Carregando configuração...
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Detectando ambiente de upload
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full space-y-4 ${className}`}>
       {/* Upload Button usando next-cloudinary */}
@@ -145,15 +168,14 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             Upload de Imagens
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            PNG, JPG, WebP até 5MB • Upload direto para Cloudinary
+            PNG, JPG, WebP até 5MB • Ambiente: {cloudinaryFolder.split('/')[1]}
           </p>
-          
+
           <CldUploadButton
             uploadPreset="michel-psi-uploads"
             onSuccess={handleUploadSuccess}
             onError={handleUploadError}
             onClose={() => {
-              console.log('🚪 Widget Cloudinary fechado');
               // Limpar estados ao fechar o widget
               setUploadResults([]);
               setErrors([]);
@@ -164,7 +186,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               resourceType: "image",
               clientAllowedFormats: ["jpg", "jpeg", "png", "webp"],
               maxFileSize: 5000000, // 5MB
-              folder: "michel-psi", // Pasta única simplificada
+              folder: cloudinaryFolder, // ✅ Usa folder do ambiente (staging/prod/dev)
               showCompletedButton: true, // Mostrar botão Done
               showUploadMoreButton: false, // Não mostrar "Upload More"
               singleUploadAutoClose: false // NÃO fechar automaticamente após único upload

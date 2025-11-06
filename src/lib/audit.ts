@@ -64,8 +64,8 @@ export const logAdminAction = async (
         },
       },
     });
-  } catch (error) {
-    console.error("Erro ao registrar ação de admin:", error);
+  } catch {
+    // Erro silencioso - auditoria não deve bloquear operações
   }
 };
 

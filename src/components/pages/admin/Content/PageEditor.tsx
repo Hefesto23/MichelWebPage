@@ -1810,7 +1810,6 @@ export const PageEditor: React.FC<PageEditorProps> = ({ page }) => {
       console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
       const token = localStorage.getItem('token');
-      console.log('🔑 Token encontrado:', token ? 'Sim' : 'Não');
 
       const response = await fetch(endpoint, {
         method: 'POST',

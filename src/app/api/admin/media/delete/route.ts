@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { v2 as cloudinary } from 'cloudinary';
 import prisma from '@/lib/prisma';
+import { CLOUDINARY_CONFIG } from '@/lib/env';
 
 // Configurar Cloudinary
 if (!cloudinary.config().cloud_name) {
   cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: CLOUDINARY_CONFIG.CLOUD_NAME,
+    api_key: CLOUDINARY_CONFIG.API_KEY,
+    api_secret: CLOUDINARY_CONFIG.API_SECRET,
   });
 }
 
@@ -66,9 +67,12 @@ export async function DELETE(request: NextRequest) {
     
     // Fallback: tentar deletar pelo filename se não tiver publicId
     if (filename) {
-      // Construir o public_id baseado no padrão michel-psi/filename
-      const inferredPublicId = `michel-psi/${filename.replace(/\.[^/.]+$/, '')}`;
-      
+      // Construir o public_id baseado no padrão do ambiente atual
+      const folder = CLOUDINARY_CONFIG.getFolder();
+      const inferredPublicId = `${folder}/${filename.replace(/\.[^/.]+$/, '')}`;
+
+      console.log(`🔍 Tentando deletar com public_id inferido: ${inferredPublicId}`);
+
       try {
         const result = await cloudinary.uploader.destroy(inferredPublicId);
         console.log(`✅ Resultado do delete (inferido):`, result);

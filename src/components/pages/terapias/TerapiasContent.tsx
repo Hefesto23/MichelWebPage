@@ -56,10 +56,8 @@ export const TerapiasContent = () => {
   console.log('🔥 TerapiasContent MONTADO - iniciando...');
 
   useEffect(() => {
-    console.log('⚡ TerapiasContent useEffect EXECUTADO!');
     const loadContent = async () => {
       try {
-        console.log('🌐 TerapiasContent: Iniciando fetch para /api/admin/content/terapias');
         const response = await fetch('/api/admin/content/terapias');
         console.log('📡 TerapiasContent: Response recebido:', {
           status: response.status,

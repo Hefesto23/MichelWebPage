@@ -2,6 +2,7 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import crypto from "crypto";
 import sharp from "sharp";
+import { CLOUDINARY_CONFIG, logEnvironmentInfo } from "./env";
 
 interface UploadResult {
   filename: string;
@@ -21,9 +22,9 @@ export class CloudinaryUploadService {
   private allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   constructor() {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const cloudName = CLOUDINARY_CONFIG.CLOUD_NAME;
+    const apiKey = CLOUDINARY_CONFIG.API_KEY;
+    const apiSecret = CLOUDINARY_CONFIG.API_SECRET;
 
     if (!cloudName || !apiKey || !apiSecret) {
       console.error("❌ Cloudinary credentials missing:", {
@@ -47,6 +48,9 @@ export class CloudinaryUploadService {
 
     console.log("🔧 Configuring Cloudinary with cloud_name:", cloudName);
 
+    // Log environment info for debugging
+    logEnvironmentInfo();
+
     cloudinary.config({
       cloud_name: cloudName,
       api_key: apiKey,
@@ -57,29 +61,9 @@ export class CloudinaryUploadService {
   // Método para testar configuração
   async testConfiguration(): Promise<boolean> {
     try {
-      console.log("🧪 Testing Cloudinary configuration...");
-      const result = await cloudinary.api.ping();
-      console.log("✅ Cloudinary connection test passed:", result);
+      await cloudinary.api.ping();
       return true;
-    } catch (error: any) {
-      console.error("❌ Cloudinary connection test failed:", error);
-
-      // Se o erro de teste também contém HTML, vamos exibir
-      if (error.message && error.message.includes("<!DOCTYPE")) {
-        console.error("🔍 TESTE CLOUDINARY RETORNOU HTML - PÁGINA COMPLETA:");
-        console.error("=" + "=".repeat(80));
-
-        const htmlContent = error.message;
-        const chunkSize = 1000;
-        for (let i = 0; i < htmlContent.length; i += chunkSize) {
-          const chunk = htmlContent.slice(i, i + chunkSize);
-          console.error(`[CHUNK ${Math.floor(i / chunkSize) + 1}] ${chunk}`);
-        }
-
-        console.error("=" + "=".repeat(80));
-        console.error("🔚 FIM DA PÁGINA HTML DO ERRO DE TESTE");
-      }
-
+    } catch {
       return false;
     }
   }
@@ -121,12 +105,10 @@ export class CloudinaryUploadService {
       const randomId = crypto.randomUUID().slice(0, 8);
       const filename = `${timestamp}_${randomId}`;
 
-      // Pasta organizada por data
+      // Pasta organizada por ambiente e data
       const date = new Date();
-      const folder = `michel-psi/${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}`;
-
-      // Upload para Cloudinary
-      console.log(`📤 Uploading to folder: ${folder}/${filename}`);
+      const baseFolder = CLOUDINARY_CONFIG.getFolder();
+      const folder = `${baseFolder}/${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}`;
 
       const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
         cloudinary.uploader
@@ -154,36 +136,8 @@ export class CloudinaryUploadService {
             },
             (error: any, result: any) => {
               if (error) {
-                console.error("❌ Cloudinary upload error:", error);
-
-                // Se o erro contém HTML, vamos exibir a página completa
-                if (error.message && error.message.includes("<!DOCTYPE")) {
-                  console.error("🔍 CLOUDINARY RETORNOU HTML - PÁGINA COMPLETA:");
-                  console.error("=" + "=".repeat(80));
-
-                  // Dividir em chunks de 1000 caracteres para garantir que apareça todo
-                  const htmlContent = error.message;
-                  const chunkSize = 1000;
-                  for (let i = 0; i < htmlContent.length; i += chunkSize) {
-                    const chunk = htmlContent.slice(i, i + chunkSize);
-                    console.error(`[CHUNK ${Math.floor(i / chunkSize) + 1}] ${chunk}`);
-                  }
-
-                  console.error("=" + "=".repeat(80));
-                  console.error("🔚 FIM DA PÁGINA HTML DO ERRO");
-                }
-
-                // Log completo do objeto de erro
-                console.error("📊 ERRO COMPLETO:", {
-                  name: error.name,
-                  message: error.message?.substring(0, 200) + "...", // Só primeiros 200 chars aqui
-                  http_code: error.http_code,
-                  stack: error.stack,
-                });
-
                 reject(error);
               } else if (result) {
-                console.log("✅ Cloudinary upload success:", result.public_id);
                 resolve(result);
               } else {
                 reject(new Error("Upload failed - no result"));
@@ -234,10 +188,18 @@ export class CloudinaryUploadService {
     }
   }
 
-  async listImages(folder: string = "michel-psi", limit: number = 50): Promise<any[]> {
+  async listImages(
+    folder?: string,
+    limit: number = 50,
+  ): Promise<any[]> {
     try {
+      // Se não especificar pasta, usar do ambiente atual
+      const searchFolder = folder || CLOUDINARY_CONFIG.getFolder();
+
+      console.log(`📋 Listing images from folder: ${searchFolder}`);
+
       const result = await cloudinary.search
-        .expression(`folder:${folder}/*`)
+        .expression(`folder:${searchFolder}/*`)
         .sort_by("created_at", "desc")
         .max_results(limit)
         .execute();

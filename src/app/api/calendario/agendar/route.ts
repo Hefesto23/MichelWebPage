@@ -127,8 +127,6 @@ export async function POST(request: Request) {
     console.log(`⚡ Operações críticas concluídas em: ${criticalTime - startTime}ms`);
 
     // 📧 EMAIL EM BACKGROUND (não bloqueia resposta)
-    console.log("📧 Disparando emails em background...");
-    
     // Não aguardar (fire-and-forget)
     enviarEmailConfirmacaoGmail({
       to: email,
@@ -139,10 +137,8 @@ export async function POST(request: Request) {
       codigo,
       telefone,
       endereco, // ✅ ADICIONADO
-    }).then(success => {
-      console.log(`📧 Email resultado: ${success ? "✅ Sucesso" : "❌ Falha"}`);
-    }).catch(error => {
-      console.error("📧 Erro em background:", error);
+    }).catch(() => {
+      // Erro silencioso - não deve bloquear o agendamento
     });
 
     // ✅ RESPOSTA RÁPIDA (sem aguardar email)

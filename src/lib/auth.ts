@@ -97,7 +97,6 @@ export const hasValidToken = (): boolean => {
   const token = getToken();
   const expired = token ? isTokenExpired(token) : true;
   const isValid = token ? !expired : false;
-  console.log("hasValidToken - Token:", token ? "existe" : "não existe", "Expired:", expired, "Valid:", isValid);
   return isValid;
 };
 
@@ -218,11 +217,9 @@ export const fetchWithAuth = async (
 // ============================================
 export const getCurrentUser = (): AuthUser | null => {
   const token = getToken();
-  console.log("getCurrentUser - Token:", token ? "existe" : "não existe");
   if (!token) return null;
 
   const payload = verifyToken(token);
-  console.log("getCurrentUser - Payload:", payload);
   if (!payload) return null;
 
   const user = {

@@ -7,7 +7,7 @@
     "build": "next build",
     "build:prod": "prisma generate && next build",
     "build:production": "npm run db:generate && npm run type-check && next build",
-    "build:vercel": "prisma migrate deploy && npm run db:seed && next build",
+    "build:vercel": "prisma generate && npm run db:seed && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

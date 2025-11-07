@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
           { status: 401 }
         );
       }
-    } catch (tokenError) {
-      console.error("Erro na verificação do token:", tokenError);
+    } catch {
       return NextResponse.json(
         { valid: false, error: "Token inválido" },
         { status: 401 }

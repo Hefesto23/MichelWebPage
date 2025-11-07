@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { v2 as cloudinary } from 'cloudinary';
 import prisma from '@/lib/prisma';
+import { CLOUDINARY_CONFIG } from '@/lib/env';
 
 // Configurar Cloudinary
 if (!cloudinary.config().cloud_name) {
   cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: CLOUDINARY_CONFIG.CLOUD_NAME,
+    api_key: CLOUDINARY_CONFIG.API_KEY,
+    api_secret: CLOUDINARY_CONFIG.API_SECRET,
   });
 }
 
@@ -38,10 +39,14 @@ export async function GET(request: NextRequest) {
 
     let images: ImageInfo[] = [];
 
-    // Buscar imagens diretamente do Cloudinary
+    // Buscar imagens diretamente do Cloudinary do ambiente correto
     try {
+      const folder = CLOUDINARY_CONFIG.getFolder(); // Auto-detecta ambiente!
+
+      console.log(`🔍 Buscando imagens no folder: ${folder}`);
+
       const cloudinaryResult = await cloudinary.search
-        .expression('folder:michel-psi')
+        .expression(`folder:${folder}/*`) // Busca recursiva na pasta do ambiente
         .sort_by('created_at', 'desc')
         .max_results(100) // Ajuste conforme necessário
         .execute();

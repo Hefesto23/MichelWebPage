@@ -2,13 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { verifyToken } from '@/lib/auth';
+import { CLOUDINARY_CONFIG } from '@/lib/env';
 
 // Configurar Cloudinary (compatível com next-cloudinary)
 if (!cloudinary.config().cloud_name) {
   cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: CLOUDINARY_CONFIG.CLOUD_NAME,
+    api_key: CLOUDINARY_CONFIG.API_KEY,
+    api_secret: CLOUDINARY_CONFIG.API_SECRET,
   });
 }
 
@@ -38,16 +39,18 @@ export async function POST(request: NextRequest) {
     // Gerar assinatura usando Cloudinary
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign,
-      process.env.CLOUDINARY_API_SECRET!
+      CLOUDINARY_CONFIG.API_SECRET
     );
 
     console.log('✅ Assinatura gerada para upload Cloudinary');
+    console.log('📁 Upload será para o folder:', CLOUDINARY_CONFIG.getFolder());
 
     return NextResponse.json({
       signature,
       timestamp: paramsToSign.timestamp,
-      cloudname: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-      apikey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+      cloudname: CLOUDINARY_CONFIG.CLOUD_NAME,
+      apikey: CLOUDINARY_CONFIG.API_KEY,
+      folder: CLOUDINARY_CONFIG.getFolder(), // Incluir folder correto
     });
 
   } catch (error) {

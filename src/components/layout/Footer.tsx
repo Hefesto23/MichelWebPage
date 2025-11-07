@@ -6,6 +6,7 @@ import { CLINIC_INFO } from "@/utils/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { IoLogoWhatsapp } from "react-icons/io";
+import { format } from "date-fns";
 
 export const Footer = () => {
   const { settings, loading, formatWorkingDays } = usePublicSettings();
@@ -24,6 +25,9 @@ export const Footer = () => {
   const ageDisclaimer = settings?.age_disclaimer || "* Atendimentos a partir de 20 anos de idade";
   const appointmentNote = settings?.appointment_note || CLINIC_INFO.HOURS.NOTE;
   const additionalNotes = settings?.additional_notes;
+
+  // Ano atual
+  const currentYear = format(new Date(), "yyyy");
 
   return (
     <footer className="footer-container">
@@ -85,7 +89,7 @@ export const Footer = () => {
 
           {/* Copyright */}
           <div className="footer-copyright">
-            &copy; 2024 {psychologistName}. Todos os direitos reservados.
+            &copy; {currentYear} {psychologistName}. Todos os direitos reservados.
             {/* Developer Credit */}
             <div className="mt-2 ">
               Desenvolvido com ❤️ por{" "}

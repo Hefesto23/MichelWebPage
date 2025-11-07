@@ -66,20 +66,18 @@ export const getToken = (): string | null => {
   if (typeof window !== "undefined") {
     // Primeiro tenta localStorage
     let token = localStorage.getItem(TOKEN_KEY);
-    
+
     // Se não tiver no localStorage, tenta cookie
     if (!token) {
       const cookies = document.cookie.split(";");
-      const tokenCookie = cookies.find(cookie => 
-        cookie.trim().startsWith(`${TOKEN_KEY}=`)
-      );
+      const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith(`${TOKEN_KEY}=`));
       if (tokenCookie) {
         token = tokenCookie.split("=")[1];
         // Sincroniza com localStorage
         localStorage.setItem(TOKEN_KEY, token);
       }
     }
-    
+
     return token;
   }
   return null;
@@ -97,7 +95,6 @@ export const hasValidToken = (): boolean => {
   const token = getToken();
   const expired = token ? isTokenExpired(token) : true;
   const isValid = token ? !expired : false;
-  console.log("hasValidToken - Token:", token ? "existe" : "não existe", "Expired:", expired, "Valid:", isValid);
   return isValid;
 };
 
@@ -106,7 +103,7 @@ export const hasValidToken = (): boolean => {
 // ============================================
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<{ success: boolean; token?: string; error?: string }> => {
   try {
     const response = await fetch("/api/auth/login", {
@@ -131,7 +128,7 @@ export const loginUser = async (
 export const logoutUser = async (): Promise<void> => {
   try {
     // Chama API de logout para limpar cookies do servidor
-    await fetch("/api/auth/logout", { 
+    await fetch("/api/auth/logout", {
       method: "POST",
       headers: createAuthHeaders(),
     });
@@ -149,15 +146,11 @@ export const logoutUser = async (): Promise<void> => {
 // ============================================
 // 🔍 VALIDATION FUNCTIONS
 // ============================================
-export const extractTokenFromHeader = (
-  authHeader: string | null
-): string | null => {
+export const extractTokenFromHeader = (authHeader: string | null): string | null => {
   return authHeader?.replace("Bearer ", "") || null;
 };
 
-export const validateAuthHeader = (
-  authHeader: string | null
-): AuthTokenPayload | null => {
+export const validateAuthHeader = (authHeader: string | null): AuthTokenPayload | null => {
   const token = extractTokenFromHeader(authHeader);
   return token ? verifyToken(token) : null;
 };
@@ -193,10 +186,7 @@ export const handleAuthError = (response: Response): boolean => {
   return false;
 };
 
-export const fetchWithAuth = async (
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> => {
+export const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const headers = {
     "Content-Type": "application/json",
     ...createAuthHeaders(),
@@ -204,12 +194,12 @@ export const fetchWithAuth = async (
   };
 
   const response = await fetch(url, { ...options, headers });
-  
+
   // Auto-handle 401 errors
   if (handleAuthError(response)) {
     throw new Error("Authentication expired");
   }
-  
+
   return response;
 };
 
@@ -218,11 +208,9 @@ export const fetchWithAuth = async (
 // ============================================
 export const getCurrentUser = (): AuthUser | null => {
   const token = getToken();
-  console.log("getCurrentUser - Token:", token ? "existe" : "não existe");
   if (!token) return null;
 
   const payload = verifyToken(token);
-  console.log("getCurrentUser - Payload:", payload);
   if (!payload) return null;
 
   const user = {

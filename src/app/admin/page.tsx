@@ -12,26 +12,25 @@ export default function AdminRedirect() {
     const checkAuthAndRedirect = () => {
       try {
         const token = localStorage.getItem("token");
-        
+
         if (token) {
           // Token existe, verificar se é válido
           try {
             // Parse basic JWT validation (without verification for client-side)
-            const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+            const tokenPayload = JSON.parse(atob(token.split(".")[1]));
             const currentTime = Date.now() / 1000;
-            
+
             if (tokenPayload.exp > currentTime) {
               // Token válido, redirecionar para dashboard
               router.replace("/admin/dashboard");
               return;
             }
-          } catch (error) {
+          } catch {
             // Token inválido, remover e continuar para login
             localStorage.removeItem("token");
-            console.warn("Token inválido removido:", error);
           }
         }
-        
+
         // Sem token válido, redirecionar para login
         router.replace("/admin/login");
       } catch (error) {

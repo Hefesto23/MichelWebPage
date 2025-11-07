@@ -9,7 +9,6 @@ export const dynamic = 'force-dynamic';
 // GET - Buscar todas as configurações
 export async function GET(request: NextRequest) {
   try {
-    console.log("📡 API: GET request received for admin settings");
 
     const authHeader = request.headers.get("authorization");
     console.log("🔑 API: Auth header present:", authHeader ? 'Sim' : 'Não');
@@ -17,7 +16,6 @@ export async function GET(request: NextRequest) {
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }
@@ -66,7 +64,6 @@ export async function GET(request: NextRequest) {
 // POST - Salvar configurações
 export async function POST(request: NextRequest) {
   try {
-    console.log("📡 API: POST request received for admin settings");
 
     const authHeader = request.headers.get("authorization");
     console.log("🔑 API: Auth header present:", authHeader ? 'Sim' : 'Não');
@@ -74,7 +71,6 @@ export async function POST(request: NextRequest) {
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }
@@ -135,7 +131,6 @@ export async function POST(request: NextRequest) {
 // PUT - Atualizar uma configuração específica
 export async function PUT(request: NextRequest) {
   try {
-    console.log("📡 API: PUT request received for admin settings");
 
     const authHeader = request.headers.get("authorization");
     console.log("🔑 API: Auth header present:", authHeader ? 'Sim' : 'Não');
@@ -143,7 +138,6 @@ export async function PUT(request: NextRequest) {
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }
@@ -203,13 +197,11 @@ export async function PUT(request: NextRequest) {
 // DELETE - Restaurar configurações padrão (seção específica ou todas)
 export async function DELETE(request: NextRequest) {
   try {
-    console.log("📡 API: DELETE request received for admin settings");
 
     const authHeader = request.headers.get("authorization");
     const payload = validateAuthHeader(authHeader);
 
     if (!payload) {
-      console.log("❌ API: Token inválido ou ausente");
       return NextResponse.json(
         { error: "Token inválido" },
         { status: 401 }

@@ -1,6 +1,6 @@
 // src/app/api/calendario/cancelar/route.ts
 
-import { enviarEmailCancelamento } from "@/lib/email";
+import { enviarEmailCancelamentoGmail } from "@/lib/email-gmail";
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 
@@ -9,10 +9,7 @@ export async function POST(request: Request) {
     const { codigo } = await request.json();
 
     if (!codigo) {
-      return NextResponse.json(
-        { error: "Código não fornecido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Código não fornecido" }, { status: 400 });
     }
 
     // Configuração do cliente OAuth2
@@ -43,7 +40,7 @@ export async function POST(request: Request) {
         {
           error: "Agendamento não encontrado ou já cancelado",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -83,9 +80,9 @@ export async function POST(request: Request) {
       eventId: evento.id,
     });
 
-    // Enviar confirmação por e-mail usando o serviço SendGrid
+    // Enviar email de cancelamento
     if (email) {
-      await enviarEmailCancelamento({
+      await enviarEmailCancelamentoGmail({
         to: email,
         nome,
         data,
@@ -104,7 +101,7 @@ export async function POST(request: Request) {
       {
         error: "Erro ao cancelar agendamento",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

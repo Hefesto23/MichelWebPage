@@ -3,6 +3,7 @@
 
 import { CldImage } from 'next-cloudinary';
 import Image from 'next/image';
+import { CLOUDINARY_CONFIG } from '@/lib/env';
 
 interface CloudinaryImageProps {
   src: string;
@@ -19,7 +20,7 @@ interface CloudinaryImageProps {
 /**
  * Componente wrapper para exibir imagens
  * Detecta automaticamente se é uma URL do Cloudinary ou externa
- * e usa o componente apropriado
+ * e usa o componente apropriado com normalização de folder por ambiente
  */
 export const CloudinaryImage: React.FC<CloudinaryImageProps> = ({
   src,
@@ -34,33 +35,29 @@ export const CloudinaryImage: React.FC<CloudinaryImageProps> = ({
 }) => {
   // Verificar se é uma URL do Cloudinary
   const isCloudinaryUrl = src?.includes('cloudinary.com') || src?.includes('res.cloudinary.com');
-  
-  // Extrair public_id da URL do Cloudinary se necessário
+
+  /**
+   * Normaliza o public_id usando o sistema centralizado de ambiente
+   * Garante que imagens sempre apontem para o folder correto (prod/staging/dev)
+   */
   const getPublicId = (url: string): string => {
     if (!isCloudinaryUrl) return url;
-    
-    // Debug
-    console.log('🖼️ Processing Cloudinary URL:', url);
-    
-    // Padrão: .../upload/v123/michel-psi/filename.ext
-    // ou: .../upload/michel-psi/filename.ext
-    
-    // Método simplificado: pegar tudo entre /upload/ (ou /vXXX/) e a extensão final
-    const patterns = [
-      /\/v\d+\/(.+)\.[a-z]+$/i,  // Com versão
-      /\/upload\/(.+)\.[a-z]+$/i  // Sem versão
-    ];
-    
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) {
-        console.log('✅ Extracted public_id:', match[1]);
-        return match[1]; // Retorna: michel-psi/filename
-      }
+
+    try {
+      // Usar função centralizada que detecta ambiente automaticamente
+      const normalizedId = CLOUDINARY_CONFIG.normalizePublicId(url);
+
+      console.log('🖼️ CloudinaryImage normalized:', {
+        original: url.substring(0, 100) + '...',
+        normalized: normalizedId,
+        environment: CLOUDINARY_CONFIG.getFolder()
+      });
+
+      return normalizedId;
+    } catch (error) {
+      console.error('❌ Error normalizing public_id:', error);
+      return url;
     }
-    
-    console.log('⚠️ Could not extract public_id, using full URL');
-    return url;
   };
 
   // Se for Cloudinary, usar CldImage para otimização automática

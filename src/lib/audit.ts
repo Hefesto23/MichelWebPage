@@ -23,7 +23,7 @@ export const logAuthEvent = async (
     ipAddress?: string;
     userAgent?: string;
     error?: string;
-  }
+  },
 ) => {
   try {
     await prisma.analytics.create({
@@ -38,7 +38,7 @@ export const logAuthEvent = async (
         userAgent: data.userAgent,
       },
     });
-    
+
     console.log(`[AUDIT] ${event}:`, {
       adminId: data.adminId,
       email: data.email,
@@ -52,7 +52,7 @@ export const logAuthEvent = async (
 export const logAdminAction = async (
   action: string,
   adminId: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) => {
   try {
     await prisma.analytics.create({
@@ -64,8 +64,8 @@ export const logAdminAction = async (
         },
       },
     });
-  } catch (error) {
-    console.error("Erro ao registrar ação de admin:", error);
+  } catch {
+    // Erro silencioso - auditoria não deve bloquear operações
   }
 };
 
@@ -77,6 +77,6 @@ export const extractClientInfo = (request: Request) => {
   const realIp = request.headers.get("x-real-ip");
   const ipAddress = forwardedFor?.split(",")[0] || realIp || "unknown";
   const userAgent = request.headers.get("user-agent") || "unknown";
-  
+
   return { ipAddress, userAgent };
 };

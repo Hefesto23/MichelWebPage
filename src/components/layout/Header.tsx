@@ -1,8 +1,6 @@
 // src/components/layout/Header.tsx
 "use client";
 import { robotoSlab } from "@/app/fonts";
-import { LogoutButton } from "@/components/shared/navigation";
-import { Button } from "@/components/shared/ui/button";
 import { Switch } from "@/components/shared/ui/switch";
 import { ROUTES } from "@/utils/constants";
 import { cn } from "@/utils/utils";
@@ -14,12 +12,10 @@ import { useState } from "react";
 
 export const Header = ({
   isDarkMode,
-  isAdminLogged,
   toggleDarkMode,
   mounted,
 }: {
   isDarkMode: boolean;
-  isAdminLogged: boolean;
   toggleDarkMode: () => void;
   mounted: boolean;
 }) => {
@@ -132,7 +128,7 @@ export const Header = ({
             </Link>
           </nav>
 
-          {/* Desktop Admin Button - Visible from 1200px and up */}
+          {/* Desktop Admin Button - REMOVED FOR PRODUCTION
           <div className="hidden xl:flex items-center space-x-2">
             {isAdminLogged ? (
               <>
@@ -151,6 +147,7 @@ export const Header = ({
               </Link>
             )}
           </div>
+          */}
 
           {/* Desktop Theme Toggle */}
           <div className="header-actions hidden xl:flex">

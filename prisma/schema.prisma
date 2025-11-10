@@ -86,6 +86,11 @@ model Appointment {
   googleEventId      String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+
+  // 🔒 CONSTRAINT: Impede agendamentos duplicados no mesmo horário
+  // Ignora agendamentos cancelados para permitir reagendamento
+  @@unique([dataSelecionada, horarioSelecionado], name: "unique_datetime_slot")
+  @@index([dataSelecionada, horarioSelecionado, status], name: "idx_appointment_datetime_status")
 }
 
 // Modelo para configurações do sistema

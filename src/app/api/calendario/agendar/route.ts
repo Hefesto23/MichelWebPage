@@ -37,76 +37,103 @@ export async function POST(request: Request) {
 
     console.log("⏰ Data processada:", dataHoraInicio.toISOString());
 
-    // 🚀 OPERAÇÕES CRÍTICAS EM PARALELO (Google Calendar + Database)
-    console.log("⚡ Executando operações críticas em paralelo...");
-    
-    const [evento, agendamentoDB] = await Promise.all([
-      // Google Calendar com timeout e retry
-      withRetry(async () => {
-        const auth = new google.auth.GoogleAuth({
-          credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),
-          scopes: ["https://www.googleapis.com/auth/calendar"],
-        });
+    // 🔒 TRANSACTION: Validação atômica com lock para prevenir race conditions
+    console.log("🔍 Iniciando validação com transaction lock...");
 
-        const calendar = google.calendar({ version: "v3", auth });
-        
-        return await calendar.events.insert({
-          calendarId: process.env.GOOGLE_CALENDAR_ID,
-          requestBody: {
-            summary: `Consulta: ${nome}`,
-            description: `
-              Nome: ${nome}
-              Email: ${email}
-              Telefone: ${telefone}
-              Modalidade: ${modalidade}
-              ${modalidade === "presencial" && endereco ? `Endereço: ${endereco}` : ""}
-              Código: ${codigo}
-
-              Mensagem: ${mensagem || "Não informada"}
-            `,
-            location: modalidade === "presencial" && endereco ? endereco : undefined,
-            start: {
-              dateTime: dataHoraInicio.toISOString(),
-              timeZone: "America/Sao_Paulo",
-            },
-            end: {
-              dateTime: dataHoraFim.toISOString(),
-              timeZone: "America/Sao_Paulo",
-            },
-            colorId: modalidade === "presencial" ? "1" : "2",
-            reminders: {
-              useDefault: false,
-              overrides: [
-                { method: "email", minutes: 60 },
-                { method: "popup", minutes: 24 * 60 },
-              ],
-            },
-          },
-        });
-      }, TIMEOUT_CONFIGS.GOOGLE_CALENDAR),
-
-      // Database com timeout e retry
-      withRetry(async () => {
-        return await prisma.appointment.create({
-          data: {
-            nome,
-            email,
-            telefone,
-            dataSelecionada: new Date(dataHoraInicio),
-            horarioSelecionado: horario,
-            modalidade,
-            endereco: endereco || null,
-            primeiraConsulta: true,
-            mensagem: mensagem || null,
-            codigo,
-            status: "CONFIRMADO",
-            googleEventId: null, // Será atualizado após o Google Calendar
-            createdAt: new Date(),
-            updatedAt: new Date(),
+    const agendamentoDB = await prisma.$transaction(async (tx) => {
+      // 1. Verificar com lock (impede outras transações simultâneas)
+      const existingAppointment = await tx.appointment.findFirst({
+        where: {
+          dataSelecionada: new Date(dataHoraInicio),
+          horarioSelecionado: horario,
+          status: {
+            in: ["CONFIRMADO", "PENDENTE", "agendado"]
           }
+        }
+      });
+
+      if (existingAppointment) {
+        console.log("❌ Horário já ocupado (detectado na transaction):", {
+          data: data,
+          horario: horario,
+          existingId: existingAppointment.id
         });
-      }, TIMEOUT_CONFIGS.DATABASE)
-    ]);
+
+        throw new Error("HORARIO_OCUPADO");
+      }
+
+      console.log("✅ Horário disponível, criando agendamento...");
+
+      // 2. Criar agendamento (garantido único pela transaction)
+      return await tx.appointment.create({
+        data: {
+          nome,
+          email,
+          telefone,
+          dataSelecionada: new Date(dataHoraInicio),
+          horarioSelecionado: horario,
+          modalidade,
+          endereco: endereco || null,
+          primeiraConsulta: true,
+          mensagem: mensagem || null,
+          codigo,
+          status: "CONFIRMADO",
+          googleEventId: null, // Será atualizado após o Google Calendar
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      });
+    }, {
+      timeout: 10000, // 10s timeout
+      isolationLevel: 'Serializable' // Maior nível de isolamento
+    });
+
+    console.log("✅ Agendamento criado no banco com sucesso!");
+
+    // 🚀 CRIAR EVENTO NO GOOGLE CALENDAR (após garantir slot único)
+    console.log("📅 Criando evento no Google Calendar...");
+    const evento = await withRetry(async () => {
+      const auth = new google.auth.GoogleAuth({
+        credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || "{}"),
+        scopes: ["https://www.googleapis.com/auth/calendar"],
+      });
+
+      const calendar = google.calendar({ version: "v3", auth });
+
+      return await calendar.events.insert({
+        calendarId: process.env.GOOGLE_CALENDAR_ID,
+        requestBody: {
+          summary: `Consulta: ${nome}`,
+          description: `
+            Nome: ${nome}
+            Email: ${email}
+            Telefone: ${telefone}
+            Modalidade: ${modalidade}
+            ${modalidade === "presencial" && endereco ? `Endereço: ${endereco}` : ""}
+            Código: ${codigo}
+
+            Mensagem: ${mensagem || "Não informada"}
+          `,
+          location: modalidade === "presencial" && endereco ? endereco : undefined,
+          start: {
+            dateTime: dataHoraInicio.toISOString(),
+            timeZone: "America/Sao_Paulo",
+          },
+          end: {
+            dateTime: dataHoraFim.toISOString(),
+            timeZone: "America/Sao_Paulo",
+          },
+          colorId: modalidade === "presencial" ? "1" : "2",
+          reminders: {
+            useDefault: false,
+            overrides: [
+              { method: "email", minutes: 60 },
+              { method: "popup", minutes: 24 * 60 },
+            ],
+          },
+        },
+      });
+    }, TIMEOUT_CONFIGS.GOOGLE_CALENDAR);
 
     // Atualizar com Google Event ID (com timeout)
     if (evento.data.id) {
@@ -156,7 +183,18 @@ export async function POST(request: Request) {
   } catch (error) {
     const errorTime = Date.now() - startTime;
     console.error(`❌ Erro após ${errorTime}ms:`, error);
-    
+
+    // Tratar erro específico de horário ocupado
+    if (error instanceof Error && error.message === "HORARIO_OCUPADO") {
+      return NextResponse.json(
+        {
+          error: "Este horário já está ocupado. Por favor, escolha outro horário.",
+          ocupado: true
+        },
+        { status: 409 } // 409 Conflict
+      );
+    }
+
     return NextResponse.json(
       { error: "Erro ao agendar consulta" },
       { status: 500 }

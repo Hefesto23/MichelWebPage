@@ -25,14 +25,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const showWhatsApp = !isAdminPage;
   const showSectionNav = isHomePage;
 
-  const isAdminLogged = false;
-
   return (
     <div className="min-h-screen flex flex-col">
       {!isAdminPage && (
         <Header
           isDarkMode={isDarkMode}
-          isAdminLogged={isAdminLogged}
           toggleDarkMode={toggleDarkMode}
           mounted={mounted}
         />

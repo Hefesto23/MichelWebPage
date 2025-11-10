@@ -184,13 +184,30 @@ export async function GET(request: Request) {
 
     console.log(`📊 Total de datas a processar: ${dates.length}`);
 
-    // 🚀 PARALELIZAR: Buscar settings + eventos em paralelo
-    const [timeSlots, allEvents] = await Promise.all([
+    // 🚀 PARALELIZAR: Buscar settings + eventos + agendamentos do banco
+    const [timeSlots, allEvents, dbAppointments] = await Promise.all([
       generateTimeSlots(),
       fetchAllGoogleEvents(startDate, endDate),
+      // Buscar agendamentos do Prisma
+      prisma.appointment.findMany({
+        where: {
+          dataSelecionada: {
+            gte: new Date(startDate + 'T00:00:00'),
+            lte: new Date(endDate + 'T23:59:59')
+          },
+          status: {
+            in: ["CONFIRMADO", "PENDENTE", "agendado"]
+          }
+        },
+        select: {
+          dataSelecionada: true,
+          horarioSelecionado: true
+        }
+      })
     ]);
 
     console.log(`⚙️ Time slots gerados:`, timeSlots);
+    console.log(`📊 Agendamentos do banco: ${dbAppointments.length}`);
 
     // 🚀 PARALELIZAR: Processar todas as datas em paralelo
     const results = await Promise.all(
@@ -202,9 +219,20 @@ export async function GET(request: Request) {
           return [dateStr, []];
         }
 
-        const occupiedSlots = filterEventsByDate(allEvents, dateStr);
+        // Combinar horários ocupados do Google Calendar e do Prisma
+        const occupiedFromGoogle = filterEventsByDate(allEvents, dateStr);
+        const occupiedFromDB = dbAppointments
+          .filter(apt => {
+            const aptDateStr = format(new Date(apt.dataSelecionada), 'yyyy-MM-dd');
+            return aptDateStr === dateStr;
+          })
+          .map(apt => apt.horarioSelecionado);
+
+        // Unir e remover duplicatas
+        const allOccupiedSlots = Array.from(new Set([...occupiedFromGoogle, ...occupiedFromDB]));
+
         const availableSlots = timeSlots.filter(
-          (slot) => !occupiedSlots.includes(slot)
+          (slot) => !allOccupiedSlots.includes(slot)
         );
 
         return [dateStr, availableSlots];

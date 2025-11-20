@@ -93,10 +93,7 @@
   }
 
   /* Reserva espaço para logo durante hidratação */
-  .header-logo > div {
-    min-width: 200px;
-    min-height: 75px;
-  }
+  /* Tamanhos controlados via Tailwind no Header.tsx */
 
   /* Estabiliza switch durante hidratação */
   .header-actions {
@@ -1235,10 +1232,7 @@
     width: 100%;
   }
 
-  /* Divisor text size optimization for mobile/tablet */
-  .font-serif {
-    font-size: clamp(0.875rem, 2.5vw, 1.125rem) !important;
-  }
+  /* Divisor text size - controlado via Tailwind no componente */
 
   /* Mobile portrait specific adjustments */
   @media (max-width: 480px) and (orientation: portrait) {

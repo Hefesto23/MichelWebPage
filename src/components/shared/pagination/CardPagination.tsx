@@ -48,25 +48,26 @@ export function CardPagination<T>({
 
       {/* Paginação */}
       {totalPages > 1 && (
-        <div className={`flex items-center justify-between ${paginationClassName}`}>
+        <div className={`flex flex-col sm:flex-row items-center sm:justify-between gap-3 sm:gap-4 ${paginationClassName}`}>
           {/* Contador de itens */}
           {showItemCount && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               Mostrando {startIndex + 1}-{Math.min(endIndex, items.length)} de {items.length} itens
             </div>
           )}
 
           {/* Controles de paginação */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md border transition-colors
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-md border transition-colors
                          hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed
                          disabled:hover:bg-transparent"
             >
-              <ChevronLeft size={16} />
-              Anterior
+              <ChevronLeft size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Anterior</span>
+              <span className="sm:hidden">Ant</span>
             </button>
 
             {/* Numeração das páginas */}
@@ -75,7 +76,7 @@ export function CardPagination<T>({
                 <button
                   key={page}
                   onClick={() => goToPage(page)}
-                  className={`w-10 h-10 text-sm rounded-md border transition-colors
+                  className={`w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm rounded-md border transition-colors
                              ${currentPage === page
                                ? 'bg-primary text-primary-foreground border-primary'
                                : 'hover:bg-muted'
@@ -89,12 +90,13 @@ export function CardPagination<T>({
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-2 px-3 py-2 text-sm rounded-md border transition-colors
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-md border transition-colors
                          hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed
                          disabled:hover:bg-transparent"
             >
-              Próximo
-              <ChevronRight size={16} />
+              <span className="hidden sm:inline">Próximo</span>
+              <span className="sm:hidden">Próx</span>
+              <ChevronRight size={14} className="sm:w-4 sm:h-4" />
             </button>
           </div>
 

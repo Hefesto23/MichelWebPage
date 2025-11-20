@@ -13,7 +13,7 @@ const Divisor = ({ index = 0, quotes }: DivisorProps) => {
   const quote = quotes[safeIndex];
 
   return (
-    <div className="relative h-96 w-full overflow-hidden">
+    <div className="relative h-56 sm:h-72 md:h-96 w-full overflow-hidden">
       <div
         className="parallax-bg absolute inset-0 h-[120%] -top-[10%] bg-center bg-cover will-change-transform"
         style={{
@@ -34,10 +34,7 @@ const Divisor = ({ index = 0, quotes }: DivisorProps) => {
         >
           <blockquote>
             <p
-              className="font-serif text-white leading-relaxed text-center"
-              style={{
-                fontSize: "clamp(1.125rem, 4vw, 1.875rem)",
-              }}
+              className="font-serif text-white leading-relaxed text-center text-lg sm:text-xl md:text-2xl lg:text-3xl"
             >
               {quote.text}
             </p>

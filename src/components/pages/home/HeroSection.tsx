@@ -29,13 +29,13 @@ export const HeroSection = async () => {
           <div className="hero-content">
             <h1 className="hero-text">{mainText}</h1>
 
-            <div className="mt-4 text-white text-lg font-light">{ctaText}</div>
+            <div className="mt-4 text-white text-sm sm:text-base md:text-lg font-light">{ctaText}</div>
 
             <Link href="/agendamento">
-              <Button className="my-10 hover:opacity-80">Agende sua Consulta!</Button>
+              <Button className="my-6 sm:my-8 md:my-10 hover:opacity-80">Agende sua Consulta!</Button>
             </Link>
 
-            <div className="italic text-lg font-light text-white">{ageDisclaimer}</div>
+            <div className="italic text-sm sm:text-base md:text-lg font-light text-white">{ageDisclaimer}</div>
           </div>
         </div>
         <div className="hero-cta">

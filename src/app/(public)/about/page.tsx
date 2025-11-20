@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function About() {
   return (
     <div>
-      <section className="py-16 relative z-0 overflow-hidden">
+      <section className="py-8 sm:py-12 md:py-16 relative z-0 overflow-hidden">
         <div className="content-container">
           <div className="relative z-10">
             <Suspense fallback={<AboutSkeleton />}>

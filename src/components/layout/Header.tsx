@@ -37,21 +37,19 @@ export const Header = ({
       <div className="content-container">
         <div className="header-container">
           <div className="header-logo">
-            <Link href={ROUTES.HOME} className="w-[200px] h-[75px] flex items-center justify-center cursor-pointer">
+            <Link href={ROUTES.HOME} className="relative w-[140px] h-[52px] sm:w-[170px] sm:h-[63px] md:w-[200px] md:h-[75px] flex items-center justify-center cursor-pointer">
               <Image
                 src="/logo.png"
                 alt="Logo da Clínica"
-                width={247}
-                height={72}
-                className="object-contain w-[200px] logo-light"
+                fill
+                className="object-contain logo-light"
                 priority
               />
               <Image
                 src="/logo2.png"
                 alt="Logo da Clínica"
-                width={247}
-                height={72}
-                className="object-contain w-[200px] logo-dark absolute"
+                fill
+                className="object-contain logo-dark"
                 priority
               />
             </Link>

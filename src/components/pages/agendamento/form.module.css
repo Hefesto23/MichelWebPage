@@ -2,7 +2,7 @@
 
 /* Estilos de Tipografia */
 .formLabel {
-  @apply text-xl font-bold text-foreground mb-2 block;
+  @apply text-base sm:text-lg md:text-xl font-bold text-foreground mb-2 block;
 }
 
 .formText {

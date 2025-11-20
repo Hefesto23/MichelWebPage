@@ -340,21 +340,21 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
               locale={ptBR}
               classNames={{
                 month_caption:
-                  "flex w-full pb-6 border-b border-border items-baseline justify-center",
-                caption_label: "text-3xl font-bold capitalize text-center",
+                  "flex w-full pb-4 sm:pb-6 border-b border-border items-baseline justify-center",
+                caption_label: "text-xl sm:text-2xl md:text-3xl font-bold capitalize text-center",
                 nav: "flex justify-between w-full",
                 nav_button:
                   "flex items-center justify-center focus:outline-none focus:ring-0",
                 nav_button_previous: "absolute left-0",
                 nav_button_next: "absolute right-0",
                 chevron:
-                  "fill-foreground dark:fill-blue-700 w-10 h-10 inline-block align-baseline",
+                  "fill-foreground dark:fill-blue-700 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 inline-block align-baseline",
 
-                weekday: "font-extrabold text-xl text-center h-16",
+                weekday: "font-extrabold text-sm sm:text-base md:text-xl text-center h-10 sm:h-12 md:h-16",
                 months: "w-full",
                 month: "grid grid-cols-1",
-                day: "h-14 w-14 text-center",
-                day_button: "font-extrabold text-xl",
+                day: "h-9 w-9 sm:h-11 sm:w-11 md:h-14 md:w-14 text-center",
+                day_button: "font-extrabold text-sm sm:text-base md:text-xl",
                 today: "border-b-4 border-primary-foreground",
                 selected:
                   "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",

@@ -22,14 +22,15 @@ export const WhatsAppButton = () => {
     >
       <IoLogoWhatsapp className="text-white text-3xl" />
 
-      {/* Tooltip */}
+      {/* Tooltip - hidden on mobile */}
       <span
-        className="absolute left-full ml-6 px-4 py-2 
-                       bg-white dark:bg-gray-800 text-gray-800 dark:text-white 
-                       text-sm font-medium rounded-full shadow-xl whitespace-nowrap 
+        className="absolute left-full ml-4 sm:ml-6 px-3 sm:px-4 py-1.5 sm:py-2
+                       bg-white dark:bg-gray-800 text-gray-800 dark:text-white
+                       text-xs sm:text-sm font-medium rounded-full shadow-xl whitespace-nowrap
                        opacity-0 group-hover:opacity-100 pointer-events-none
                        transition-all duration-300 ease-out backdrop-blur-sm
-                       border border-gray-200 dark:border-gray-700 transform group-hover:scale-105"
+                       border border-gray-200 dark:border-gray-700 transform group-hover:scale-105
+                       hidden sm:block"
       >
         Fale conosco no WhatsApp
       </span>

@@ -37,7 +37,7 @@ export const Footer = () => {
             {/* First Column */}
             <div className="footer-column">
               <h3 className="footer-title">{psychologistName}</h3>
-              <p className="text-base font-bold mb-2">{crpNumber}</p>
+              <p className="text-sm sm:text-base font-bold mb-2">{crpNumber}</p>
               <div className="flex items-center font-bold justify-center md:justify-start mb-4">
                 <IoLogoWhatsapp className="mr-2" size={24} />
                 <Link
@@ -53,20 +53,18 @@ export const Footer = () => {
 
             {/* Middle Column - Logo com tema dinâmico */}
             <div className="flex justify-center items-start mt-0 pt-1">
-              <div className="relative w-[265px] h-[75px] flex items-center justify-center">
+              <div className="relative w-[160px] h-[45px] sm:w-[200px] sm:h-[57px] md:w-[265px] md:h-[75px] flex items-center justify-center">
                 <Image
                   src="/logo.svg"
                   alt="Consultório de Psicologia Logo"
-                  width={265}
-                  height={75}
+                  fill
                   className="object-contain logo-light"
                 />
                 <Image
                   src="/logo2.svg"
                   alt="Consultório de Psicologia Logo"
-                  width={265}
-                  height={75}
-                  className="object-contain logo-dark absolute"
+                  fill
+                  className="object-contain logo-dark"
                 />
               </div>
             </div>
@@ -74,15 +72,15 @@ export const Footer = () => {
             {/* Third Column */}
             <div className="footer-column text-center md:text-right">
               <h3 className="footer-title">Horário de Atendimento</h3>
-              <p className="text-base font-bold mb-2">
+              <p className="text-sm sm:text-base font-bold mb-2">
                 {loading ? "Carregando..." : `${workingDaysText} das ${startTime} às ${endTime}`}
               </p>
-              <p className="text-base font-bold mb-2">Obs: {appointmentNote}</p>
-              <p className="text-base font-bold text-gray-600 mt-1 italic">
+              <p className="text-sm sm:text-base font-bold mb-2">Obs: {appointmentNote}</p>
+              <p className="text-sm sm:text-base font-bold text-gray-600 mt-1 italic">
                 {ageDisclaimer}
               </p>
               {additionalNotes && (
-                <p className="text-base font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
+                <p className="text-sm sm:text-base font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
               )}
             </div>
           </div>

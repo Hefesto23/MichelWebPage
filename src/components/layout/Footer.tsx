@@ -37,14 +37,14 @@ export const Footer = () => {
             {/* First Column */}
             <div className="footer-column">
               <h3 className="footer-title">{psychologistName}</h3>
-              <p className="text-sm sm:text-base font-bold mb-2">{crpNumber}</p>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">{crpNumber}</p>
               <div className="flex items-center font-bold justify-center md:justify-start mb-4">
-                <IoLogoWhatsapp className="mr-2" size={24} />
+                <IoLogoWhatsapp className="mr-2 sm:mr-2.5 md:mr-3 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} />
                 <Link
                   href={`https://wa.me/55${whatsappNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-base hover:text-gray-500 text-foreground transition-colors"
+                  className="text-xs sm:text-sm md:text-base lg:text-lg hover:text-gray-500 text-foreground transition-colors"
                 >
                   {phoneDisplay}
                 </Link>
@@ -72,15 +72,15 @@ export const Footer = () => {
             {/* Third Column */}
             <div className="footer-column text-center md:text-right">
               <h3 className="footer-title">Horário de Atendimento</h3>
-              <p className="text-sm sm:text-base font-bold mb-2">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">
                 {loading ? "Carregando..." : `${workingDaysText} das ${startTime} às ${endTime}`}
               </p>
-              <p className="text-sm sm:text-base font-bold mb-2">Obs: {appointmentNote}</p>
-              <p className="text-sm sm:text-base font-bold text-gray-600 mt-1 italic">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">Obs: {appointmentNote}</p>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">
                 {ageDisclaimer}
               </p>
               {additionalNotes && (
-                <p className="text-sm sm:text-base font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
               )}
             </div>
           </div>
@@ -89,7 +89,7 @@ export const Footer = () => {
           <div className="footer-copyright">
             &copy; {currentYear} {psychologistName}. Todos os direitos reservados.
             {/* Developer Credit */}
-            <div className="mt-2 ">
+            <div className="mt-2 text-xs sm:text-sm md:text-base">
               Desenvolvido com ❤️ por{" "}
               <Link href="#" className="hover:text-gray-500 transition-colors">
                 Vinícius Raszl

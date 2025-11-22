@@ -11,7 +11,7 @@ export const ContactSection = () => {
     <section className="contact-section">
       <div className="content-container">
         <div className="relative z-10">
-          <h1 className="section-title">Contato</h1>
+          <h1 className="section-title text-lg sm:text-xl md:text-2xl">Contato</h1>
 
           <div className="grid-contact">
             <ContactCard title="Informações de Contato">

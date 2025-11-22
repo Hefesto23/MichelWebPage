@@ -215,12 +215,12 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
     if (mode === "schedule") return null;
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8">
         <button
           onClick={() => {
             updateState({ step: AppointmentStep.DATE_TIME, cancelar: false });
           }}
-          className={novoAgendamentoClasses}
+          className={`${novoAgendamentoClasses} flex-1 min-w-[140px] max-w-[240px] sm:max-w-none`}
         >
           Novo Agendamento
         </button>
@@ -228,7 +228,7 @@ export const AppointmentFlow: React.FC<AppointmentFlowProps> = ({
           onClick={() => {
             updateState({ step: AppointmentStep.LOOKUP, cancelar: false });
           }}
-          className={buscarAgendamentoClasses}
+          className={`${buscarAgendamentoClasses} flex-1 min-w-[140px] max-w-[240px] sm:max-w-none`}
         >
           Buscar Agendamento
         </button>

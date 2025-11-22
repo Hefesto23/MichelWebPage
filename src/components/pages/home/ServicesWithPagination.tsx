@@ -25,8 +25,8 @@ export const ServicesWithPagination: React.FC<ServicesWithPaginationProps> = ({
         <div className="services-container">
           <div className="services-content">
             <div className="section-header">
-              <h2 className="section-title">{title}</h2>
-              <p className="section-description">{description}</p>
+              <h2 className="section-title text-lg sm:text-xl md:text-2xl">{title}</h2>
+              <p className="section-description text-sm sm:text-base md:text-lg lg:text-xl">{description}</p>
             </div>
 
             <CardPagination

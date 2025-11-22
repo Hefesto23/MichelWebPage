@@ -68,8 +68,8 @@ export default function AppointmentDetails({
               <div className="flex items-start">
                 <Calendar className="mr-3 mt-1 text-foreground" size={20} />
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">Data</p>
-                  <p className="text-foreground">
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Data</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg">
                     {formatarDataBrasil(formData.dataSelecionada)}
                   </p>
                 </div>
@@ -78,8 +78,8 @@ export default function AppointmentDetails({
               <div className="flex items-start">
                 <Clock className="mr-3 mt-1 text-foreground" size={20} />
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">Horário</p>
-                  <p className="text-foreground">
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Horário</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg">
                     {formData.horarioSelecionado}
                   </p>
                 </div>
@@ -102,8 +102,8 @@ export default function AppointmentDetails({
                   </div>
                 </div>
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">Modalidade</p>
-                  <p className="text-foreground capitalize">
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Modalidade</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg capitalize">
                     {formData.modalidade}
                   </p>
                 </div>
@@ -117,8 +117,8 @@ export default function AppointmentDetails({
                     size={20}
                   />
                   <div className="flex-1">
-                    <p className="text-foreground/70 text-sm mb-1">Local do Atendimento</p>
-                    <p className="text-foreground font-medium">
+                    <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Local do Atendimento</p>
+                    <p className="text-foreground text-sm sm:text-base md:text-lg font-medium">
                       {formData.endereco}
                     </p>
                   </div>
@@ -128,24 +128,24 @@ export default function AppointmentDetails({
               <div className="flex items-start">
                 <User className="mr-3 mt-1 text-foreground" size={20} />
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">Nome</p>
-                  <p className="text-foreground">{formData.nome}</p>
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Nome</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg">{formData.nome}</p>
                 </div>
               </div>
 
               <div className="flex items-start">
                 <Mail className="mr-3 mt-1 text-foreground" size={20} />
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">E-mail</p>
-                  <p className="text-foreground">{formData.email}</p>
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">E-mail</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg">{formData.email}</p>
                 </div>
               </div>
 
               <div className="flex items-start">
                 <Phone className="mr-3 mt-1 text-foreground" size={20} />
                 <div>
-                  <p className="text-foreground/70 text-sm mb-1">Telefone</p>
-                  <p className="text-foreground">{formData.telefone}</p>
+                  <p className="text-foreground/70 text-xs sm:text-sm md:text-base mb-1">Telefone</p>
+                  <p className="text-foreground text-sm sm:text-base md:text-lg">{formData.telefone}</p>
                 </div>
               </div>
             </div>

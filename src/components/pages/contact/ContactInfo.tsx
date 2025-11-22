@@ -25,7 +25,7 @@ export const ContactInfo = () => {
       >
         <div className="flex items-center w-full hover:-translate-x-1 transition-transform duration-300">
           <IoLogoWhatsapp
-            className="contact-icon group-hover:scale-110 transition-transform duration-300"
+            className="contact-icon group-hover:scale-110 transition-transform duration-300 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
             size={24}
           />
           <span className="contact-text group-hover:text-foreground/80 transition-colors">
@@ -37,7 +37,7 @@ export const ContactInfo = () => {
       {/* Email */}
       <Link href={`mailto:${contactEmail}`} className="contact-item">
         <div className="flex items-center w-full">
-          <Mail className="contact-icon" size={24} strokeWidth={3} />
+          <Mail className="contact-icon w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} strokeWidth={3} />
           <span className="contact-text">{contactEmail}</span>
         </div>
       </Link>

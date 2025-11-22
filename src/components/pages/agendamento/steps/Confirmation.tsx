@@ -49,10 +49,10 @@ const Confirmation = React.memo<ConfirmationProps>(function Confirmation({
             <div className="flex flex-col items-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <div className="text-center">
-                <p className="text-sm font-medium text-foreground">
+                <p className="font-medium text-foreground text-xs sm:text-sm md:text-base">
                   Processando seu agendamento...
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-muted-foreground mt-1 text-[10px] sm:text-xs md:text-sm">
                   Aguarde enquanto confirmamos seus dados
                 </p>
               </div>
@@ -215,7 +215,7 @@ const Confirmation = React.memo<ConfirmationProps>(function Confirmation({
         </div>
 
         <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-md border border-amber-200 dark:border-amber-800">
-          <p className="text-amber-800 dark:text-amber-300 text-sm">
+          <p className="text-amber-800 dark:text-amber-300 text-xs sm:text-sm md:text-base">
             Ao confirmar, você receberá um e-mail com o código de confirmação e
             detalhes da consulta. Use este código para cancelar ou reagendar se
             necessário.

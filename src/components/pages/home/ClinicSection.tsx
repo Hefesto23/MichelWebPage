@@ -19,8 +19,8 @@ export const ClinicSection = async () => {
       <div className="content-container">
         <div className="clinic-container">
           <div className="section-header">
-            <h2 className="section-title">{content.title}</h2>
-            <p className="section-description">{content.description}</p>
+            <h2 className="section-title text-lg sm:text-xl md:text-2xl">{content.title}</h2>
+            <p className="section-description text-sm sm:text-base md:text-lg lg:text-xl">{content.description}</p>
           </div>
           <div className="mx-auto">
             <ImageGalleryComponent images={activeImages} />

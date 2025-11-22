@@ -192,7 +192,7 @@
   }
 
   .section-base {
-    @apply py-16 relative z-0 overflow-hidden;
+    @apply py-8 sm:py-12 md:py-16 relative z-0 overflow-hidden;
   }
 
   .section-fullscreen {
@@ -243,14 +243,12 @@
 
   .section-title {
     @apply text-left font-bold text-foreground;
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
     margin-bottom: clamp(0.75rem, 2vw, 1rem);
     line-height: 1.2;
   }
 
   .section-description {
     @apply text-left font-bold max-w-2xl text-foreground;
-    font-size: clamp(1rem, 3vw, 1.25rem);
     line-height: 1.4;
   }
 
@@ -354,9 +352,27 @@
   }
 
   .grid-pages > * {
-    min-height: 320px;
+    min-height: 180px;
     display: flex;
     flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .grid-pages > * {
+      min-height: 220px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .grid-pages > * {
+      min-height: 280px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-pages > * {
+      min-height: 320px;
+    }
   }
 
   /* Grid para páginas com 2 colunas (Avaliações) */
@@ -365,9 +381,27 @@
   }
 
   .grid-pages-2col > * {
-    min-height: 380px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .grid-pages-2col > * {
+      min-height: 240px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .grid-pages-2col > * {
+      min-height: 320px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-pages-2col > * {
+      min-height: 380px;
+    }
   }
 
   .grid-cards {
@@ -375,7 +409,7 @@
   }
 
   .grid-contact {
-    @apply grid md:grid-cols-2 gap-8 mb-12;
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-8 sm:mb-10 md:mb-12;
   }
 
   /* =========================
@@ -725,13 +759,11 @@
 
   .welcome-content p {
     @apply mb-4 leading-relaxed font-extrabold;
-    font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
 
   .welcome-content ul,
   .welcome-content ol {
     @apply pl-6 mb-4 space-y-2 font-extrabold;
-    font-size: clamp(1rem, 2.2vw, 1.25rem);
   }
 
   .welcome-image {
@@ -1015,11 +1047,11 @@
   }
 
   .contact-icon {
-    @apply mr-3 text-foreground;
+    @apply mr-2 sm:mr-2.5 md:mr-3 text-foreground;
   }
 
   .contact-text {
-    @apply text-lg text-foreground;
+    @apply text-sm sm:text-base md:text-lg lg:text-xl text-foreground;
   }
 
   .address-item {
@@ -1027,7 +1059,7 @@
   }
 
   .address-icon {
-    @apply mr-3 mt-1 font-bold;
+    @apply mr-2 sm:mr-2.5 md:mr-3 mt-0.5 sm:mt-1 font-bold;
   }
 
   /* =========================
@@ -1240,12 +1272,6 @@
       padding: clamp(0.75rem, 2.5vw, 1.25rem);
       max-height: 100vh;
       height: 100vh;
-    }
-
-    .welcome-content p,
-    .welcome-content ul,
-    .welcome-content ol {
-      font-size: clamp(0.875rem, 4vw, 1rem);
     }
   }
 

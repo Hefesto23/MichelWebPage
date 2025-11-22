@@ -26,12 +26,12 @@ export const AvaliacoesWithPagination: React.FC<AvaliacoesWithPaginationProps> =
   const activeCards = cards.filter(card => card.active);
 
   return (
-    <div className="w-full py-16 overflow-hidden relative z-0 min-h-screen">
+    <div className="w-full py-6 sm:py-10 md:py-16 overflow-hidden relative z-0 min-h-screen">
       <div className="content-container">
         <div className="relative z-10">
           <div className="section-header">
-            <h2 className="section-title">{title}</h2>
-            <p className="section-description">{description}</p>
+            <h2 className="section-title text-lg sm:text-xl md:text-2xl">{title}</h2>
+            <p className="section-description text-sm sm:text-base md:text-lg lg:text-xl">{description}</p>
           </div>
 
           <CardPagination

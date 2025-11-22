@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 // Contact Skeleton
 function ContactSkeleton() {
   return (
-    <div className="py-16 relative z-0 overflow-hidden">
+    <div className="py-8 sm:py-12 md:py-16 relative z-0 overflow-hidden">
       <div className="content-container">
         <div className="relative z-10">
           <div className="animate-pulse">

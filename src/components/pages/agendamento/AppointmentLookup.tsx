@@ -75,14 +75,14 @@ export default function AppointmentLookup({
         <div>
           <label
             htmlFor="codigo"
-            className="block text-foreground font-medium mb-2"
+            className="block text-foreground font-medium mb-2 text-sm sm:text-base md:text-lg"
           >
             Código de Confirmação
           </label>
           <input
             type="text"
             id="codigo"
-            className="w-full p-3 border border-border rounded-md bg-background text-foreground"
+            className="w-full p-3 border border-border rounded-md bg-background text-foreground text-sm sm:text-base md:text-lg"
             placeholder="Digite o código recebido no e-mail de confirmação"
             value={formData.codigoConfirmacao}
             onChange={(e) =>

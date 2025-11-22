@@ -64,7 +64,7 @@ export default function AppointmentConfirmation({
                 <IoCloseCircle size={32} className="text-destructive-foreground" />
               </div>
             </div>
-            <p className="text-foreground">
+            <p className="text-foreground text-xs sm:text-sm md:text-base">
               Seu agendamento para o dia {formatarData(formData.dataSelecionada)} às{" "}
               {formData.horarioSelecionado} foi cancelado com sucesso.
             </p>
@@ -76,7 +76,7 @@ export default function AppointmentConfirmation({
                 <IoCheckmarkCircle size={28} className="text-card-foreground" />
               </div>
             </div>
-            <p className="text-foreground">
+            <p className="text-foreground text-xs sm:text-sm md:text-base">
               Seu agendamento para o dia{" "}
               <b>
                 {formatarData(formData.dataSelecionada)} às {formData.horarioSelecionado}
@@ -84,12 +84,12 @@ export default function AppointmentConfirmation({
               foi confirmado com sucesso.
             </p>
             <div className="text-center my-6">
-              <p className="text-md font-bold text-foreground mb-4">Seu código de confirmação:</p>
+              <p className="text-foreground font-bold mb-4 text-sm sm:text-base md:text-lg">Seu código de confirmação:</p>
               <div className="bg-background border-2 border-card rounded-lg py-4 px-6 inline-block group relative">
                 <div className="flex items-center gap-3">
                   <span
                     className={cn(
-                      "text-3xl font-bold text-card-foreground tracking-wider",
+                      "text-xl sm:text-2xl md:text-3xl font-bold text-card-foreground tracking-wider",
                       robotoSlab.className,
                     )}
                   >
@@ -113,12 +113,12 @@ export default function AppointmentConfirmation({
                   </div>
                 )}
               </div>
-              <p className="text-md font-bold text-muted-foreground mt-4">
+              <p className="font-bold text-muted-foreground mt-4 text-xs sm:text-sm md:text-base">
                 !!! Importante - Guarde este código para futuras consultas, cancelamentos ou
                 remarcações.
               </p>
             </div>
-            <p className="text-foreground">
+            <p className="text-foreground text-xs sm:text-sm md:text-base">
               Enviamos um e-mail de confirmação para <b>{formData.email}</b> com todos os detalhes
               da sua consulta.
               {formData.modalidade === "online" &&

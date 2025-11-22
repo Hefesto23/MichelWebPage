@@ -49,16 +49,16 @@ export const ContactHours = () => {
       <div className="flex items-start justify-between gap-4">
         <div className="address-item group flex-1">
           <MapPin
-            className="address-icon group-hover:scale-110 transition-transform duration-300"
+            className="address-icon group-hover:scale-110 transition-transform duration-300 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
             size={24}
             strokeWidth={3}
           />
           <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
-            <p className="text-lg">{street1}</p>
-            <p className="text-lg">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg">{street1}</p>
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg">
               {neighborhood1}, {city1} {state1}
             </p>
-            <p className="text-lg">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg">
               {zipCode1}, Brasil
             </p>
           </div>
@@ -66,13 +66,13 @@ export const ContactHours = () => {
         {hasSecondAddress && (
           <button
             onClick={() => handleAddressChange("primary")}
-            className={`flex items-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap self-start ${
+            className={`flex items-center gap-1 sm:gap-1.5 py-2 px-3 sm:py-2.5 sm:px-4 md:py-3 md:px-6 rounded-md text-xs sm:text-sm md:text-base font-medium transition-all duration-200 whitespace-nowrap self-start min-h-[40px] sm:min-h-[42px] md:min-h-[44px] ${
               selectedAddress === "primary"
                 ? "bg-primary-foreground text-btnFg dark:bg-btn dark:text-btn-fg shadow-md"
                 : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
             }`}
           >
-            <MapPin size={16} />
+            <MapPin size={16} className="w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4" />
             Ver no Mapa
           </button>
         )}
@@ -83,29 +83,29 @@ export const ContactHours = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="address-item group flex-1">
             <MapPin
-              className="address-icon group-hover:scale-110 transition-transform duration-300"
+              className="address-icon group-hover:scale-110 transition-transform duration-300 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
               size={24}
               strokeWidth={3}
             />
             <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
-              <p className="text-lg">{street2}</p>
-              <p className="text-lg">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg">{street2}</p>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg">
                 {neighborhood2}, {city2} {state2}
               </p>
-              <p className="text-lg">
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg">
                 {zipCode2}, Brasil
               </p>
             </div>
           </div>
           <button
             onClick={() => handleAddressChange("secondary")}
-            className={`flex items-center gap-1.5 py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap self-start ${
+            className={`flex items-center gap-1 sm:gap-1.5 py-2 px-3 sm:py-2.5 sm:px-4 md:py-3 md:px-6 rounded-md text-xs sm:text-sm md:text-base font-medium transition-all duration-200 whitespace-nowrap self-start min-h-[40px] sm:min-h-[42px] md:min-h-[44px] ${
               selectedAddress === "secondary"
                 ? "bg-primary-foreground text-btnFg dark:bg-btn dark:text-btn-fg shadow-md"
                 : "bg-background text-card-foreground border-2 border-card hover:border-foreground dark:bg-secondary dark:text-secondary-foreground dark:hover:border-white dark:hover:shadow-md"
             }`}
           >
-            <MapPin size={16} />
+            <MapPin size={16} className="w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4" />
             Ver no Mapa
           </button>
         </div>
@@ -113,13 +113,13 @@ export const ContactHours = () => {
 
       {/* Hours */}
       <div className="address-item">
-        <Clock className="address-icon" size={24} strokeWidth={3} />
+        <Clock className="address-icon w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} strokeWidth={3} />
         <div className="text-foreground">
-          <p className="text-lg">{loading ? "Carregando..." : workingDaysText}</p>
-          <p className="text-lg">
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg">{loading ? "Carregando..." : workingDaysText}</p>
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg">
             Das {startTime} as {endTime}
           </p>
-          <p className="text-sm text-muted-foreground mt-2 italic">
+          <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
             Obs: {appointmentNote}
           </p>
         </div>

@@ -2,20 +2,20 @@
 
 /* Estilos de Tipografia */
 .formLabel {
-  @apply text-base sm:text-lg md:text-xl font-bold text-foreground mb-2 block;
+  @apply text-sm sm:text-base md:text-lg lg:text-xl font-bold text-foreground mb-2 sm:mb-3 md:mb-3 block;
 }
 
 .formText {
-  @apply text-base text-foreground;
+  @apply text-sm sm:text-base text-foreground;
 }
 
 .infoText {
-  @apply text-sm text-muted-foreground;
+  @apply text-xs sm:text-sm md:text-base text-muted-foreground;
 }
 
 /* Estilos de Botões - Usando as mesmas classes Tailwind das abas */
 .primaryButton {
-  @apply py-3 px-6 rounded-lg font-bold shadow-md bg-primary-foreground text-btnFg border-2 border-primary-foreground;
+  @apply py-2 px-3 sm:py-2.5 sm:px-4 md:py-3 md:px-6 rounded-lg font-bold shadow-md bg-primary-foreground text-btnFg border-2 border-primary-foreground text-xs sm:text-sm md:text-base min-h-[40px] sm:min-h-[42px] md:min-h-[44px];
 }
 
 /* Modo escuro: mesmas cores das abas ativas */
@@ -27,7 +27,7 @@
 }
 
 .secondaryButton {
-  @apply py-3 px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:border-foreground;
+  @apply py-2 px-3 sm:py-2.5 sm:px-4 md:py-3 md:px-6 rounded-lg font-bold transition-colors border-2 border-border dark:bg-background hover:border-foreground text-xs sm:text-sm md:text-base min-h-[40px] sm:min-h-[42px] md:min-h-[44px];
 }
 
 /* Efeito hover para botões secundários no modo escuro */
@@ -45,16 +45,16 @@
 
 /* Estilos de Cards e Containers */
 .formCard {
-  @apply bg-background rounded-xl p-6 md:p-8 border border-border shadow-sm mb-6;
+  @apply bg-background rounded-xl p-3 sm:p-4 md:p-6 lg:p-8 border border-border shadow-sm mb-4 sm:mb-5 md:mb-6;
 }
 
 .dataDisplay {
-  @apply bg-background bg-opacity-10 p-4 rounded-md border-2 border-foreground border-opacity-20 text-primary-foreground;
+  @apply bg-background bg-opacity-10 p-3 sm:p-4 md:p-4 rounded-md border-2 border-foreground border-opacity-20 text-primary-foreground;
 }
 
 /* Estilos de Inputs */
 .inputField {
-  @apply w-full p-3 border border-border rounded-md bg-background text-foreground;
+  @apply w-full px-3 py-2 sm:px-3 sm:py-2.5 md:p-3 border border-border rounded-md bg-background text-foreground text-sm sm:text-base md:text-base leading-relaxed min-h-[44px];
 }
 
 /* Estilos de Alerta */

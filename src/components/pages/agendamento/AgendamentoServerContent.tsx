@@ -12,8 +12,8 @@ export async function AgendamentoHeader() {
 
   return (
     <div className="mb-12">
-      <h1 className="section-title">{content.title}</h1>
-      <p className="section-description max-w-3xl">
+      <h1 className="section-title text-lg sm:text-xl md:text-2xl">{content.title}</h1>
+      <p className="section-description text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl">
         {content.description}
       </p>
     </div>
@@ -31,7 +31,7 @@ export async function AgendamentoCards() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {content.infoCards.map((card) => (
         <ContactCard key={card.id} title={card.title}>
-          <p className="text-foreground">
+          <p className="text-foreground text-xs sm:text-sm md:text-base">
             {card.content}
           </p>
         </ContactCard>

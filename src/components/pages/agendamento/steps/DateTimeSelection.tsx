@@ -315,7 +315,7 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                   }`}
                 ></label>
               </div>
-              <span className="font-bold text-lg">
+              <span className="font-bold text-sm sm:text-base md:text-lg">
                 {formData.primeiraConsulta ? "Sim" : "Não"}
               </span>
             </div>
@@ -340,21 +340,21 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
               locale={ptBR}
               classNames={{
                 month_caption:
-                  "flex w-full pb-4 sm:pb-6 border-b border-border items-baseline justify-center",
-                caption_label: "text-xl sm:text-2xl md:text-3xl font-bold capitalize text-center",
+                  "flex w-full pb-2 sm:pb-3 md:pb-4 border-b border-border items-baseline justify-center",
+                caption_label: "text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold capitalize text-center",
                 nav: "flex justify-between w-full",
                 nav_button:
-                  "flex items-center justify-center focus:outline-none focus:ring-0",
+                  "flex items-center justify-center focus:outline-none focus:ring-0 p-1 sm:p-1.5 md:p-2 rounded",
                 nav_button_previous: "absolute left-0",
                 nav_button_next: "absolute right-0",
                 chevron:
-                  "fill-foreground dark:fill-blue-700 w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 inline-block align-baseline",
+                  "fill-foreground dark:fill-blue-700 w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 inline-block align-baseline",
 
-                weekday: "font-extrabold text-sm sm:text-base md:text-xl text-center h-10 sm:h-12 md:h-16",
+                weekday: "font-extrabold text-[10px] sm:text-xs md:text-sm lg:text-base text-center h-8 sm:h-10 md:h-12 lg:h-16",
                 months: "w-full",
                 month: "grid grid-cols-1",
-                day: "h-9 w-9 sm:h-11 sm:w-11 md:h-14 md:w-14 text-center",
-                day_button: "font-extrabold text-sm sm:text-base md:text-xl",
+                day: "h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14 text-center",
+                day_button: "font-extrabold text-[10px] sm:text-xs md:text-sm lg:text-base",
                 today: "border-b-4 border-primary-foreground",
                 selected:
                   "flex mx-auto justify-center items-center bg-btn dark:bg-background text-btn-foreground dark:text-white dark:hover:bg-blue-700 rounded-full border-2 border-foreground dark:border-white",
@@ -414,10 +414,10 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                   </svg>
                 </div>
 
-                <h3 className="text-lg font-bold text-foreground mb-2">
+                <h3 className="font-bold text-foreground mb-2 text-sm sm:text-base md:text-lg">
                   Preparando calendário
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-muted-foreground mb-4 text-xs sm:text-sm md:text-base">
                   Carregando horários disponíveis para a próxima{' '}
                   <span className="font-bold text-foreground">semana</span>
                 </p>
@@ -554,10 +554,10 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p className="text-base font-semibold text-foreground mb-1">
+                <p className="font-semibold text-foreground mb-1 text-sm sm:text-base md:text-lg">
                   Nenhum horário disponível
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
                   Todos os horários desta data já estão ocupados.<br />
                   Por favor, tente outra data.
                 </p>

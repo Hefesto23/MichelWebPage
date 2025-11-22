@@ -15,9 +15,9 @@ export const WelcomeSection = async () => {
         <div className="welcome-container">
           <div className="welcome-text">
             <div className="section-header">
-              <h1 className="section-title">{title}</h1>
+              <h1 className="section-title text-lg sm:text-xl md:text-2xl">{title}</h1>
             </div>
-            <div className="welcome-content">
+            <div className="welcome-content text-xs sm:text-sm md:text-base lg:text-lg">
               <article>{parseMarkdownToJSX(content)}</article>
             </div>
           </div>

@@ -68,7 +68,7 @@ export const ContactMap = () => {
     <>
       <div
         className={`relative overflow-hidden transition-all duration-300 ${
-          isMapExpanded ? "h-[500px]" : "h-64"
+          isMapExpanded ? "h-96 sm:h-[400px] md:h-[500px]" : "h-48 sm:h-56 md:h-64"
         }`}
       >
         <iframe

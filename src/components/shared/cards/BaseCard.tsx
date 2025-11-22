@@ -123,7 +123,7 @@ export const BaseCard: React.FC<BaseCardProps> = ({
       case "image-large":
         const ImageLargeCardContent = () => (
           <div className="flex flex-col w-full h-full overflow-hidden">
-            <div className="relative w-full h-48 flex-shrink-0 overflow-hidden rounded-t-xl">
+            <div className="relative w-full h-20 sm:h-32 md:h-40 lg:h-48 flex-shrink-0 overflow-hidden rounded-t-xl">
               <Image
                 src={imageUrl!}
                 alt={typeof title === 'string' ? title : 'Image'}
@@ -132,12 +132,12 @@ export const BaseCard: React.FC<BaseCardProps> = ({
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
-            <div className="flex flex-col flex-grow p-6 justify-between">
+            <div className="flex flex-col flex-grow p-2.5 sm:p-4 md:p-5 lg:p-6 justify-between">
               <div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground transition-colors duration-300 leading-tight">
+                <h3 className="text-xs sm:text-base md:text-lg lg:text-xl font-semibold mb-1 sm:mb-2 md:mb-3 text-foreground transition-colors duration-300 leading-tight">
                   {title}
                 </h3>
-                <p className="text-base font-bold text-muted-foreground leading-relaxed">
+                <p className="text-[10px] sm:text-sm md:text-base font-bold text-muted-foreground leading-relaxed">
                   {description}
                 </p>
               </div>
@@ -186,9 +186,9 @@ export const BaseCard: React.FC<BaseCardProps> = ({
       case "contact":
       default:
         return (
-          <div className="p-6">
+          <div className="p-3 sm:p-4 md:p-6">
             {title && (
-              <h2 className="text-2xl font-semibold mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 text-foreground">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-3 sm:mb-4 md:mb-6 border-b border-gray-200 dark:border-gray-700 pb-2 sm:pb-3 md:pb-3 text-foreground">
                 {title}
               </h2>
             )}

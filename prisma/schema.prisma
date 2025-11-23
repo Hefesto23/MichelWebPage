@@ -116,3 +116,35 @@ model DynamicPage {
 
   @@index([slug])
 }
+
+// Enum para tipos de bloqueio de horários
+enum BlockType {
+  RECURRING  // Bloqueio recorrente semanal (ex: todas segundas às 9h)
+  ONE_TIME   // Bloqueio pontual em data específica (ex: 25/12/2025 às 10h)
+}
+
+// Modelo para bloqueio de horários específicos
+model BlockedSlot {
+  id           String    @id @default(cuid())
+
+  // Para bloqueios RECORRENTES (ex: todas as segundas às 9h)
+  dayOfWeek    Int?      // 1=Segunda, 2=Terça, ..., 7=Domingo (padrão ISO)
+  timeSlot     String    // ex: "09:00"
+
+  // Para bloqueios PONTUAIS (ex: 23/11/2025 às 11h)
+  specificDate DateTime? // Data específica (ignora dayOfWeek se preenchido)
+
+  // Tipo e metadados
+  blockType    BlockType // RECURRING ou ONE_TIME
+  reason       String?   // Motivo opcional (ex: "Reunião mensal", "Feriado")
+  isActive     Boolean   @default(true) // Permite desativar sem deletar
+
+  // Auditoria
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdBy    String    // Nome ou ID do admin que criou
+
+  // Índices para performance (queries rápidas)
+  @@index([dayOfWeek, timeSlot, isActive])
+  @@index([specificDate, timeSlot, isActive])
+}

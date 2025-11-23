@@ -184,8 +184,8 @@ export async function GET(request: Request) {
 
     console.log(`📊 Total de datas a processar: ${dates.length}`);
 
-    // 🚀 PARALELIZAR: Buscar settings + eventos + agendamentos do banco
-    const [timeSlots, allEvents, dbAppointments] = await Promise.all([
+    // 🚀 PARALELIZAR: Buscar settings + eventos + agendamentos + bloqueios do banco
+    const [timeSlots, allEvents, dbAppointments, blockedSlots] = await Promise.all([
       generateTimeSlots(),
       fetchAllGoogleEvents(startDate, endDate),
       // Buscar agendamentos do Prisma
@@ -203,11 +203,34 @@ export async function GET(request: Request) {
           dataSelecionada: true,
           horarioSelecionado: true
         }
+      }),
+      // 🆕 Buscar bloqueios ativos (recorrentes + pontuais no período)
+      prisma.blockedSlot.findMany({
+        where: {
+          isActive: true,
+          OR: [
+            { blockType: 'RECURRING' },
+            {
+              blockType: 'ONE_TIME',
+              specificDate: {
+                gte: new Date(startDate + 'T00:00:00'),
+                lte: new Date(endDate + 'T23:59:59')
+              }
+            }
+          ]
+        },
+        select: {
+          blockType: true,
+          dayOfWeek: true,
+          timeSlot: true,
+          specificDate: true
+        }
       })
     ]);
 
     console.log(`⚙️ Time slots gerados:`, timeSlots);
     console.log(`📊 Agendamentos do banco: ${dbAppointments.length}`);
+    console.log(`🚫 Bloqueios ativos: ${blockedSlots.length}`);
 
     // 🚀 PARALELIZAR: Processar todas as datas em paralelo
     const results = await Promise.all(
@@ -219,6 +242,23 @@ export async function GET(request: Request) {
           return [dateStr, []];
         }
 
+        // 🆕 Filtrar bloqueios para esta data específica
+        const dayOfWeek = date.getDay() || 7; // ISO format: 1=Segunda, 7=Domingo
+        const blockedTimes = blockedSlots
+          .filter(block => {
+            // Bloqueios recorrentes: verificar dia da semana
+            if (block.blockType === 'RECURRING') {
+              return block.dayOfWeek === dayOfWeek;
+            }
+            // Bloqueios pontuais: verificar data específica
+            if (block.blockType === 'ONE_TIME' && block.specificDate) {
+              const blockDateStr = format(new Date(block.specificDate), 'yyyy-MM-dd');
+              return blockDateStr === dateStr;
+            }
+            return false;
+          })
+          .map(block => block.timeSlot);
+
         // Combinar horários ocupados do Google Calendar e do Prisma
         const occupiedFromGoogle = filterEventsByDate(allEvents, dateStr);
         const occupiedFromDB = dbAppointments
@@ -228,8 +268,12 @@ export async function GET(request: Request) {
           })
           .map(apt => apt.horarioSelecionado);
 
-        // Unir e remover duplicatas
-        const allOccupiedSlots = Array.from(new Set([...occupiedFromGoogle, ...occupiedFromDB]));
+        // Unir e remover duplicatas (incluindo bloqueios)
+        const allOccupiedSlots = Array.from(new Set([
+          ...occupiedFromGoogle,
+          ...occupiedFromDB,
+          ...blockedTimes  // 🆕 Adicionar bloqueios
+        ]));
 
         const availableSlots = timeSlots.filter(
           (slot) => !allOccupiedSlots.includes(slot)

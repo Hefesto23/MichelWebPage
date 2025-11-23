@@ -6,6 +6,7 @@ import { cn } from "@/utils/utils";
 import {
   BarChart3,
   Calendar,
+  CalendarX2,
   FileText,
   Home,
   Image as ImageIcon,
@@ -22,6 +23,7 @@ import { usePathname } from "next/navigation";
 const sidebarItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Home },
   { href: "/admin/appointments", label: "Agendamentos", icon: Calendar },
+  { href: "/admin/blocked-slots", label: "Bloqueio de Horários", icon: CalendarX2 },
   { href: "/admin/analytics", label: "Estatísticas", icon: BarChart3 },
   { href: "/admin/content", label: "Gerenciar Conteúdo", icon: FileText },
   { href: "/admin/paginas", label: "Páginas Personalizadas", icon: FileCode },

@@ -361,30 +361,36 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
               }}
               footer={
                 <div className="mt-3 pt-3 border-t border-border">
-                  <p className="text-md text-muted-foreground text-center font-bold">
-                    {settingsLoading ? (
-                      "Carregando horários..."
-                    ) : (
-                      <>
-                        Atendimento disponível{" "}
-                        <span className="font-extrabold capitalize">
-                          {formatWorkingDays().toLowerCase()}
-                        </span>
-                        {settings && (
-                          <>
-                            {" "}das{" "}
-                            <span className="font-extrabold">
-                              {settings.start_time}
-                            </span>
-                            {" às "}
-                            <span className="font-extrabold">
-                              {settings.end_time}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </p>
+                  {settingsLoading ? (
+                    <p className="text-md text-muted-foreground text-center font-bold">
+                      Carregando horários...
+                    </p>
+                  ) : activeDays.length === 0 ? (
+                    <p className="text-md text-center font-bold">
+                      <span className="text-amber-600 dark:text-amber-400">
+                        ⚠️ Agendamentos indisponíveis - Favor entrar em contato
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-md text-muted-foreground text-center font-bold">
+                      Atendimento disponível{" "}
+                      <span className="font-extrabold capitalize">
+                        {formatWorkingDays().toLowerCase()}
+                      </span>
+                      {settings && (
+                        <>
+                          {" "}das{" "}
+                          <span className="font-extrabold">
+                            {settings.start_time}
+                          </span>
+                          {" às "}
+                          <span className="font-extrabold">
+                            {settings.end_time}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  )}
 
                   {/* Status de carregamento incremental no footer */}
                   {loadingMore && (

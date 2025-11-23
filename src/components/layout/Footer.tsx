@@ -72,15 +72,27 @@ export const Footer = () => {
             {/* Third Column */}
             <div className="footer-column text-center md:text-right">
               <h3 className="footer-title">Horário de Atendimento</h3>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">
-                {loading ? "Carregando..." : `${workingDaysText} das ${startTime} às ${endTime}`}
-              </p>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">Obs: {appointmentNote}</p>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">
-                {ageDisclaimer}
-              </p>
-              {additionalNotes && (
-                <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
+              {loading ? (
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">
+                  Carregando...
+                </p>
+              ) : workingDaysText.toLowerCase() === "fechado" ? (
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2 text-amber-600 dark:text-amber-400">
+                  ⚠️ Agendamentos indisponíveis - Favor entrar em contato
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">
+                    {`${workingDaysText} das ${startTime} às ${endTime}`}
+                  </p>
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold mb-2">Obs: {appointmentNote}</p>
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">
+                    {ageDisclaimer}
+                  </p>
+                  {additionalNotes && (
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-600 mt-1 italic">{additionalNotes}</p>
+                  )}
+                </>
               )}
             </div>
           </div>

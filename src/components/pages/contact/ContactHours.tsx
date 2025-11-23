@@ -115,13 +115,23 @@ export const ContactHours = () => {
       <div className="address-item">
         <Clock className="address-icon w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} strokeWidth={3} />
         <div className="text-foreground">
-          <p className="text-xs sm:text-sm md:text-base lg:text-lg">{loading ? "Carregando..." : workingDaysText}</p>
-          <p className="text-xs sm:text-sm md:text-base lg:text-lg">
-            Das {startTime} as {endTime}
-          </p>
-          <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
-            Obs: {appointmentNote}
-          </p>
+          {loading ? (
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg">Carregando...</p>
+          ) : workingDaysText.toLowerCase() === "fechado" ? (
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-amber-600 dark:text-amber-400 font-bold">
+              ⚠️ Agendamentos indisponíveis - Favor entrar em contato
+            </p>
+          ) : (
+            <>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg">{workingDaysText}</p>
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg">
+                Das {startTime} as {endTime}
+              </p>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
+                Obs: {appointmentNote}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

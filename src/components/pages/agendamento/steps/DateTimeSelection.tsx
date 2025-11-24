@@ -34,7 +34,14 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   handleError,
 }: DateTimeSelectionProps) {
   // Hook para configurações públicas
-  const { settings, loading: settingsLoading, formatWorkingDays, getActiveDaysAsNumbers } = usePublicSettings();
+  const {
+    settings,
+    loading: settingsLoading,
+    formatWorkingDays,
+    getActiveDaysAsNumbers,
+    isDayValidForLocation,
+    formatScheduleByLocation
+  } = usePublicSettings();
 
   // Estado para os horários disponíveis
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
@@ -43,6 +50,9 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   );
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [loadingHorarios, setLoadingHorarios] = useState(false);
+
+  // 🆕 Estado para rastrear qual localidade está selecionada (1 ou 2)
+  const [selectedLocationNumber, setSelectedLocationNumber] = useState<1 | 2 | null>(null);
 
   // Limpar estado local quando dados do formulário são resetados
   useEffect(() => {
@@ -57,6 +67,43 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
   const advanceDays = useMemo(() => settings?.advance_days || 60, [settings?.advance_days]);
   const fimPeriodo = useMemo(() => addMonths(hoje, Math.ceil(advanceDays / 30)), [hoje, advanceDays]);
   const activeDays = useMemo(() => getActiveDaysAsNumbers(), [getActiveDaysAsNumbers]);
+
+  // 🆕 Verificar quais localidades estão disponíveis para a data selecionada (ou em geral se não há data)
+  const availableLocationsForDate = useMemo(() => {
+    const locationSchedules = formatScheduleByLocation();
+    const hasMultipleLocations = locationSchedules.length > 1;
+
+    // Se não há data selecionada, mostrar localidades que têm ALGUM dia
+    if (!date) {
+      return {
+        location1Available: locationSchedules.some(s => s.locationNumber === 1 && s.days.length > 0),
+        location2Available: locationSchedules.some(s => s.locationNumber === 2 && s.days.length > 0),
+        hasMultipleLocations
+      };
+    }
+
+    // Se há data selecionada, verificar qual dia da semana e filtrar
+    const selectedDayOfWeek = date.getDay(); // 0 = domingo, 1 = segunda, etc.
+    const dayKeys: Array<keyof import("@/hooks/usePublicSettings").PublicWorkingDays | 'sunday'> = [
+      'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
+    ];
+    const selectedDayKey = dayKeys[selectedDayOfWeek];
+
+    // Verificar se cada localidade está disponível para este dia específico
+    // Se for domingo, retornar false (não tratamos domingo ainda)
+    const location1Available = selectedDayKey === 'sunday' ? false : isDayValidForLocation(selectedDayKey, 1);
+    const location2Available = selectedDayKey === 'sunday' ? false : isDayValidForLocation(selectedDayKey, 2);
+
+    console.log('🗓️ Data selecionada:', date, 'Dia da semana:', selectedDayKey);
+    console.log('📍 Localidade 1 disponível?', location1Available);
+    console.log('📍 Localidade 2 disponível?', location2Available);
+
+    return {
+      location1Available,
+      location2Available,
+      hasMultipleLocations
+    };
+  }, [formatScheduleByLocation, date, isDayValidForLocation]);
 
   // 🚀 OTIMIZAÇÃO: Batch prefetch incremental (30 dias iniciais)
   const {
@@ -85,32 +132,69 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
     }
   }, [currentMonth, batchLoading, hasDateRange, loadMoreDates]);
 
-  // 🏠 Auto-selecionar primeiro local quando modalidade presencial for escolhida
+  // 🏠 REMOVIDO: Auto-select do primeiro endereço
+  // Agora o usuário deve selecionar o endereço APÓS escolher a data
+  // O calendário mostrará TODOS os dias habilitados (independente da localidade)
+  // Após selecionar a data, apenas os endereços válidos para aquele dia serão exibidos
+
+  // 🆕 Detectar qual localidade está selecionada baseado no endereço
   useEffect(() => {
-    // Condições:
-    // 1. Modalidade presencial selecionada
-    // 2. Nenhum endereço selecionado ainda
-    // 3. Settings carregados com endereço disponível
-    if (
-      formData.modalidade === MODALITY.IN_PERSON &&
-      !formData.endereco &&
-      settings?.street
-    ) {
-      const primeiroEndereco = `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`;
-      updateFormData({ endereco: primeiroEndereco });
+    if (formData.modalidade !== MODALITY.IN_PERSON || !formData.endereco || !settings) {
+      setSelectedLocationNumber(null);
+      return;
     }
-  }, [formData.modalidade, formData.endereco, settings, updateFormData]);
+
+    const endereco1 = `${settings.street}, ${settings.neighborhood} - ${settings.city}/${settings.state}`;
+    const endereco2 = settings.street2
+      ? `${settings.street2}, ${settings.neighborhood2} - ${settings.city2}/${settings.state2}`
+      : null;
+
+    if (formData.endereco === endereco1) {
+      setSelectedLocationNumber(1);
+    } else if (endereco2 && formData.endereco === endereco2) {
+      setSelectedLocationNumber(2);
+    } else {
+      setSelectedLocationNumber(null);
+    }
+  }, [formData.modalidade, formData.endereco, settings]);
+
+  // ✅ MODIFICADO: Limpar endereço sempre que a data mudar (Opção 1)
+  // Isso força o usuário a escolher o endereço APÓS selecionar a data
+  useEffect(() => {
+    if (!date || formData.modalidade !== MODALITY.IN_PERSON) {
+      return;
+    }
+
+    // Limpar o endereço quando a data mudar, forçando nova seleção
+    if (formData.endereco) {
+      console.log('📍 Data mudou, limpando seleção de endereço para permitir nova escolha');
+      updateFormData({ endereco: "" });
+    }
+  }, [date, formData.modalidade]); // Intencionalmente não incluir formData.endereco para evitar loop
 
   // Função memoizada para verificar se um dia é desabilitado baseado nas configurações
   const isDiaDesabilitado = useCallback((data: Date) => {
     const dayOfWeek = data.getDay(); // 0 = domingo, 1 = segunda, etc.
 
-    return (
-      !isAfter(data, hoje) ||  // Desabilita hoje + datas passadas (só permite amanhã em diante)
-      isAfter(data, fimPeriodo) ||
-      !activeDays.includes(dayOfWeek) // Só permite dias configurados no admin
-    );
-  }, [hoje, fimPeriodo, activeDays]);
+    // Verificações básicas de data
+    if (!isAfter(data, hoje) || isAfter(data, fimPeriodo) || !activeDays.includes(dayOfWeek)) {
+      return true;
+    }
+
+    // ✅ MODIFICADO: Apenas filtrar por localidade se o endereço JÁ estiver selecionado
+    // Se não há endereço selecionado, mostrar TODOS os dias habilitados
+    if (formData.modalidade === MODALITY.IN_PERSON && selectedLocationNumber) {
+      // Mapear dayOfWeek (0-6, Sunday=0) para key de working_days
+      const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayKey = dayKeys[dayOfWeek] as 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+
+      // Verificar se este dia é válido para a localidade selecionada
+      return !isDayValidForLocation(dayKey, selectedLocationNumber);
+    }
+
+    // Se não há localidade selecionada, permitir todos os dias habilitados
+    return false;
+  }, [hoje, fimPeriodo, activeDays, formData.modalidade, selectedLocationNumber, isDayValidForLocation]);
 
   // 🚀 Função de seleção de data com feedback visual
   const handleDateChange = useCallback((selectedDate: Date | undefined) => {
@@ -222,12 +306,25 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
           </div>
         </div>
 
-        {/* Seleção de endereço (apenas se presencial) */}
-        {formData.modalidade === MODALITY.IN_PERSON && (
+        {/* ✅ MOVIDO: Seleção de endereço agora vem DEPOIS da data */}
+        {/* Será exibido mais abaixo, após a seleção de data */}
+
+        {/* 🆕 Mensagem informativa para modalidade presencial */}
+        {formData.modalidade === MODALITY.IN_PERSON && !formData.dataSelecionada && (
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              💡 <strong>Primeiro selecione uma data no calendário abaixo.</strong> Após escolher a data, você poderá selecionar o local do atendimento disponível para aquele dia.
+            </p>
+          </div>
+        )}
+
+        {/* PLACEHOLDER - Seleção de endereço será exibida aqui após escolher a data */}
+        {formData.modalidade === MODALITY.IN_PERSON && formData.dataSelecionada && (
           <div>
             <label className={formStyles.formLabel}>Escolha o Local do Atendimento</label>
             <div className="space-y-3">
-              {settings?.street && (
+              {/* Endereço 1 - Mostrar apenas se estiver disponível para a data selecionada */}
+              {settings?.street && (availableLocationsForDate.location1Available || !availableLocationsForDate.hasMultipleLocations) && (
                 <button
                   type="button"
                   className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
@@ -256,7 +353,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
                 </button>
               )}
 
-              {settings?.street2 && settings?.city2 && (
+              {/* Endereço 2 - Mostrar apenas se estiver disponível para a data selecionada */}
+              {settings?.street2 && settings?.city2 && availableLocationsForDate.location2Available && (
                 <button
                   type="button"
                   className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
@@ -321,6 +419,8 @@ const DateTimeSelection = React.memo<DateTimeSelectionProps>(function DateTimeSe
             </div>
           </div>
         </div>
+
+        {/* ✅ REMOVIDO: Legenda de localidades (não é mais necessária com o novo fluxo) */}
 
         {/* Calendário com overlay de loading */}
         <label className={formStyles.formLabel}>

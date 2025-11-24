@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { getToken } from '@/lib/auth';
-import { BlockedSlot, BlockType, DAY_OF_WEEK_MAP, DAY_NAME_TO_NUMBER } from '@/types/blocked-slot';
+import { BlockedSlot, DAY_OF_WEEK_MAP } from '@/types/blocked-slot';
 import { APPOINTMENT } from '@/utils/constants';
 import { Calendar, Clock, Trash2, Power, PowerOff, Plus, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';

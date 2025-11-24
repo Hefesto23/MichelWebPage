@@ -81,6 +81,7 @@ async function generateTimeSlots(): Promise<string[]> {
 }
 
 // Helper para verificar se o dia está ativo (usando cache)
+// ✅ ATUALIZADO: Suporta ambos os formatos (legacy boolean e novo location-based)
 async function isDayAllowed(date: string): Promise<boolean> {
   try {
     const dayOfWeek = new Date(date + 'T12:00:00').getDay();
@@ -102,7 +103,17 @@ async function isDayAllowed(date: string): Promise<boolean> {
     };
 
     const dayKey = dayMapping[dayOfWeek as keyof typeof dayMapping];
-    return dayKey ? workingDays[dayKey] === true : false;
+    if (!dayKey) return false;
+
+    const dayConfig = workingDays[dayKey];
+
+    // ✅ NOVO FORMATO: { enabled: boolean, location: 1 | 2 | null }
+    if (typeof dayConfig === 'object' && dayConfig !== null) {
+      return dayConfig.enabled === true;
+    }
+
+    // ✅ FORMATO ANTIGO (legacy): boolean
+    return dayConfig === true;
   } catch (error) {
     console.error("Erro ao verificar dia:", error);
     const dayOfWeek = new Date(date + 'T12:00:00').getDay();

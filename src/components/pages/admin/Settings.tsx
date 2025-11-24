@@ -2,9 +2,10 @@
 "use client";
 
 import { AdminCard } from "@/components/shared/cards/BaseCard";
-import { WeekDaySelector } from "@/components/shared/ui/WeekDaySelector";
+import { LocationScheduleEditor } from "@/components/shared/ui/LocationScheduleEditor";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
-import { useSettings, WorkingDays } from "@/hooks/useSettings";
+import { useSettings } from "@/hooks/useSettings";
+import type { LocationBasedWorkingDays } from "@/types/location-schedule";
 import {
   AlertTriangle,
   Bell,
@@ -351,6 +352,7 @@ export const Settings = () => {
     settingId: string,
     value: any
   ) => {
+    console.log(`⚙️ Settings: handleSettingChange called`, { sectionId, settingId, value });
     setLocalChanges((prev) => ({
       ...prev,
       [`${sectionId}.${settingId}`]: value,
@@ -364,9 +366,11 @@ export const Settings = () => {
     setSuccess(null);
 
     try {
+      console.log('💾 Settings: Iniciando salvamento. localChanges:', localChanges);
+
       // Agrupar mudanças por seção
       const changesBySection: Record<string, Record<string, any>> = {};
-      
+
       Object.entries(localChanges).forEach(([key, value]) => {
         const [sectionId, settingId] = key.split(".");
         if (!changesBySection[sectionId]) {
@@ -375,8 +379,11 @@ export const Settings = () => {
         changesBySection[sectionId][settingId] = value;
       });
 
+      console.log('💾 Settings: Mudanças agrupadas por seção:', changesBySection);
+
       // Salvar cada seção
       for (const [sectionId, sectionSettings] of Object.entries(changesBySection)) {
+        console.log(`💾 Settings: Salvando seção "${sectionId}":`, sectionSettings);
         await saveMultipleSettings(sectionId, sectionSettings);
       }
 
@@ -499,12 +506,18 @@ export const Settings = () => {
         );
 
       case "weekdays":
+        // Check if second address is configured
+        const hasSecondAddress = Boolean(
+          settings?.endereco?.street2 && settings.endereco.street2.trim() !== ''
+        );
+
         return (
-          <WeekDaySelector
-            value={value as WorkingDays}
+          <LocationScheduleEditor
+            value={value as LocationBasedWorkingDays | Record<string, boolean>}
             onChange={(workingDays) =>
               handleSettingChange(sectionId, setting.id, workingDays)
             }
+            hasSecondAddress={hasSecondAddress}
           />
         );
 

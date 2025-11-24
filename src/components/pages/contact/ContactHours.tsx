@@ -9,7 +9,7 @@ import { useState } from "react";
 type AddressType = "primary" | "secondary";
 
 export const ContactHours = () => {
-  const { settings, loading, formatWorkingDays } = usePublicSettings();
+  const { settings, loading, formatWorkingDays, formatScheduleByLocation } = usePublicSettings();
   const [selectedAddress, setSelectedAddress] = useState<AddressType>("primary");
 
   // Função para notificar o mapa sobre a mudança de endereço
@@ -111,29 +111,75 @@ export const ContactHours = () => {
         </div>
       )}
 
-      {/* Hours */}
-      <div className="address-item">
-        <Clock className="address-icon w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} strokeWidth={3} />
-        <div className="text-foreground">
-          {loading ? (
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg">Carregando...</p>
-          ) : workingDaysText.toLowerCase() === "fechado" ? (
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-amber-600 dark:text-amber-400 font-bold">
-              ⚠️ Agendamentos indisponíveis - Favor entrar em contato
-            </p>
-          ) : (
-            <>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg">{workingDaysText}</p>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg">
-                Das {startTime} as {endTime}
-              </p>
-              <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
-                Obs: {appointmentNote}
-              </p>
-            </>
-          )}
-        </div>
-      </div>
+      {/* Hours - Location Based Schedule */}
+      {(() => {
+        const locationSchedules = formatScheduleByLocation();
+
+        // If there are location-based schedules, show them
+        if (locationSchedules.length > 0) {
+          return (
+            <div className="space-y-6">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-foreground mb-4">
+                📅 Horários de Atendimento por Localidade
+              </h3>
+              {locationSchedules.map((schedule, index) => (
+                <div key={index} className="address-item group">
+                  <Clock
+                    className="address-icon group-hover:scale-110 transition-transform duration-300 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8"
+                    size={24}
+                    strokeWidth={3}
+                  />
+                  <div className="text-foreground hover:-translate-x-1 transition-transform duration-300">
+                    <p className="text-sm sm:text-base md:text-lg lg:text-xl font-extrabold text-primary">
+                      {schedule.locationName}
+                    </p>
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg mt-1">
+                      {schedule.days.join(', ')}
+                    </p>
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg">
+                      {schedule.hours}
+                    </p>
+                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
+                      📍 {schedule.address}, {schedule.neighborhood}
+                    </p>
+                    {appointmentNote && (
+                      <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
+                        Obs: {appointmentNote}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        // Fallback to traditional display
+        return (
+          <div className="address-item">
+            <Clock className="address-icon w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-8 lg:h-8" size={24} strokeWidth={3} />
+            <div className="text-foreground">
+              {loading ? (
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg">Carregando...</p>
+              ) : workingDaysText.toLowerCase() === "fechado" ? (
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-amber-600 dark:text-amber-400 font-bold">
+                  ⚠️ Agendamentos indisponíveis - Favor entrar em contato
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg">{workingDaysText}</p>
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg">
+                    Das {startTime} as {endTime}
+                  </p>
+                  <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2 italic">
+                    Obs: {appointmentNote}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

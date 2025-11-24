@@ -214,16 +214,17 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const section = searchParams.get("section");
 
-    // Configurações padrão
+    // Configurações padrão (usando novo formato location-based)
     const defaultSettings = {
       agendamento: {
         working_days: {
-          monday: true,
-          tuesday: true,
-          wednesday: true,
-          thursday: true,
-          friday: false,
-          saturday: false,
+          monday: { enabled: true, location: null },
+          tuesday: { enabled: true, location: null },
+          wednesday: { enabled: true, location: null },
+          thursday: { enabled: true, location: null },
+          friday: { enabled: false, location: null },
+          saturday: { enabled: false, location: null },
+          sunday: { enabled: false, location: null }
         },
         start_time: "08:00",
         end_time: "21:00",
